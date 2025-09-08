@@ -88,6 +88,7 @@ Notes:
 - Functions should be small and expressive; avoid boolean parameter flags—prefer data classes or sealed types.
 - Keep files short and cohesive; split when responsibilities multiply.
 - Add KDoc to public types and nontrivial functions.
+- **After every code change, run the type checker (e.g., `./gradlew build` or `./gradlew compileDebugKotlin`) to ensure type safety and prevent regressions.**
 
 ## Pull Requests & Reviews
 
