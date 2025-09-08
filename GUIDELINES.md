@@ -12,7 +12,7 @@ These guidelines define how we structure, write, and review code in TicketScan. 
 - Separation of Concerns (Domain vs View)
   - Domain logic lives under `domain/` and is UI-agnostic. It contains models, use cases/interactors, and interfaces for repositories and services.
   - View/UI logic lives under `ui/` and deals with rendering, user interaction, and state presentation.
-  - Data and infrastructure concerns (e.g., network, database, platform APIs) live outside of `domain/` (commonly under `data/` or `core/infra/`).
+  - Data and infrastructure concerns (e.g., network, database, platform APIs) live outside of `domain/`
 
 - No In-Place Custom Styling
   - Do not embed custom styles inline inside screens or ad-hoc views.
