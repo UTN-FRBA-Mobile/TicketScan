@@ -45,6 +45,10 @@ Notes:
 ## UI & Styling Rules
 
 - Centralize theme and design tokens (colors, spacing, typography) under `ui/theme/`.
+- **Do not hardcode or directly use `MaterialTheme` or any specific theme implementation in reusable components or screens.**
+    - Instead, reference theme values via an abstraction (e.g., `TicketScanTheme` or `LocalTicketScanColors`) so the app can be rethemed easily.
+    - If your component needs a color, shape, or typography, always get it from the theme abstraction, not from `MaterialTheme` directly.
+    - This ensures the app can switch themes (e.g., light/dark, custom branding) without refactoring all usages.
 - When a screen needs a custom look or repeated pattern, extract a dedicated component into `ui/components/` and reuse it.
 - Components should accept parameters for configuration (e.g., padding, colors) rather than hard-coding values.
 - Avoid duplicating style literals across screens; prefer reusing tokens and components.
