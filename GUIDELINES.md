@@ -57,7 +57,6 @@ Notes:
 
 - **Use Material 3 exclusively.** Prefer `androidx.compose.material3:*` components and APIs.
 - **Do not mix Material (M2) and Material 3 in the same module.** Mixing `androidx.compose.material.*` with `androidx.compose.material3.*` can lead to styling conflicts and hard-to-debug issues.
-  - Build must include only `androidx.compose.material3` dependencies. Remove `androidx.compose.material` if present.
   - In code, imports must not reference `androidx.compose.material.*` when using Material 3. Use M3 equivalents (e.g., `NavigationBar`/`NavigationBarItem` instead of `BottomNavigation`/`BottomNavigationItem`).
 - **Theme flexibility requirement:** All components/screens must depend on our theme abstraction (`TicketScanTheme`) for colors, typography, and shapes. The abstraction can internally map to Material 3 or any future system without changing component code.
 - If a new design system is adopted, only update the provider under `ui/theme/` and keep components untouched.
@@ -105,6 +104,24 @@ Notes:
 - Ensure new code adheres to the layout above and these principles.
 - Add/maintain tests for new behaviors.
 - No inline custom styles; extract `ui/components/*` as needed.
+
+## Icons
+
+- Use the `TicketScanIcons` abstraction in `ui/theme/TicketScanIcons.kt`. Components/screens must reference icons only via `TicketScanIcons` (e.g., `TicketScanIcons.Home`).
+- Material icon source of truth: `androidx.compose.material:material-icons-extended`.
+  - `TicketScanIcons` maps each semantic icon to `Icons.Default.*` (Material Icons Extended).
+  - Do NOT reference `Icons.Default.*` directly in components/screens; always go through `TicketScanIcons`.
+- Forbidden: Custom icons under `app/src/main/res/drawable/`.
+  - Do not add SVG/PNG/vector assets for icons in `res/drawable/`.
+  - Exceptions require design approval and a tech decision; if approved, they still must be consumed through `TicketScanIcons` so components remain decoupled.
+- Swapping icon packs later:
+  - Update mappings inside `ui/theme/TicketScanIcons.kt` (e.g., switch from Material Icons to a brand pack). No component changes required.
+- Adding a new icon:
+  1. Define a new semantic property in `TicketScanIcons` (e.g., `val Reports`).
+  2. Map it to the appropriate `Icons.Default.*` symbol (or approved alternative).
+  3. Use the new property in components/screens.
+- Accessibility:
+  - Always provide `contentDescription` for icons that convey meaning; pass `null` only for decorative icons.
 
 ## Definition of Done (DoD)
 
