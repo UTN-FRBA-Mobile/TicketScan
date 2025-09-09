@@ -16,28 +16,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.ticketscan.ui.components.TicketScanBottomNavigation
 import com.example.ticketscan.ui.components.UploadCard
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         color = TicketScanTheme.colors.background
     ) {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 72.dp),
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(32.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 UploadOption(label = "Audio", icon = TicketScanIcons.Audio) { /* TODO */ }
                 UploadOption(label = "Cámara", icon = TicketScanIcons.Camera) { /* TODO */ }
@@ -51,10 +50,15 @@ fun HomeScreen(navController: NavController) {
                 color = TicketScanTheme.colors.onBackground
             )
             // TODO: Add filter dropdown here
-            UploadCard(title = "Por audio") {}
-            UploadCard(title = "Por texto") {}
-            UploadCard(title = "Por foto") {}
+            Column(
+                modifier = Modifier
+                .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                UploadCard(title = "Por audio", modifier = Modifier.fillMaxWidth()) {}
+                UploadCard(title = "Por texto", modifier = Modifier.fillMaxWidth()) {}
+                UploadCard(title = "Por fotos", modifier = Modifier.fillMaxWidth()) {}
+            }
         }
     }
-    TicketScanBottomNavigation(navController = navController)
 }
