@@ -53,6 +53,15 @@ Notes:
 - Components should accept parameters for configuration (e.g., padding, colors) rather than hard-coding values.
 - Avoid duplicating style literals across screens; prefer reusing tokens and components.
 
+### Compose UI Toolkit and Material Library
+
+- **Use Material 3 exclusively.** Prefer `androidx.compose.material3:*` components and APIs.
+- **Do not mix Material (M2) and Material 3 in the same module.** Mixing `androidx.compose.material.*` with `androidx.compose.material3.*` can lead to styling conflicts and hard-to-debug issues.
+  - Build must include only `androidx.compose.material3` dependencies. Remove `androidx.compose.material` if present.
+  - In code, imports must not reference `androidx.compose.material.*` when using Material 3. Use M3 equivalents (e.g., `NavigationBar`/`NavigationBarItem` instead of `BottomNavigation`/`BottomNavigationItem`).
+- **Theme flexibility requirement:** All components/screens must depend on our theme abstraction (`TicketScanTheme`) for colors, typography, and shapes. The abstraction can internally map to Material 3 or any future system without changing component code.
+- If a new design system is adopted, only update the provider under `ui/theme/` and keep components untouched.
+
 ## Domain Rules
 
 - Domain models are immutable and serialization-agnostic.
