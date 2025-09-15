@@ -1,4 +1,4 @@
-# 📲 TicketScan: Aplicación lectora de tickets
+# 📲 TicketScan
 
 ## 📌 Resumen
 **TicketScan** es una aplicación móvil desarrollada para **Android** que permite al usuario registrar sus compras de supermercado de diferentes maneras:
