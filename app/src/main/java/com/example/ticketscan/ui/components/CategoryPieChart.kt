@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlin.collections.map
 
 @Composable
@@ -28,9 +30,20 @@ fun CategoryPieChart(
         return
     }
 
-    val total = stats.sumOf { it.amount.toDouble() }.toFloat()
-    val proportions = stats.map { it.amount / total }
-    val angles = proportions.map { 360 * it }
+    val total: BigDecimal = stats
+        .map { it.amount }
+        .reduceOrNull { acc, value -> acc + value }
+        ?: BigDecimal.ZERO
+
+    val proportions: List<BigDecimal> = if (total > BigDecimal.ZERO) {
+        stats.map { it.amount.divide(total, 4, RoundingMode.HALF_UP) }
+    } else {
+        List(stats.size) { BigDecimal.ZERO }
+    }
+
+    val angles = proportions.map {
+        it.multiply(BigDecimal(360)).toFloat()
+    }
 
     Row(modifier = modifier.padding(16.dp)) {
         Canvas(modifier = Modifier
@@ -66,7 +79,7 @@ fun CategoryPieChart(
                             .background(stat.color, shape = CircleShape)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("${stat.name}: %.2f".format(stat.amount))
+                    Text("${stat.name}: $${stat.amount.setScale(2, RoundingMode.HALF_UP)}")
                 }
             }
         }

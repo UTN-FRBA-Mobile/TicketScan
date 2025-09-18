@@ -11,6 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ticketscan.domain.StatsRepositoryImpl
+import com.example.ticketscan.ui.screens.StatsScreen
+import com.example.ticketscan.ui.screens.StatsViewModel
+import com.example.ticketscan.ui.screens.StatsViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
 class MainActivity : ComponentActivity() {
@@ -29,6 +34,28 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+// ver mi screen como main
+/*class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        val repository = StatsRepositoryImpl()
+        val factory = StatsViewModelFactory(repository)
+
+        setContent {
+            TicketScanTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    val statsViewModel: StatsViewModel = viewModel(factory = factory)
+                    StatsScreen(
+                        statsViewModel = statsViewModel
+                    )
+                }
+            }
+        }
+    }
+}*/
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {

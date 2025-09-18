@@ -4,15 +4,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
-fun ComparisonSection(current: Double, previous: Double) {
-    val difference = current - previous
-    val color = if (difference >= 0) Color.Red else Color.Green
-    val sign = if (difference >= 0) "+" else "-"
+fun ComparisonSection(current: BigDecimal, previous: BigDecimal) {
+    val difference = current.subtract(previous)
+    val color = if (difference >= BigDecimal.ZERO) Color.Red else Color.Green
+    val sign = if (difference >= BigDecimal.ZERO) "+" else "-"
+
+    val formattedDifference = difference
+        .abs()
+        .setScale(2, RoundingMode.HALF_UP)
+        .toPlainString()
 
     Text(
-        text = "Cambio respecto al período anterior: $sign$${"%.2f".format(kotlin.math.abs(difference))}",
+        text = "Cambio respecto al período anterior: $sign$$formattedDifference",
         color = color,
         style = MaterialTheme.typography.bodyMedium
     )
