@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.composable
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
 import com.example.ticketscan.ui.screens.HomeScreen
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
@@ -24,12 +25,20 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    bottomBar = { TicketScanBottomNavigation(navController) }
+                    bottomBar = { TicketScanBottomNavigation(navController) { navController.navigate("scan") } }
                 ) { innerPadding ->
-                    HomeScreen(
+                    // Simple NavHost to switch between screens so bottom navigation works and preview/navigation to ticket works
+                    androidx.navigation.compose.NavHost(
                         navController = navController,
+                        startDestination = "home",
                         modifier = Modifier.padding(innerPadding)
-                    )
+                    ) {
+                        composable("home") { HomeScreen(navController = navController) }
+                        composable("expenses") { /* TODO: Expenses screen */ HomeScreen(navController = navController) }
+                        composable("scan") { com.example.ticketscan.ui.screens.TicketScreen(navController = navController) }
+                        composable("profile") { /* TODO: Profile screen */ HomeScreen(navController = navController) }
+                        composable("more") { /* TODO: More screen */ HomeScreen(navController = navController) }
+                    }
                 }
             }
         }

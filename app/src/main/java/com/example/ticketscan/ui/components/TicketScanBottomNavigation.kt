@@ -4,6 +4,10 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -42,25 +46,45 @@ fun TicketScanBottomNavigation(
     ) {
         BottomNavItem.items.forEach { item ->
             val isSelected = currentRoute == item.route
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        tint = if (isSelected) TicketScanTheme.colors.primary else Color.Gray
-                    )
-                },
-                label = { Text(item.label) },
-                selected = isSelected,
-                onClick = {
-                    if (item is BottomNavItem.Scan && onScanClick != null) {
-                        onScanClick()
-                    } else {
-                        navController.navigate(item.route)
-                    }
-                },
-                alwaysShowLabel = true
-            )
+            if (item is BottomNavItem.Scan) {
+                // Render a larger circular central button
+                NavigationBarItem(
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .background(color = TicketScanTheme.colors.primary, shape = CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                tint = TicketScanTheme.colors.onPrimary,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    },
+                    label = { Text(item.label) },
+                    selected = isSelected,
+                    onClick = {
+                        if (onScanClick != null) onScanClick()
+                    },
+                    alwaysShowLabel = false
+                )
+            } else {
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.label,
+                            tint = if (isSelected) TicketScanTheme.colors.primary else Color.Gray
+                        )
+                    },
+                    label = { Text(item.label) },
+                    selected = isSelected,
+                    onClick = { navController.navigate(item.route) },
+                    alwaysShowLabel = true
+                )
+            }
         }
     }
 }
