@@ -1,8 +1,10 @@
 package com.example.ticketscan.ui.screens
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,31 +13,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.InputTransformation
-import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.maxLength
-import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.text.input.then
-import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.ticketscan.domain.repositories.TicketRepositoryImpl
+import com.example.ticketscan.domain.model.TicketItem
+import com.example.ticketscan.domain.repositories.TicketRepositoryMock
+import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 
@@ -43,147 +37,133 @@ import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 @Composable
 fun TicketScreen(
     navController: NavController,
+    viewModel: TicketViewModel
 ) {
-    val factory = remember { TicketViewModelFactory(TicketRepositoryImpl()) }
-    val viewModel: TicketViewModel = viewModel(factory = factory)
+    val ticket by viewModel.ticket.collectAsState()
 
-    val categories by viewModel.categories.collectAsState()
-
-    TicketScanThemeProvider {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-        ) {
-            Spacer(Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(
-                    text = "Ticket ###",
-                    style = TicketScanTheme.typography.headlineLarge,
-                    color = TicketScanTheme.colors.onBackground
-                )
-                Text(
-                    text = "Fecha xx/xx/xxxx",
-                    style = TicketScanTheme.typography.bodyLarge,
-                    color = TicketScanTheme.colors.onBackground
-                )
-            }
-
-            Spacer(Modifier.height(20.dp))
-
-            categories.forEach { category ->
-                Text(
-                    text = category.name,
-                    style = TicketScanTheme.typography.titleMedium,
-                    color = TicketScanTheme.colors.onBackground,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-                CategorySection(category = category, navController = navController)
-                Spacer(Modifier.height(12.dp))
-            }
-
-            Spacer(Modifier.weight(1f)) // push actions to bottom
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                androidx.compose.material3.IconButton(onClick = { /* eliminar */ }) {
-                    androidx.compose.material3.Icon(
-                        imageVector = com.example.ticketscan.ui.theme.TicketScanIcons.Close,
-                        contentDescription = "Eliminar",
-                        tint = TicketScanTheme.colors.onBackground,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-                androidx.compose.material3.IconButton(onClick = { /* editar */ }) {
-                    androidx.compose.material3.Icon(
-                        imageVector = com.example.ticketscan.ui.theme.TicketScanIcons.Edit,
-                        contentDescription = "Editar",
-                        tint = TicketScanTheme.colors.onBackground,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-                androidx.compose.material3.IconButton(onClick = { /* compartir */ }) {
-                    androidx.compose.material3.Icon(
-                        imageVector = com.example.ticketscan.ui.theme.TicketScanIcons.Share,
-                        contentDescription = "Compartir",
-                        tint = TicketScanTheme.colors.onBackground,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun CategorySection(category: Category, navController: NavController) {
-    Text(category.name)
-    Column {
-        category.items.forEach { item ->
-            ItemRow(item, navController)
-        }
-    }
-}
-
-@Composable
-fun ItemRow(item: Item, navController: NavController) {
-    Row(
+    Column(
         modifier = Modifier
-            .height(52.dp)
-            .fillMaxWidth()
+            .fillMaxSize()
+            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-        androidx.compose.material3.Surface(
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
-            color = TicketScanTheme.colors.surface,
-            tonalElevation = 4.dp,
-            modifier = Modifier
-                .fillMaxWidth()
+        Spacer(Modifier.height(8.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = "Ticket ###",
+                style = TicketScanTheme.typography.headlineLarge,
+                color = TicketScanTheme.colors.onBackground
+            )
+            Text(
+                text = ticket?.date?.toString() ?: "Fecha xx/xx/xxxx",
+                style = TicketScanTheme.typography.bodyLarge,
+                color = TicketScanTheme.colors.onBackground
+            )
+        }
+
+        Spacer(Modifier.height(20.dp))
+
+        val itemsByCategory = ticket?.items?.groupBy { it.category } ?: emptyMap()
+        itemsByCategory.forEach { (category, items) ->
+            CategorySection(category = category, items = items, false)
+            Spacer(Modifier.height(12.dp))
+        }
+
+        Spacer(Modifier.weight(1f)) // push actions to bottom
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(
-                    item.name,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable(enabled = item.route != null) {
-                            item.route?.let { navController.navigate(it) }
-                        }
+            IconButton(onClick = { /* TODO eliminar ticket */ }) {
+                Icon(
+                    imageVector = TicketScanIcons.Close,
+                    contentDescription = "Eliminar",
+                    tint = TicketScanTheme.colors.onBackground,
+                    modifier = Modifier.size(40.dp)
                 )
-                IntTextField()
+            }
+            IconButton(onClick = { /* TODO ir a vista de editar ticket */ }) {
+                Icon(
+                    imageVector = TicketScanIcons.Edit,
+                    contentDescription = "Editar",
+                    tint = TicketScanTheme.colors.onBackground,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+            IconButton(onClick = { /* TODO mostrar opciones para exportar ticket */ }) {
+                Icon(
+                    imageVector = TicketScanIcons.Share,
+                    contentDescription = "Compartir",
+                    tint = TicketScanTheme.colors.onBackground,
+                    modifier = Modifier.size(40.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-fun IntTextField() {
-    var text by remember { mutableStateOf("0.0") }
-    val number: Int? = text.toIntOrNull() // null si no es número válido
+fun CategorySection(category: String, items: List<TicketItem>, isEditable: Boolean = false) {
+    Column {
+        Text(
+            text = category,
+            style = TicketScanTheme.typography.titleMedium,
+            color = TicketScanTheme.colors.onBackground,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
 
-    TextField(
-        value = text,
-        onValueChange = { newText -> text = newText },
-        label = { Text(text) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-    )
+        )
+        items.forEach { item ->
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 10.dp)
+                    .border(BorderStroke(1.dp, TicketScanTheme.colors.primary), TicketScanTheme.shapes.small),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "${item.name} (${item.quantity} u.) - $${item.price}",
+                    style = TicketScanTheme.typography.bodyMedium,
+                    color = TicketScanTheme.colors.onBackground,
+                    modifier = Modifier.padding(PaddingValues(horizontal = 15.dp))
+                )
+                if (isEditable) {
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(
+                        onClick = { /* TODO eliminar ticket */ },
+                        modifier = Modifier.padding(0.dp).size(24.dp),
+
+                    ) {
+                        Icon(
+                            imageVector = TicketScanIcons.Edit,
+                            contentDescription = "Editar",
+                            tint = TicketScanTheme.colors.onBackground,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "Total: $${items.sumOf { it.price * it.quantity }}",
+            style = TicketScanTheme.typography.bodyLarge,
+            color = TicketScanTheme.colors.primary,
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.End
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun TicketScreenPreview() {
-    val navController = rememberNavController()
-    TicketScreen(navController = navController)
+    TicketScanThemeProvider {
+        val navController = rememberNavController()
+        val factory = remember { TicketViewModelFactory(TicketRepositoryMock()) }
+        val viewModel: TicketViewModel = viewModel(factory = factory)
+        TicketScreen(navController = navController, viewModel)
+    }
 }
-
-data class Category(
-    val name: String,
-    val items: List<Item>
-)
-
-data class Item(
-    val name: String,
-    val quantity: Float,
-    val route: String? = null // opcional, por si querés redirigir
-)

@@ -8,12 +8,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
+import com.example.ticketscan.domain.repositories.TicketRepositoryMock
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
 import com.example.ticketscan.ui.screens.HomeScreen
+import com.example.ticketscan.ui.screens.TicketScreen
+import com.example.ticketscan.ui.screens.TicketViewModel
+import com.example.ticketscan.ui.screens.TicketViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 
 class MainActivity : ComponentActivity() {
@@ -23,11 +29,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             TicketScanThemeProvider {
                 val navController = rememberNavController()
+                val factory = remember { TicketViewModelFactory(TicketRepositoryMock()) }
+                val viewModel: TicketViewModel = viewModel(factory = factory)
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = { TicketScanBottomNavigation(navController) { navController.navigate("scan") } }
                 ) { innerPadding ->
-                    // Simple NavHost to switch between screens so bottom navigation works and preview/navigation to ticket works
                     androidx.navigation.compose.NavHost(
                         navController = navController,
                         startDestination = "home",
@@ -35,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("home") { HomeScreen(navController = navController) }
                         composable("expenses") { /* TODO: Expenses screen */ HomeScreen(navController = navController) }
-                        composable("scan") { com.example.ticketscan.ui.screens.TicketScreen(navController = navController) }
+                        composable("scan") { TicketScreen(navController = navController, viewModel) }
                         composable("profile") { /* TODO: Profile screen */ HomeScreen(navController = navController) }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController = navController) }
                     }
