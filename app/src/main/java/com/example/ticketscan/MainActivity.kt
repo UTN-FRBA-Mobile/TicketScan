@@ -11,6 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.ui.screens.HomeScreen
+import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ticketscan.domain.StatsRepositoryImpl
 import com.example.ticketscan.ui.screens.StatsScreen
@@ -23,10 +26,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TicketScanTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+            TicketScanThemeProvider {
+                val navController = rememberNavController()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = { com.example.ticketscan.ui.components.TicketScanBottomNavigation(navController) }
+                ) { innerPadding ->
+                    HomeScreen(
+                        navController = navController,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -67,8 +74,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    TicketScanTheme {
-        Greeting("Android")
+fun HomePreview() {
+    TicketScanThemeProvider {
+        val navController = rememberNavController()
+        HomeScreen(navController = navController)
     }
 }
