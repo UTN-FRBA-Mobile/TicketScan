@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.ticketscan.ui.components.AudioRecorderButton
-import com.example.ticketscan.ui.theme.TicketScanTheme
+import com.example.ticketscan.ui.theme.Typography
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
@@ -40,19 +40,19 @@ fun AudioInputScreen() {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Ingresar ",
-            style = TicketScanTheme.typography.titleLarge,
+            style = Typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
         Text(
             text = "{audio}",
-            style = TicketScanTheme.typography.titleLarge,
+            style = Typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 4.dp)
         )
         Spacer(modifier = Modifier.height(48.dp))
         Text(
             text = "Otros métodos",
-            style = TicketScanTheme.typography.titleMedium,
+            style = Typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -78,9 +78,9 @@ fun AudioInputScreen() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "{otro_metodo}", style = TicketScanTheme.typography.bodyMedium)
+            Text(text = "{otro_metodo}", style = Typography.bodyMedium)
             Spacer(modifier = Modifier.size(32.dp))
-            Text(text = "{otro_metodo}", style = TicketScanTheme.typography.bodyMedium)
+            Text(text = "{otro_metodo}", style = Typography.bodyMedium)
         }
     }
 }

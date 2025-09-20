@@ -10,6 +10,7 @@ import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Singleton
 
+
 @Module
 @InstallIn(ViewModelComponent::class)
 object AudioModule {

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.ui.screens.AudioInputScreen
 import com.example.ticketscan.ui.screens.HomeScreen
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 
@@ -21,16 +22,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TicketScanThemeProvider {
-                val navController = rememberNavController()
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = { com.example.ticketscan.ui.components.TicketScanBottomNavigation(navController) }
-                ) { innerPadding ->
-                    HomeScreen(
-                        navController = navController,
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                // Visualización directa de la pantalla de grabación para pruebas
+                AudioInputScreen()
+                // Si quieres volver a HomeScreen, reemplaza la línea anterior por:
+                // val navController = rememberNavController()
+                // Scaffold(
+                //     modifier = Modifier.fillMaxSize(),
+                //     bottomBar = { com.example.ticketscan.ui.components.TicketScanBottomNavigation(navController) }
+                // ) { innerPadding ->
+                //     HomeScreen(
+                //         navController = navController,
+                //         modifier = Modifier.padding(innerPadding)
+                //     )
+                // }
             }
         }
     }

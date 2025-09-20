@@ -20,4 +20,6 @@ object TicketScanIcons {
     val Audio: ImageVector = Icons.Filled.Audiotrack
     val Camera: ImageVector = Icons.Filled.CameraAlt
     val Text: ImageVector = Icons.Filled.TextFields
+    val Mic: ImageVector = Icons.Filled.Audiotrack
+    val Stop: ImageVector = Icons.Filled.Stop
 }
