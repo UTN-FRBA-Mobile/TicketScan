@@ -1,9 +1,9 @@
 package com.example.ticketscan.ui.components
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.example.ticketscan.ui.theme.TicketScanTheme
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -21,6 +21,6 @@ fun ComparisonSection(current: BigDecimal, previous: BigDecimal) {
     Text(
         text = "Cambio respecto al período anterior: $sign$$formattedDifference",
         color = color,
-        style = MaterialTheme.typography.bodyMedium
+        style = TicketScanTheme.typography.bodyMedium
     )
 }

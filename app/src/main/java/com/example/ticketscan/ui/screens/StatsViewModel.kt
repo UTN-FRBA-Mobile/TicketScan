@@ -19,7 +19,7 @@ data class StatsUiState(
     val categoryStats: List<CategoryStat> = emptyList()
 )
 
-/*class StatsViewModelFactory(
+class StatsViewModelFactory(
     private val repository: StatsRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -29,7 +29,7 @@ data class StatsUiState(
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
-}*/
+}
 
 class StatsViewModel(
     private val repository: StatsRepository
@@ -67,7 +67,7 @@ class StatsViewModel(
             uiState.value = uiState.value.copy(
                 totalAmount = total,
                 averageAmount = average,
-                previousAmount = total, // TODO
+                previousAmount = total.subtract(BigDecimal.valueOf(100)), // TODO
                 categoryStats = stats
             )
         }
