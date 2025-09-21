@@ -13,24 +13,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.ticketscan.ia.example.AnalisisActivity
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.ui.screens.HomeScreen
+import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TicketScanTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(modifier = Modifier.padding(innerPadding)) {
-                        Greeting(name = "Android")
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = {
-                            val intent = Intent(this@MainActivity, AnalisisActivity::class.java)
-                            startActivity(intent)
-                        }) {
-                            Text("Ejemplo de análisis")
-                        }
-                    }
+            TicketScanThemeProvider {
+                val navController = rememberNavController()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = { com.example.ticketscan.ui.components.TicketScanBottomNavigation(navController) }
+                ) { innerPadding ->
+                    HomeScreen(
+                        navController = navController,
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
@@ -47,8 +48,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    TicketScanTheme {
-        Greeting("Android")
+fun HomePreview() {
+    TicketScanThemeProvider {
+        val navController = rememberNavController()
+        HomeScreen(navController = navController)
     }
 }
