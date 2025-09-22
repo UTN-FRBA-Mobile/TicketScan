@@ -1,6 +1,6 @@
 package com.example.ticketscan.ia.internal
 
-import com.example.ticketscan.ia.AnalizedItem
+import com.example.ticketscan.domain.AnalizedItem
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.Multipart

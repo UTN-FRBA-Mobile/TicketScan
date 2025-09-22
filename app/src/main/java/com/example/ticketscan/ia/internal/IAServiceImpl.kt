@@ -1,6 +1,9 @@
 package com.example.ticketscan.ia.internal
 
-import com.example.ticketscan.ia.AnalizedItem
+import android.content.Context
+import com.example.ticketscan.data.SQLiteService
+import com.example.ticketscan.domain.AnalizedItem
+import com.example.ticketscan.domain.Ticket
 import com.example.ticketscan.ia.IAService
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -9,10 +12,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 
-class IAServiceImpl : IAService {
-    private val api: IAApi
+class IAServiceImpl(private val context: Context, baseUrl: String) : IAService {
+    private var api: IAApi
+    private val db: SQLiteService = SQLiteService(context)
 
-    constructor(baseUrl: String) {
+    init {
         val retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
@@ -20,23 +24,41 @@ class IAServiceImpl : IAService {
         api = retrofit.create(IAApi::class.java)
     }
 
-    constructor(api: IAApi) {
+    constructor(context: Context, api: IAApi) : this(context, "") {
         this.api = api
     }
 
-    override suspend fun analizeTicketImage(image: File): List<AnalizedItem> {
+    override suspend fun analizeTicketImage(image: File): Ticket {
         val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), image)
         val body = MultipartBody.Part.createFormData("image", image.name, requestFile)
-        return api.analizeImage(body)
+        val items = api.analizeImage(body)
+        val creationDate = System.currentTimeMillis()
+        val ticketId = db.insertTicket(creationDate)
+        items.forEach {
+            db.insertAnalizedItem(it.copy(ticketId = ticketId))
+        }
+        return db.getTicketWithItems(ticketId)!!
     }
 
-    override suspend fun analizeTicketAudio(audio: File): List<AnalizedItem> {
+    override suspend fun analizeTicketAudio(audio: File): Ticket {
         val requestFile = RequestBody.create("audio/*".toMediaTypeOrNull(), audio)
         val body = MultipartBody.Part.createFormData("audio", audio.name, requestFile)
-        return api.analizeAudio(body)
+        val items = api.analizeAudio(body)
+        val creationDate = System.currentTimeMillis()
+        val ticketId = db.insertTicket(creationDate)
+        items.forEach {
+            db.insertAnalizedItem(it.copy(ticketId = ticketId))
+        }
+        return db.getTicketWithItems(ticketId)!!
     }
 
-    override suspend fun analizeTicketItems(items: Map<String, Double>): List<AnalizedItem> {
-        return api.analizeItems(items)
+    override suspend fun analizeTicketItems(items: Map<String, Double>): Ticket {
+        val analizedItems = api.analizeItems(items)
+        val creationDate = System.currentTimeMillis()
+        val ticketId = db.insertTicket(creationDate)
+        analizedItems.forEach {
+            db.insertAnalizedItem(it.copy(ticketId = ticketId))
+        }
+        return db.getTicketWithItems(ticketId)!!
     }
 }

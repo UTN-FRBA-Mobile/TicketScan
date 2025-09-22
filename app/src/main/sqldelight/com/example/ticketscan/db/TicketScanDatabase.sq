@@ -1,0 +1,21 @@
+-- Tabla de tickets
+CREATE TABLE Ticket (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    creationDate INTEGER NOT NULL
+);
+
+-- Tabla de items analizados
+CREATE TABLE AnalizedItem (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    price REAL NOT NULL,
+    category TEXT NOT NULL,
+    ticketId INTEGER NOT NULL REFERENCES Ticket(id) ON DELETE CASCADE
+);
+
+-- Consultar un ticket con sus items
+selectTicketWithItems:
+SELECT * FROM Ticket
+LEFT JOIN AnalizedItem ON Ticket.id = AnalizedItem.ticketId
+WHERE Ticket.id = ?;
+
