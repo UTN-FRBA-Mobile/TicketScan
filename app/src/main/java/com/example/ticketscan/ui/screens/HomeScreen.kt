@@ -55,9 +55,21 @@ fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
                 .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                UploadCard(title = "Por audio", modifier = Modifier.fillMaxWidth()) {}
-                UploadCard(title = "Por texto", modifier = Modifier.fillMaxWidth()) {}
-                UploadCard(title = "Por fotos", modifier = Modifier.fillMaxWidth()) {}
+                UploadCard(
+                    title = "Por audio",
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { navController.navigate("ticket") }
+                )
+                UploadCard(
+                    title = "Por texto",
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { navController.navigate("ticket") }
+                )
+                UploadCard(
+                    title = "Por fotos",
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { navController.navigate("ticket") }
+                )
             }
         }
     }
