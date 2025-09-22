@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("home") { HomeScreen(navController = navController) }
                         composable("expenses") { /* TODO: Expenses screen */ HomeScreen(navController = navController) }
-                        composable("scan") { TicketScreen(navController = navController, viewModel) }
+                        composable("scan") { /* TODO: Scan screen */ HomeScreen(navController = navController) }
                         composable("profile") { /* TODO: Profile screen */ HomeScreen(navController = navController) }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController = navController) }
                     }
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
+
 
 @Preview(showBackground = true)
 @Composable
