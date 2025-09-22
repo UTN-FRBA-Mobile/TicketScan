@@ -1,18 +1,18 @@
 package com.example.ticketscan.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,7 +45,7 @@ fun UploadOption(
                     .background(TicketScanTheme.colors.surface)
                     .fillMaxSize()
             ) {
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = icon,
                     contentDescription = label,
                     tint = TicketScanTheme.colors.onSurface,
