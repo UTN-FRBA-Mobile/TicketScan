@@ -25,7 +25,6 @@ import com.example.ticketscan.domain.repositories.StatsRepositoryMock
 import com.example.ticketscan.ui.screens.StatsScreen
 import com.example.ticketscan.ui.screens.StatsViewModel
 import com.example.ticketscan.ui.screens.StatsViewModelFactory
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

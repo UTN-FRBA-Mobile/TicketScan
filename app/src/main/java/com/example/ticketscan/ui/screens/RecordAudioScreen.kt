@@ -1,32 +1,27 @@
 package com.example.ticketscan.ui.screens
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.arthenica.mobileffmpeg.FFmpeg
-import androidx.compose.runtime.rememberCoroutineScope
 import com.example.ticketscan.ia.internal.IAServiceImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun RecordAudioScreen(
     iaService: IAServiceImpl,
@@ -62,9 +57,10 @@ fun RecordAudioScreen(
             onClick = {
                 if (!isRecording) {
                     val fileName = "ticket_audio_${System.currentTimeMillis()}.aac"
-                    val file = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), fileName)
+                    //val file = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), fileName)
+                    val file = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), "grabacion_test.aac")
                     audioFile = file
-                    recorder = MediaRecorder().apply {
+                    recorder = MediaRecorder(context).apply {
                         setAudioSource(MediaRecorder.AudioSource.MIC)
                         setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
                         setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
@@ -86,18 +82,16 @@ fun RecordAudioScreen(
         ) {
             Text(if (isRecording) "Detener grabación" else "Iniciar grabación")
         }
+
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
                 audioFile?.let { file ->
                     coroutineScope.launch {
-                        val mp3File = convertAacToMp3(file, context)
-                        if (mp3File != null) {
-                            val result = withContext(Dispatchers.IO) {
-                                iaService.analizeTicketAudio(mp3File)
-                            }
-                            onResult(result)
+                        val result = withContext(Dispatchers.IO) {
+                            iaService.analizeTicketAudio(file)
                         }
+                        onResult(result)
                     }
                 }
             },
@@ -105,21 +99,7 @@ fun RecordAudioScreen(
         ) {
             Text("Analizar audio")
         }
+
     }
 }
 
-private suspend fun convertAacToMp3(aacFile: File, context: Context): File? = withContext(Dispatchers.IO) {
-    try {
-        val mp3File = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), aacFile.name.replace(".aac", ".mp3"))
-        val command = "-y -i ${aacFile.absolutePath} -codec:a libmp3lame -qscale:a 2 ${mp3File.absolutePath}"
-        val rc = FFmpeg.execute(command)
-        if (rc == 0 && mp3File.exists()) {
-            mp3File
-        } else {
-            null
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
