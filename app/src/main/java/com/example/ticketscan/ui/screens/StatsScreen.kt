@@ -71,10 +71,10 @@ fun StatsScreen(
                 CategoryPieChart(stats = state.categoryStats)
             }
 
-            ComparisonSection(
+            /*ComparisonSection(
                 current = state.totalAmount,
                 previous = state.previousAmount
-            )
+            )*/
         }
     }
 }

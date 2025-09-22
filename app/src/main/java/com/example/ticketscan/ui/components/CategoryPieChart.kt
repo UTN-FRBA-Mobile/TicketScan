@@ -82,7 +82,7 @@ fun CategoryPieChart(
                             .size(16.dp)
                             .background(stat.color, shape = CircleShape)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                     FormattedCurrencyText(
                         label = stat.name,
                         amount = stat.amount,
