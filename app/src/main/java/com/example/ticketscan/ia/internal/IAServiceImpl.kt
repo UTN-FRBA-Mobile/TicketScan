@@ -1,5 +1,6 @@
 package com.example.ticketscan.ia.internal
 
+import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.TicketItem
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -23,19 +24,19 @@ class IAServiceImpl : IAService {
         this.api = api
     }
 
-    override suspend fun analyzeTicketImage(image: File): List<TicketItem> {
+    override suspend fun analyzeTicketImage(image: File, categories: List<Category>): List<TicketItem> {
         val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), image)
         val body = MultipartBody.Part.createFormData("image", image.name, requestFile)
         return api.analyzeImage(body)
     }
 
-    override suspend fun analyzeTicketAudio(audio: File): List<TicketItem> {
+    override suspend fun analyzeTicketAudio(audio: File, categories: List<Category>): List<TicketItem> {
         val requestFile = RequestBody.create("audio/*".toMediaTypeOrNull(), audio)
         val body = MultipartBody.Part.createFormData("audio", audio.name, requestFile)
         return api.analyzeAudio(body)
     }
 
-    override suspend fun analyzeTicketItems(items: Map<String, Double>): List<TicketItem> {
+    override suspend fun analyzeTicketItems(items: Map<String, Double>, categories: List<Category>): List<TicketItem> {
         return api.analyzeItems(items)
     }
 }
