@@ -4,7 +4,7 @@ import com.example.ticketscan.domain.model.TicketItem
 import java.io.File
 
 interface IAService {
-    suspend fun analizeTicketImage(imagen: File): List<TicketItem>
-    suspend fun analizeTicketAudio(audio: File): List<TicketItem>
-    suspend fun analizeTicketItems(items: Map<String, Double>): List<TicketItem>
+    suspend fun analyzeTicketImage(imagen: File): List<TicketItem>
+    suspend fun analyzeTicketAudio(audio: File): List<TicketItem>
+    suspend fun analyzeTicketItems(items: Map<String, Double>): List<TicketItem>
 }

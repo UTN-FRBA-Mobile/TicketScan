@@ -10,12 +10,12 @@ import retrofit2.http.Part
 interface IAApi {
     @Multipart
     @POST("analyze/image")
-    suspend fun analizeImage(@Part image: MultipartBody.Part): List<TicketItem>
+    suspend fun analyzeImage(@Part image: MultipartBody.Part): List<TicketItem>
 
     @Multipart
     @POST("analyze/audio")
-    suspend fun analizeAudio(@Part audio: MultipartBody.Part): List<TicketItem>
+    suspend fun analyzeAudio(@Part audio: MultipartBody.Part): List<TicketItem>
 
     @POST("analyze/items")
-    suspend fun analizeItems(@Body items: Map<String, Double>): List<TicketItem>
+    suspend fun analyzeItems(@Body items: Map<String, Double>): List<TicketItem>
 }

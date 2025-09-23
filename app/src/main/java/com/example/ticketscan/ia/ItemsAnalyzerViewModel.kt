@@ -13,23 +13,23 @@ class ItemsAnalyzerViewModel(
     private val iaService: IAService = IAServiceImpl(MockIAApi())
 ) : ViewModel() {
 
-    fun analizeImageTicket(imagen: File, onResult: (List<TicketItem>) -> Unit) {
+    fun analyzeImageTicket(imagen: File, onResult: (List<TicketItem>) -> Unit) {
         viewModelScope.launch {
-            val resultado = iaService.analizeTicketImage(imagen)
+            val resultado = iaService.analyzeTicketImage(imagen)
             onResult(resultado)
         }
     }
 
-    fun analizeAudioTicket(audio: File, onResult: (List<TicketItem>) -> Unit) {
+    fun analyzeAudioTicket(audio: File, onResult: (List<TicketItem>) -> Unit) {
         viewModelScope.launch {
-            val resultado = iaService.analizeTicketAudio(audio)
+            val resultado = iaService.analyzeTicketAudio(audio)
             onResult(resultado)
         }
     }
 
-    fun analizeItemsTicket(items: Map<String, Double>, onResult: (List<TicketItem>) -> Unit) {
+    fun analyzeItemsTicket(items: Map<String, Double>, onResult: (List<TicketItem>) -> Unit) {
         viewModelScope.launch {
-            val resultado = iaService.analizeTicketItems(items)
+            val resultado = iaService.analyzeTicketItems(items)
             onResult(resultado)
         }
     }

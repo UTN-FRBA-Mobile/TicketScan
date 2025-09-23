@@ -8,7 +8,7 @@ import okhttp3.MultipartBody
 import java.util.UUID
 
 class MockIAApi : IAApi {
-    override suspend fun analizeImage(image: MultipartBody.Part): List<TicketItem> {
+    override suspend fun analyzeImage(image: MultipartBody.Part): List<TicketItem> {
         return listOf(
             TicketItem(
                 id = UUID.randomUUID(),
@@ -29,7 +29,7 @@ class MockIAApi : IAApi {
         )
     }
 
-    override suspend fun analizeAudio(audio: MultipartBody.Part): List<TicketItem> {
+    override suspend fun analyzeAudio(audio: MultipartBody.Part): List<TicketItem> {
         return listOf(
             TicketItem(
                 id = UUID.randomUUID(),
@@ -50,7 +50,7 @@ class MockIAApi : IAApi {
         )
     }
 
-    override suspend fun analizeItems(items: Map<String, Double>): List<TicketItem> {
+    override suspend fun analyzeItems(items: Map<String, Double>): List<TicketItem> {
         return items.map { (nombre, precio) ->
             TicketItem(
                 id = UUID.randomUUID(),
