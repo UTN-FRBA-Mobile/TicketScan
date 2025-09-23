@@ -9,7 +9,7 @@ import com.example.ticketscan.ia.internal.mock.MockIAApi
 import kotlinx.coroutines.launch
 import java.io.File
 
-class ItemsAnalizerViewModel(
+class ItemsAnalyzerViewModel(
     private val iaService: IAService = IAServiceImpl(MockIAApi())
 ) : ViewModel() {
 
