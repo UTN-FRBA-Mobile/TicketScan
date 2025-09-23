@@ -3,9 +3,10 @@ package com.example.ticketscan.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Ticket
-import com.example.ticketscan.domain.repositories.TicketRepository
-import com.example.ticketscan.domain.repositories.TicketRepositoryMock
+import com.example.ticketscan.domain.repositories.ticket.TicketRepository
+import com.example.ticketscan.domain.repositories.ticket.TicketRepositoryMock
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +32,7 @@ class TicketViewModel(
         }
     }
 
-    fun updateTicketItem(itemId: UUID, name: String? = null, price: Double? = null, quantity: Int? = null, category: String? = null) {
+    fun updateTicketItem(itemId: UUID, name: String? = null, price: Double? = null, quantity: Int? = null, category: Category? = null) {
         val currentTicket = _ticket.value ?: return
         val updatedItems = currentTicket.items.map { item ->
             if (item.id == itemId) {

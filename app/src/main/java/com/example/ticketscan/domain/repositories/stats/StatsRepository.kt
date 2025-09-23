@@ -1,4 +1,4 @@
-package com.example.ticketscan.domain.repositories
+package com.example.ticketscan.domain.repositories.stats
 
 import com.example.ticketscan.ui.components.CategoryStat
 import com.example.ticketscan.ui.components.Period
