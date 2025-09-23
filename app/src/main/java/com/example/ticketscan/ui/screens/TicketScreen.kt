@@ -27,8 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.TicketItem
-import com.example.ticketscan.domain.repositories.TicketRepositoryMock
+import com.example.ticketscan.domain.repositories.ticket.TicketRepositoryMock
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
@@ -103,10 +104,10 @@ fun TicketScreen(
 }
 
 @Composable
-fun CategorySection(category: String, items: List<TicketItem>, isEditable: Boolean = false) {
+fun CategorySection(category: Category, items: List<TicketItem>, isEditable: Boolean = false) {
     Column {
         Text(
-            text = category,
+            text = category.name,
             style = TicketScanTheme.typography.titleMedium,
             color = TicketScanTheme.colors.onBackground,
             modifier = Modifier
