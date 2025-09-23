@@ -11,11 +11,19 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import com.example.ticketscan.ia.internal.IAServiceImpl
+import com.example.ticketscan.ui.components.UploadOption
+import com.example.ticketscan.ui.theme.TicketScanIcons
+import com.example.ticketscan.ui.theme.TicketScanTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,8 +32,8 @@ import java.io.File
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun RecordAudioScreen(
+    navController: NavController,
     iaService: IAServiceImpl,
-    baseUrl: String,
     onResult: (List<com.example.ticketscan.ia.AnalizedItem>) -> Unit
 ) {
     val context = LocalContext.current
@@ -50,56 +58,108 @@ fun RecordAudioScreen(
         }
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Grabar nota de voz para registrar compra", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                if (!isRecording) {
-                    val fileName = "ticket_audio_${System.currentTimeMillis()}.aac"
-                    //val file = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), fileName)
-                    val file = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), "grabacion_test.aac")
-                    audioFile = file
-                    recorder = MediaRecorder(context).apply {
-                        setAudioSource(MediaRecorder.AudioSource.MIC)
-                        setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-                        setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                        setOutputFile(file.absolutePath)
-                        prepare()
-                        start()
-                    }
-                    isRecording = true
-                } else {
-                    recorder?.apply {
-                        stop()
-                        release()
-                    }
-                    recorder = null
-                    isRecording = false
-                }
-            },
-            enabled = hasPermission
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = TicketScanTheme.colors.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(if (isRecording) "Detener grabación" else "Iniciar grabación")
-        }
+            // Title with audio icon
+            Spacer(modifier = Modifier.height(64.dp))
+            UploadOption(
+                label = "Ingresar Audio",
+                icon = TicketScanIcons.Audio,
+                modifier = Modifier.size(160.dp),
+                onClick = {}
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                audioFile?.let { file ->
-                    coroutineScope.launch {
-                        val result = withContext(Dispatchers.IO) {
-                            iaService.analizeTicketAudio(file)
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // Other methods section
+            Text(
+                text = "Otros Métodos",
+                style = LocalTextStyle.current.copy(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                textAlign = TextAlign.Center,
+                color = TicketScanTheme.colors.onBackground,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+
+            // Other upload options
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                UploadOption(
+                    label = "Cámara",
+                    icon = TicketScanIcons.Camera,
+                    onClick = { navController.navigate("record_audio") }
+                )
+                UploadOption(
+                    label = "Texto",
+                    icon = TicketScanIcons.Text,
+                    onClick = { navController.navigate("record_audio") }
+                )
+            }
+
+            // Recording controls
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = {
+                    if (!isRecording) {
+                        val file = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), "grabacion_test.aac")
+                        audioFile = file
+                        recorder = MediaRecorder(context).apply {
+                            setAudioSource(MediaRecorder.AudioSource.MIC)
+                            setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+                            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                            setOutputFile(file.absolutePath)
+                            prepare()
+                            start()
                         }
-                        onResult(result)
+                        isRecording = true
+                    } else {
+                        recorder?.apply {
+                            stop()
+                            release()
+                        }
+                        recorder = null
+                        isRecording = false
                     }
-                }
-            },
-            enabled = audioFile != null && !isRecording
-        ) {
-            Text("Analizar audio")
-        }
+                },
+                enabled = hasPermission,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+            ) {
+                Text(if (isRecording) "Detener grabación" else "Iniciar grabación")
+            }
 
+            Button(
+                onClick = {
+                    audioFile?.let { file ->
+                        coroutineScope.launch {
+                            val result = withContext(Dispatchers.IO) {
+                                iaService.analizeTicketAudio(file)
+                            }
+                            onResult(result)
+                        }
+                    }
+                },
+                enabled = audioFile != null && !isRecording,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Analizar audio")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
-
