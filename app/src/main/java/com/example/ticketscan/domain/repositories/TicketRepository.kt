@@ -6,4 +6,5 @@ import java.util.UUID
 
 interface TicketRepository {
     suspend fun getTicket(id: UUID): Flow<Ticket>
+    suspend fun updateTicket(ticket: Ticket)
 }

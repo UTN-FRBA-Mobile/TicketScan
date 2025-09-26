@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Save
 
 object TicketScanIcons {
     val Home: ImageVector = Icons.Filled.Home
@@ -26,4 +27,5 @@ object TicketScanIcons {
     val Close: ImageVector = Icons.Filled.Close
     val Edit: ImageVector = Icons.Filled.Edit
     val Share: ImageVector = Icons.Filled.Share
+    val Save: ImageVector = Icons.Filled.Save
 }

@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,12 +38,14 @@ import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.util.UUID
 
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun TicketScreen(
     navController: NavController,
     viewModel: TicketViewModel
 ) {
     val ticket by viewModel.ticket.collectAsState()
+    var isEditing by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -50,7 +55,7 @@ fun TicketScreen(
         Spacer(Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = "Ticket ###",
+                text = if (isEditing) "Editar Ticket ###" else "Ticket ###",
                 style = TicketScanTheme.typography.headlineLarge,
                 color = TicketScanTheme.colors.onBackground
             )
@@ -65,7 +70,20 @@ fun TicketScreen(
 
         val itemsByCategory = ticket?.items?.groupBy { it.category } ?: emptyMap()
         itemsByCategory.forEach { (category, items) ->
-            CategorySection(category = category, items = items, false)
+            CategorySection(
+                category = category,
+                items = items,
+                isEditable = isEditing,
+                onItemChange = { id, name, price, quantity, categoryValue ->
+                    viewModel.updateTicketItem(
+                        itemId = id,
+                        name = name,
+                        price = price,
+                        quantity = quantity,
+                        category = categoryValue
+                    )
+                }
+            )
             Spacer(Modifier.height(12.dp))
         }
 
@@ -75,26 +93,46 @@ fun TicketScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            IconButton(onClick = { /* TODO eliminar ticket */ }) {
+            if (!isEditing) {
+                IconButton(onClick = { /* TODO eliminar ticket */ }) {
+                    Icon(
+                        imageVector = TicketScanIcons.Close,
+                        contentDescription = "Eliminar",
+                        tint = TicketScanTheme.colors.onBackground,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
+
+            IconButton(onClick = {
+                if (isEditing) {
+                    // cancelar edición
+                    viewModel.refreshTicket()
+                    isEditing = false
+                } else {
+                    isEditing = true
+                }
+            }) {
                 Icon(
-                    imageVector = TicketScanIcons.Close,
-                    contentDescription = "Eliminar",
+                    imageVector = if (isEditing) TicketScanIcons.Close else TicketScanIcons.Edit,
+                    contentDescription = if (isEditing) "Cerrar edición" else "Editar",
                     tint = TicketScanTheme.colors.onBackground,
                     modifier = Modifier.size(40.dp)
                 )
             }
-            IconButton(onClick = { /* TODO ir a vista de editar ticket */ }) {
+
+            // Save or Share
+            IconButton(onClick = {
+                if (isEditing) {
+                    viewModel.saveTicket()
+                    isEditing = false
+                } else {
+                    /* TODO mostrar opciones para exportar ticket */
+                }
+            }) {
                 Icon(
-                    imageVector = TicketScanIcons.Edit,
-                    contentDescription = "Editar",
-                    tint = TicketScanTheme.colors.onBackground,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-            IconButton(onClick = { /* TODO mostrar opciones para exportar ticket */ }) {
-                Icon(
-                    imageVector = TicketScanIcons.Share,
-                    contentDescription = "Compartir",
+                    imageVector = if (isEditing) TicketScanIcons.Save else TicketScanIcons.Share,
+                    contentDescription = if (isEditing) "Guardar" else "Compartir",
                     tint = TicketScanTheme.colors.onBackground,
                     modifier = Modifier.size(40.dp)
                 )
@@ -104,7 +142,12 @@ fun TicketScreen(
 }
 
 @Composable
-fun CategorySection(category: String, items: List<TicketItem>, isEditable: Boolean = false) {
+fun CategorySection(
+    category: String,
+    items: List<TicketItem>,
+    isEditable: Boolean = false,
+    onItemChange: (id: UUID, name: String?, price: Double?, quantity: Int?, category: String?) -> Unit = { _, _, _, _, _ -> }
+) {
     Column {
         Text(
             text = category,
@@ -122,14 +165,33 @@ fun CategorySection(category: String, items: List<TicketItem>, isEditable: Boole
                     .border(BorderStroke(1.dp, TicketScanTheme.colors.primary), TicketScanTheme.shapes.small),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = "${item.name} (${item.quantity} u.) - $${item.price}",
-                    style = TicketScanTheme.typography.bodyMedium,
-                    color = TicketScanTheme.colors.onBackground,
-                    modifier = Modifier.padding(PaddingValues(horizontal = 15.dp))
-                )
                 if (isEditable) {
-                    Spacer(Modifier.width(8.dp))
+                    TextField(
+                        value = item.name,
+                        onValueChange = { newName -> onItemChange(item.id, newName, null, null, null) },
+                        modifier = Modifier
+                            .padding(PaddingValues(start = 12.dp))
+                            .width(160.dp)
+                    )
+
+                    TextField(
+                        value = item.quantity.toString(),
+                        onValueChange = { newQtyStr ->
+                            val parsed = newQtyStr.toIntOrNull()
+                            onItemChange(item.id, null, null, parsed, null)
+                        },
+                        modifier = Modifier.width(80.dp)
+                    )
+
+                    TextField(
+                        value = item.price.toString(),
+                        onValueChange = { newPriceStr ->
+                            val parsed = newPriceStr.toDoubleOrNull()
+                            onItemChange(item.id, null, parsed, null, null)
+                        },
+                        modifier = Modifier.width(100.dp)
+                    )
+
                     IconButton(
                         onClick = { /* TODO eliminar ticket */ },
                         modifier = Modifier.padding(0.dp).size(24.dp),
@@ -142,6 +204,13 @@ fun CategorySection(category: String, items: List<TicketItem>, isEditable: Boole
                             modifier = Modifier.size(20.dp)
                         )
                     }
+                } else {
+                    Text(
+                        text = "${item.name} (${item.quantity} u.) - $${item.price}",
+                        style = TicketScanTheme.typography.bodyMedium,
+                        color = TicketScanTheme.colors.onBackground,
+                        modifier = Modifier.padding(PaddingValues(horizontal = 15.dp))
+                    )
                 }
             }
         }

@@ -32,6 +32,10 @@ class TicketViewModel(
         }
     }
 
+    fun refreshTicket() {
+        loadTicket(ticketId)
+    }
+
     fun updateTicketItem(itemId: UUID, name: String? = null, price: Double? = null, quantity: Int? = null, category: String? = null) {
         val currentTicket = _ticket.value ?: return
         val updatedItems = currentTicket.items.map { item ->
@@ -45,6 +49,14 @@ class TicketViewModel(
             } else item
         }
         _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf { it.price * it.quantity })
+    }
+
+    fun saveTicket() {
+        val currentTicket = _ticket.value ?: return
+        viewModelScope.launch {
+            repository.updateTicket(currentTicket)
+            loadTicket(ticketId)
+        }
     }
 }
 
