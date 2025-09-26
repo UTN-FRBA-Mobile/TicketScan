@@ -25,6 +25,8 @@ import com.example.ticketscan.domain.repositories.StatsRepositoryMock
 import com.example.ticketscan.ui.screens.StatsScreen
 import com.example.ticketscan.ui.screens.StatsViewModel
 import com.example.ticketscan.ui.screens.StatsViewModelFactory
+import com.example.ticketscan.ui.screens.ProcessingScreen
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,8 +36,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             TicketScanThemeProvider {
                 val navController = rememberNavController()
-                val ticketFactory = remember { TicketViewModelFactory(TicketRepositoryMock()) }
-                val ticketsViewModel: TicketViewModel = viewModel(factory = ticketFactory)
                 val repository = StatsRepositoryMock()
                 val statsFactory = StatsViewModelFactory(repository)
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
@@ -61,7 +61,17 @@ class MainActivity : ComponentActivity() {
                         composable("scan") { /* TODO: Scan screen */ HomeScreen(navController = navController) }
                         composable("profile") { /* TODO: Profile screen */ HomeScreen(navController = navController) }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController = navController) }
-                        composable("ticket") { TicketScreen(navController = navController, ticketsViewModel) }
+                        composable("ticket/{id}") { backStackEntry ->
+                            val idArg = backStackEntry.arguments?.getString("id")
+                            val uuid = UUID.fromString(idArg)
+                            val factoryWithId = remember(uuid) { TicketViewModelFactory(TicketRepositoryMock(), uuid) }
+                            val viewModelWithId: TicketViewModel = viewModel(factory = factoryWithId)
+                            TicketScreen(navController = navController, viewModelWithId)
+                        }
+                        composable("processing/{mode}") { backStackEntry ->
+                            val mode = backStackEntry.arguments?.getString("mode") ?: "unknown"
+                            ProcessingScreen(navController = navController, mode = mode)
+                        }
                     }
                 }
             }

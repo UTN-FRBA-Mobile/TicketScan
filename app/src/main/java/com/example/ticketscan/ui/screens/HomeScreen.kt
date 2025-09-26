@@ -20,6 +20,7 @@ import com.example.ticketscan.ui.components.UploadCard
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import java.util.UUID
 
 @Composable
 fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
@@ -40,7 +41,7 @@ fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
             ) {
                 UploadOption(label = "Audio", icon = TicketScanIcons.Audio) { /* TODO */ }
                 UploadOption(label = "Cámara", icon = TicketScanIcons.Camera) { /* TODO */ }
-                UploadOption(label = "Texto", icon = TicketScanIcons.Text) { /* TODO */ }
+                UploadOption(label = "Texto", icon = TicketScanIcons.Text) { navController.navigate("processing/texto") }
             }
             Spacer(modifier = Modifier.height(32.dp))
             Text(
@@ -58,17 +59,17 @@ fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
                 UploadCard(
                     title = "Por audio",
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket") }
+                    onClick = { navController.navigate("ticket/" + UUID.randomUUID()) }
                 )
                 UploadCard(
                     title = "Por texto",
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket") }
+                    onClick = { navController.navigate("ticket/" + UUID.randomUUID()) }
                 )
                 UploadCard(
                     title = "Por fotos",
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket") }
+                    onClick = { navController.navigate("ticket/" + UUID.randomUUID()) }
                 )
             }
         }

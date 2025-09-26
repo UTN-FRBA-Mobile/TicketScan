@@ -32,6 +32,7 @@ import com.example.ticketscan.domain.repositories.TicketRepositoryMock
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
+import java.util.UUID
 
 
 @Composable
@@ -162,7 +163,7 @@ fun CategorySection(category: String, items: List<TicketItem>, isEditable: Boole
 fun TicketScreenPreview() {
     TicketScanThemeProvider {
         val navController = rememberNavController()
-        val factory = remember { TicketViewModelFactory(TicketRepositoryMock()) }
+        val factory = remember { TicketViewModelFactory(TicketRepositoryMock(), UUID.randomUUID()) }
         val viewModel: TicketViewModel = viewModel(factory = factory)
         TicketScreen(navController = navController, viewModel)
     }

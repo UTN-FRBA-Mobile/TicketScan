@@ -13,19 +13,20 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class TicketViewModel(
-    private val repository: TicketRepository = TicketRepositoryMock()
+    private val repository: TicketRepository = TicketRepositoryMock(),
+    private val ticketId: UUID
 ) : ViewModel() {
 
     private val _ticket = MutableStateFlow<Ticket?>(null)
     val ticket: StateFlow<Ticket?> = _ticket
 
     init {
-        loadTicket()
+        loadTicket(ticketId)
     }
 
-    private fun loadTicket() {
+    private fun loadTicket(id: UUID) {
         viewModelScope.launch {
-            repository.processTicket().collectLatest { result ->
+            repository.getTicket(id).collectLatest { result ->
                 _ticket.value = result
             }
         }
@@ -48,12 +49,13 @@ class TicketViewModel(
 }
 
 class TicketViewModelFactory(
-    private val repository: TicketRepository
+    private val repository: TicketRepository,
+    private val ticketId: UUID
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TicketViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TicketViewModel(repository) as T
+            return TicketViewModel(repository, ticketId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

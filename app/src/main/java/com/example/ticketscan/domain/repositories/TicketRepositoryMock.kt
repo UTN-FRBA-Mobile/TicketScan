@@ -2,9 +2,9 @@ package com.example.ticketscan.domain.repositories
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
-import com.example.ticketscan.domain.model.Store
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
@@ -12,7 +12,7 @@ import java.util.UUID
 
 class TicketRepositoryMock : TicketRepository {
     @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun processTicket(): Flow<Ticket> {
+    override suspend fun getTicket(id: UUID): Flow<Ticket> {
         val items = listOf(
             TicketItem(
                 id = UUID.randomUUID(),
@@ -40,7 +40,7 @@ class TicketRepositoryMock : TicketRepository {
             )
         )
         val ticket = Ticket(
-            id = UUID.randomUUID(),
+            id = id,
             date = LocalDate.of(2025, 5, 15),
             store = Store(id = UUID.randomUUID(), name = "Supermercado Ejemplo", cuit = 20304050607, location = "Calle Falsa 123"),
             items = items,
