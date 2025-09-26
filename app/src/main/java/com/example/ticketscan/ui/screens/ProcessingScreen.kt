@@ -48,7 +48,12 @@ fun ProcessingScreen(navController: NavController, mode: String) {
             colorFilter = ColorFilter.tint(TicketScanTheme.colors.primary)
         )
         Text(text = "Procesando $mode", modifier = Modifier.padding(top = 12.dp))
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            modifier = Modifier
+                .padding(top = 24.dp)
+                .size(48.dp),
+            color = TicketScanTheme.colors.primary
+        )
     }
 }
 
