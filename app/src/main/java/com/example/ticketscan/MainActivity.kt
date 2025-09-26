@@ -52,7 +52,9 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         navController = navController,
                         startDestination = "home",
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize()
                     ) {
                         composable("home") { HomeScreen(navController = navController) }
                         composable("expenses") { StatsScreen(navController = navController,
