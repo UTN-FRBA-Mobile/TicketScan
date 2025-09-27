@@ -1,8 +1,11 @@
 package com.example.ticketscan.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.repositories.TicketRepository
 import com.example.ticketscan.domain.repositories.TicketRepositoryMock
@@ -12,26 +15,34 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class TicketViewModel(
-    private val repository: TicketRepository = TicketRepositoryMock()
+@RequiresApi(Build.VERSION_CODES.O)
+class TicketViewModel (
+    private val repository: TicketRepository = TicketRepositoryMock,
+    private val ticketId: UUID
 ) : ViewModel() {
 
     private val _ticket = MutableStateFlow<Ticket?>(null)
+    private val _categories = MutableStateFlow(Category.getAllCategories())
     val ticket: StateFlow<Ticket?> = _ticket
+    val categories: StateFlow<List<Category>> = _categories
 
     init {
-        loadTicket()
+        loadTicket(ticketId)
     }
 
-    private fun loadTicket() {
+    private fun loadTicket(id: UUID) {
         viewModelScope.launch {
-            repository.processTicket().collectLatest { result ->
+            repository.getTicket(id).collectLatest { result ->
                 _ticket.value = result
             }
         }
     }
 
-    fun updateTicketItem(itemId: UUID, name: String? = null, price: Double? = null, quantity: Int? = null, category: String? = null) {
+    fun refreshTicket() {
+        loadTicket(ticketId)
+    }
+
+    fun updateTicketItem(itemId: UUID, name: String? = null, price: Double? = null, quantity: Int? = null, category: Category? = null) {
         val currentTicket = _ticket.value ?: return
         val updatedItems = currentTicket.items.map { item ->
             if (item.id == itemId) {
@@ -43,17 +54,45 @@ class TicketViewModel(
                 )
             } else item
         }
-        _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf { it.price * it.quantity })
+        _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf {
+            it.price
+        })
+    }
+
+    fun addTicketItem(item: com.example.ticketscan.domain.model.TicketItem) {
+        val currentTicket = _ticket.value ?: return
+        val updatedItems = currentTicket.items + item
+        _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf {
+            it.price
+        })
+    }
+
+    fun removeTicketItem(itemId: UUID) {
+        val currentTicket = _ticket.value ?: return
+        val updatedItems = currentTicket.items.filter { it.id != itemId }
+        _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf {
+            it.price
+        })
+    }
+
+    fun saveTicket() {
+        val currentTicket = _ticket.value ?: return
+        viewModelScope.launch {
+            repository.updateTicket(currentTicket)
+            loadTicket(ticketId)
+        }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 class TicketViewModelFactory(
-    private val repository: TicketRepository
+    private val repository: TicketRepository,
+    private val ticketId: UUID
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TicketViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TicketViewModel(repository) as T
+            return TicketViewModel(repository, ticketId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
