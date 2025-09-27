@@ -1,5 +1,7 @@
 package com.example.ticketscan.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,21 +14,32 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.domain.repositories.TicketRepositoryMock
 import com.example.ticketscan.ui.components.UploadCard
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
-import java.util.UUID
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    ) {
+
+    val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(TicketRepositoryMock))
+    val tickets by viewModel.tickets.collectAsState()
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = TicketScanTheme.colors.background
@@ -51,34 +64,40 @@ fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
                 text = "Últimas cargas",
                 style = TicketScanTheme.typography.headlineSmall,
                 modifier = Modifier.padding(vertical = 16.dp),
-                color = TicketScanTheme.colors.onBackground
-            )
             // TODO: Add filter dropdown here
+            )
             Column(
                 modifier = Modifier
                 .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                UploadCard(
-                    title = "Por audio",
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket/" + UUID.randomUUID()) }
-                )
-                UploadCard(
-                    title = "Por texto",
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket/" + UUID.randomUUID()) }
-                )
-                UploadCard(
-                    title = "Por fotos",
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket/" + UUID.randomUUID()) }
-                )
+                if (tickets.isEmpty()) {
+                    Text(
+                        text = "No hay tickets cargados aún",
+                        style = TicketScanTheme.typography.bodyMedium,
+                        color = TicketScanTheme.colors.onBackground
+                    )
+                } else {
+                    tickets.forEach { ticket ->
+                        UploadCard(
+                            title = ticket.store?.name ?: "Ticket ${ticket.id.toString().take(8)}",
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { navController.navigate("ticket/${ticket.id}") }
+                        ) {
+                            Text(
+                                text = "Fecha: ${ticket.date}  •  Total: $${ticket.total}",
+                                style = TicketScanTheme.typography.bodyMedium,
+                                color = TicketScanTheme.colors.onBackground
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {

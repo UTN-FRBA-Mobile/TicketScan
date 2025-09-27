@@ -1,5 +1,7 @@
 package com.example.ticketscan.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,17 +21,25 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.ticketscan.R
+import com.example.ticketscan.domain.model.Ticket
+import com.example.ticketscan.domain.model.TicketOrigin
+import com.example.ticketscan.domain.repositories.TicketRepository
+import com.example.ticketscan.domain.repositories.TicketRepositoryMock
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import kotlinx.coroutines.delay
-import java.util.UUID
+import kotlinx.coroutines.flow.first
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProcessingScreen(navController: NavController, mode: String) {
+fun ProcessingScreen(
+    navController: NavController,
+    repository: TicketRepository,
+    mode: TicketOrigin) {
     LaunchedEffect(mode) {
         delay(1200)
-        val generatedId = UUID.randomUUID().toString()
-        navController.navigate("ticket/$generatedId") {
+        val ticket: Ticket = repository.createTextTicket().first()
+        navController.navigate("ticket/${ticket.id}") {
             popUpTo("home") { inclusive = false }
         }
     }
@@ -57,11 +67,12 @@ fun ProcessingScreen(navController: NavController, mode: String) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 fun ProcessingScreenPreview() {
     TicketScanThemeProvider {
         val navController = rememberNavController()
-        ProcessingScreen(navController = navController, mode = "texto")
+        ProcessingScreen(navController = navController, repository = TicketRepositoryMock, mode = TicketOrigin.TEXT)
     }
 }

@@ -1,5 +1,7 @@
 package com.example.ticketscan.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,12 +15,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,12 +34,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.repositories.TicketRepositoryMock
 import com.example.ticketscan.ui.theme.TicketScanIcons
@@ -40,6 +51,7 @@ import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.util.UUID
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Suppress("UNUSED_PARAMETER")
 @Composable
 fun TicketScreen(
@@ -47,6 +59,7 @@ fun TicketScreen(
     viewModel: TicketViewModel
 ) {
     val ticket by viewModel.ticket.collectAsState()
+    val categories by viewModel.categories.collectAsState()
     var isEditing by remember { mutableStateOf(false) }
 
     Column(
@@ -76,6 +89,7 @@ fun TicketScreen(
                 category = category,
                 items = items,
                 isEditable = isEditing,
+                categories = categories,
                 onItemChange = { id, name, price, quantity, categoryValue ->
                     viewModel.updateTicketItem(
                         itemId = id,
@@ -143,23 +157,26 @@ fun TicketScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditItemDialog(
     initial: TicketItem,
+    categories: List<Category>,
     onDismiss: () -> Unit,
-    onSave: (name: String, price: Double?, quantity: Int?, category: String) -> Unit
+    onSave: (name: String, price: Double?, quantity: Int?, category: Category) -> Unit
 ) {
     var name by remember { mutableStateOf(initial.name) }
     var qtyText by remember { mutableStateOf(initial.quantity.toString()) }
     var priceText by remember { mutableStateOf(initial.price.toString()) }
     var category by remember { mutableStateOf(initial.category) }
+    var expanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
-                val parsedQty = qtyText.toIntOrNull()
-                val parsedPrice = priceText.toDoubleOrNull()
+                val parsedQty = qtyText.toIntOrNull()?.coerceAtLeast(0) ?: 0
+                val parsedPrice = priceText.toDoubleOrNull()?.coerceAtLeast(0.0) ?: 0.0
                 onSave(name, parsedPrice, parsedQty, category)
             }) {
                 Text("Guardar")
@@ -171,13 +188,61 @@ fun EditItemDialog(
         title = { Text("Editar artículo") },
         text = {
             Column {
-                TextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") })
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre") }
+                )
                 Spacer(Modifier.height(8.dp))
-                TextField(value = qtyText, onValueChange = { qtyText = it }, label = { Text("Cantidad") })
+                OutlinedTextField(
+                    value = qtyText,
+                    onValueChange = { if (it.all { c -> c.isDigit() }) qtyText = it },
+                    label = { Text("Cantidad") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    )
+                )
                 Spacer(Modifier.height(8.dp))
-                TextField(value = priceText, onValueChange = { priceText = it }, label = { Text("Precio") })
+                OutlinedTextField(
+                    value = priceText,
+                    onValueChange = {
+                        if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*"))) priceText = it
+                    },
+                    label = { Text("Precio") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    )
+                )
                 Spacer(Modifier.height(8.dp))
-                TextField(value = category, onValueChange = { category = it }, label = { Text("Categoría") })
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = category.name,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Categoría") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        categories.forEach { cat ->
+                            DropdownMenuItem(
+                                text = { Text(cat.name) },
+                                onClick = {
+                                    category = cat
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     )
@@ -185,14 +250,15 @@ fun EditItemDialog(
 
 @Composable
 fun CategorySection(
-    category: String,
+    category: Category,
     items: List<TicketItem>,
+    categories: List<Category>,
     isEditable: Boolean = false,
-    onItemChange: (id: UUID, name: String?, price: Double?, quantity: Int?, category: String?) -> Unit = { _, _, _, _, _ -> }
+    onItemChange: (id: UUID, name: String?, price: Double?, quantity: Int?, category: Category?) -> Unit = { _, _, _, _, _ -> }
 ) {
     Column {
         Text(
-            text = category,
+            text = category.name,
             style = TicketScanTheme.typography.titleMedium,
             color = TicketScanTheme.colors.onBackground,
             modifier = Modifier
@@ -236,6 +302,7 @@ fun CategorySection(
         if (editingItem != null) {
             EditItemDialog(
                 initial = editingItem!!,
+                categories = categories,
                 onDismiss = { editingItem = null },
                 onSave = { name, price, quantity, categoryValue ->
                     onItemChange(editingItem!!.id, name, price, quantity, categoryValue)
@@ -257,12 +324,13 @@ fun CategorySection(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun TicketScreenPreview() {
     TicketScanThemeProvider {
         val navController = rememberNavController()
-        val factory = remember { TicketViewModelFactory(TicketRepositoryMock(), UUID.randomUUID()) }
+        val factory = remember { TicketViewModelFactory(TicketRepositoryMock, UUID.randomUUID()) }
         val viewModel: TicketViewModel = viewModel(factory = factory)
         TicketScreen(navController = navController, viewModel)
     }

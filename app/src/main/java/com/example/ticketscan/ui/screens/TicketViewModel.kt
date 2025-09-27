@@ -1,8 +1,11 @@
 package com.example.ticketscan.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.repositories.TicketRepository
 import com.example.ticketscan.domain.repositories.TicketRepositoryMock
@@ -12,13 +15,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class TicketViewModel(
-    private val repository: TicketRepository = TicketRepositoryMock(),
+@RequiresApi(Build.VERSION_CODES.O)
+class TicketViewModel (
+    private val repository: TicketRepository = TicketRepositoryMock,
     private val ticketId: UUID
 ) : ViewModel() {
 
     private val _ticket = MutableStateFlow<Ticket?>(null)
+    private val _categories = MutableStateFlow(Category.getAllCategories())
     val ticket: StateFlow<Ticket?> = _ticket
+    val categories: StateFlow<List<Category>> = _categories
 
     init {
         loadTicket(ticketId)
@@ -36,7 +42,7 @@ class TicketViewModel(
         loadTicket(ticketId)
     }
 
-    fun updateTicketItem(itemId: UUID, name: String? = null, price: Double? = null, quantity: Int? = null, category: String? = null) {
+    fun updateTicketItem(itemId: UUID, name: String? = null, price: Double? = null, quantity: Int? = null, category: Category? = null) {
         val currentTicket = _ticket.value ?: return
         val updatedItems = currentTicket.items.map { item ->
             if (item.id == itemId) {
@@ -48,7 +54,9 @@ class TicketViewModel(
                 )
             } else item
         }
-        _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf { it.price * it.quantity })
+        _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf {
+            it.price * it.quantity
+        })
     }
 
     fun saveTicket() {
@@ -60,6 +68,7 @@ class TicketViewModel(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 class TicketViewModelFactory(
     private val repository: TicketRepository,
     private val ticketId: UUID
