@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +62,7 @@ fun TicketScreen(
     val ticket by viewModel.ticket.collectAsState()
     val categories by viewModel.categories.collectAsState()
     var isEditing by remember { mutableStateOf(false) }
+    var creatingItem by remember { mutableStateOf<TicketItem?>(null) }
 
     Column(
         modifier = Modifier
@@ -98,7 +100,8 @@ fun TicketScreen(
                         quantity = quantity,
                         category = categoryValue
                     )
-                }
+                },
+                onItemDelete = { id -> viewModel.removeTicketItem(id) }
             )
             Spacer(Modifier.height(12.dp))
         }
@@ -121,6 +124,26 @@ fun TicketScreen(
                         modifier = Modifier.size(40.dp)
                     )
                 }
+
+                IconButton(onClick = {
+                    val defaultCategory = categories.firstOrNull() ?: Category.Other
+                    creatingItem = TicketItem(
+                        id = UUID.randomUUID(),
+                        name = "",
+                        category = defaultCategory,
+                        quantity = 0,
+                        isIntUnit = true,
+                        price = 0.0
+                    )
+                }) {
+                    Icon(
+                        imageVector = TicketScanIcons.Add,
+                        contentDescription = "Crear artículo",
+                        tint = TicketScanTheme.colors.onBackground,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+
                 IconButton(onClick = {
                     viewModel.saveTicket()
                     isEditing = false
@@ -154,6 +177,27 @@ fun TicketScreen(
                 }
             }
         }
+
+        if (creatingItem != null) {
+            EditItemDialog(
+                initial = creatingItem!!,
+                categories = categories,
+                onDismiss = { creatingItem = null },
+                onSave = { name, price, quantity, categoryValue ->
+                    val item = TicketItem(
+                        id = creatingItem!!.id,
+                        name = name,
+                        category = categoryValue,
+                        quantity = quantity ?: 0,
+                        isIntUnit = true,
+                        price = price ?: 0.0
+                    )
+                    viewModel.addTicketItem(item)
+                    creatingItem = null
+                },
+                onDelete = null
+            )
+        }
     }
 }
 
@@ -163,13 +207,15 @@ fun EditItemDialog(
     initial: TicketItem,
     categories: List<Category>,
     onDismiss: () -> Unit,
-    onSave: (name: String, price: Double?, quantity: Int?, category: Category) -> Unit
+    onSave: (name: String, price: Double?, quantity: Int?, category: Category) -> Unit,
+    onDelete: ((UUID) -> Unit)? = null
 ) {
     var name by remember { mutableStateOf(initial.name) }
     var qtyText by remember { mutableStateOf(initial.quantity.toString()) }
     var priceText by remember { mutableStateOf(initial.price.toString()) }
     var category by remember { mutableStateOf(initial.category) }
     var expanded by remember { mutableStateOf(false) }
+    var showConfirmDelete by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -226,12 +272,12 @@ fun EditItemDialog(
                         readOnly = true,
                         label = { Text("Categoría") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor() // <-- Añadido menuAnchor
+                        modifier = Modifier.fillMaxWidth().menuAnchor()
                     )
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
-                        modifier = Modifier.exposedDropdownSize(true) // Opcional para tamaño correcto
+                        modifier = Modifier.exposedDropdownSize(true)
                     ) {
                         categories.forEach { cat ->
                             DropdownMenuItem(
@@ -242,6 +288,33 @@ fun EditItemDialog(
                                 }
                             )
                         }
+                    }
+                }
+
+                if (onDelete != null) {
+                    Spacer(Modifier.height(12.dp))
+                    TextButton(
+                        onClick = { showConfirmDelete = true },
+                    ) {
+                        Text("Eliminar", color = Color.Red)
+                    }
+
+                    if (showConfirmDelete) {
+                        AlertDialog(
+                            onDismissRequest = { showConfirmDelete = false },
+                            title = { Text("Confirmar eliminación") },
+                            text = { Text("¿Estás seguro de que quieres eliminar este artículo?") },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    onDelete(initial.id)
+                                    showConfirmDelete = false
+                                    onDismiss()
+                                }) { Text("Eliminar", color = Color.Red) }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showConfirmDelete = false }) { Text("Cancelar") }
+                            }
+                        )
                     }
                 }
             }
@@ -255,7 +328,8 @@ fun CategorySection(
     items: List<TicketItem>,
     categories: List<Category>,
     isEditable: Boolean = false,
-    onItemChange: (id: UUID, name: String?, price: Double?, quantity: Int?, category: Category?) -> Unit = { _, _, _, _, _ -> }
+    onItemChange: (id: UUID, name: String?, price: Double?, quantity: Int?, category: Category?) -> Unit = { _, _, _, _, _ -> },
+    onItemDelete: (id: UUID) -> Unit = {}
 ) {
     Column {
         Text(
@@ -307,13 +381,17 @@ fun CategorySection(
                 onSave = { name, price, quantity, categoryValue ->
                     onItemChange(editingItem!!.id, name, price, quantity, categoryValue)
                     editingItem = null
+                },
+                onDelete = { id ->
+                    onItemDelete(id)
+                    editingItem = null
                 }
             )
         }
 
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Total: $${items.sumOf { it.price * it.quantity }}",
+            text = "Total: $${items.sumOf { it.price }}",
             style = TicketScanTheme.typography.bodyLarge,
             color = TicketScanTheme.colors.primary,
             modifier = Modifier

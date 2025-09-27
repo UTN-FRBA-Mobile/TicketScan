@@ -55,7 +55,23 @@ class TicketViewModel (
             } else item
         }
         _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf {
-            it.price * it.quantity
+            it.price
+        })
+    }
+
+    fun addTicketItem(item: com.example.ticketscan.domain.model.TicketItem) {
+        val currentTicket = _ticket.value ?: return
+        val updatedItems = currentTicket.items + item
+        _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf {
+            it.price
+        })
+    }
+
+    fun removeTicketItem(itemId: UUID) {
+        val currentTicket = _ticket.value ?: return
+        val updatedItems = currentTicket.items.filter { it.id != itemId }
+        _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf {
+            it.price
         })
     }
 
