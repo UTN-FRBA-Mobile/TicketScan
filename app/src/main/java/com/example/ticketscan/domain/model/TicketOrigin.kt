@@ -1,6 +1,6 @@
 package com.example.ticketscan.domain.model
 
-enum class TicketOrigin(mode: String) {
+enum class TicketOrigin(val mode: String) {
     MEDIA("media"),
     TEXT("text"),
     AUDIO("audio");

@@ -226,11 +226,12 @@ fun EditItemDialog(
                         readOnly = true,
                         label = { Text("Categoría") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().menuAnchor() // <-- Añadido menuAnchor
                     )
                     DropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.exposedDropdownSize(true) // Opcional para tamaño correcto
                     ) {
                         categories.forEach { cat ->
                             DropdownMenuItem(
@@ -263,8 +264,7 @@ fun CategorySection(
             color = TicketScanTheme.colors.onBackground,
             modifier = Modifier
                 .padding(vertical = 8.dp)
-                .fillMaxWidth()
-
+                .fillMaxWidth(),
         )
         var editingItem by remember { mutableStateOf<TicketItem?>(null) }
 
