@@ -39,7 +39,9 @@ fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 UploadOption(label = "Audio", icon = TicketScanIcons.Audio) { /* TODO */ }
-                UploadOption(label = "Cámara", icon = TicketScanIcons.Camera) { /* TODO */ }
+                UploadOption(label = "Cámara", icon = TicketScanIcons.Camera) {
+                    navController.navigate("scan")
+                }
                 UploadOption(label = "Texto", icon = TicketScanIcons.Text) { /* TODO */ }
             }
             Spacer(modifier = Modifier.height(32.dp))
@@ -74,3 +76,4 @@ fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
         }
     }
 }
+

@@ -25,6 +25,7 @@ import com.example.ticketscan.domain.repositories.StatsRepositoryMock
 import com.example.ticketscan.ui.screens.StatsScreen
 import com.example.ticketscan.ui.screens.StatsViewModel
 import com.example.ticketscan.ui.screens.StatsViewModelFactory
+import com.example.ticketscan.ui.screens.CameraScan
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +59,7 @@ class MainActivity : ComponentActivity() {
                         composable("expenses") { StatsScreen(navController = navController,
                             statsViewModel = statsViewModel
                         ) }
-                        composable("scan") { /* TODO: Scan screen */ HomeScreen(navController = navController) }
+                        composable("scan") { CameraScan() }
                         composable("profile") { /* TODO: Profile screen */ HomeScreen(navController = navController) }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController = navController) }
                         composable("ticket") { TicketScreen(navController = navController, ticketsViewModel) }
