@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
                         composable("expenses") { StatsScreen(navController = navController,
                             statsViewModel = statsViewModel
                         ) }
-                        composable("scan") { CameraScan() }
+                        composable("scan") { CameraScan(navController = navController) }
                         composable("profile") { /* TODO: Profile screen */ HomeScreen(navController = navController) }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController = navController) }
                         composable("ticket") { TicketScreen(navController = navController, ticketsViewModel) }

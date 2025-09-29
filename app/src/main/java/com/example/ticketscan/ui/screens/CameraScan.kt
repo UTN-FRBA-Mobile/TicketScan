@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import java.io.File
 import java.util.concurrent.Executor
 import java.util.Locale
@@ -31,7 +32,8 @@ import java.util.Locale
 @Composable
 fun CameraScan(
     modifier: Modifier = Modifier,
-    vm: CameraScanViewModel = viewModel()
+    vm: CameraScanViewModel = viewModel(),
+    navController: NavController
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalContext.current as LifecycleOwner
@@ -132,11 +134,15 @@ fun CameraScan(
                         )
                     }
                 ) { Text("Capturar y analizar") }
+                Button(
+                    enabled = items.isNotEmpty() && !loading,
+                    onClick = { navController.navigate("ticket") }
+                ) { Text("Continuar") }
             }
 
             if (error != null) {
                 Spacer(Modifier.height(8.dp))
-                Text(text = "Error: ${'$'}error", color = MaterialTheme.colorScheme.error)
+                Text(text = "Error: $error", color = MaterialTheme.colorScheme.error)
             }
 
             if (items.isNotEmpty()) {
@@ -163,4 +169,5 @@ fun CameraScan(
         }
     }
 }
+
 
