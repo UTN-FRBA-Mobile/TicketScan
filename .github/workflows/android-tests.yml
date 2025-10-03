@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JAVA_TOOL_OPTIONS: "-XX:+UseContainerSupport"
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -32,8 +33,26 @@ jobs:
       - name: Grant execute for gradlew
         run: chmod +x ./gradlew
 
+      - name: Install Android SDK command-line tools, platform-tools and system image
+        run: |
+          set -e
+          mkdir -p "$ANDROID_SDK_ROOT"
+          cd "$ANDROID_SDK_ROOT"
+          curl -sSfLo commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip -q commandlinetools.zip -d cmdline-tools-temp
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools-temp/cmdline-tools/* cmdline-tools/latest/
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses || true
+          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "emulator" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
+          # ensure adb and emulator are on PATH for subsequent steps (supported method)
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/emulator" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        shell: bash
+
       - name: Run unit tests
-        run: ./gradlew test --no-daemon --parallel --build-cache --stacktrace
+        run: ./gradlew :app:testDebugUnitTest --no-daemon --parallel --build-cache --stacktrace
 
       - name: Start Android emulator
         uses: reactivecircus/android-emulator-runner@v2
@@ -43,11 +62,21 @@ jobs:
           target: google_apis
           force-avd-creation: true
           emulator-options: -no-window -no-audio -no-boot-anim
+          cores: 2
+          avd-name: test
+          emulator-boot-timeout: 600
+          emulator-port: 5554
+          disable-animations: true
+          disable-spellchecker: false
+          disable-linux-hw-accel: auto
+          enable-hw-keyboard: false
+          channel: stable
 
       - name: Wait for emulator to be ready
         run: |
           adb wait-for-device
           adb shell getprop sys.boot_completed | grep -m 1 '1'
+        shell: bash
 
       - name: Run instrumentation tests
-        run: ./gradlew connectedDebugAndroidTest --no-daemon --build-cache --stacktrace
+        run: ./gradlew :app:connectedDebugAndroidTest --no-daemon --build-cache --stacktrace
