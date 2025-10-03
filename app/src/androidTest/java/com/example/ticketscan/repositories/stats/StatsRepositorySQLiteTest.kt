@@ -11,6 +11,9 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.graphics.Color
@@ -54,9 +57,10 @@ class StatsRepositorySQLiteTest {
         // Insertar un store para cumplir la FK de tickets
         val storeId = UUID.randomUUID().toString()
         db.execSQL("CREATE TABLE IF NOT EXISTS stores (id TEXT PRIMARY KEY, name TEXT NOT NULL, cuit INTEGER NOT NULL, location TEXT NOT NULL)")
-        db.execSQL("INSERT INTO stores (id, name, cuit, location) VALUES (?, ?, ?, ?)", arrayOf(storeId, "TestStore", 12345678901L, "TestLocation"))
-        db.execSQL("INSERT INTO tickets (id, date, store_id, total) VALUES (?, ?, ?, ?)", arrayOf(ticketId, "2025-09-22", storeId, 20.0))
-        db.execSQL("INSERT INTO ticket_items (id, ticket_id, name, category_id, quantity, isIntUnit, price) VALUES (?, ?, ?, ?, ?, ?, ?)", arrayOf(UUID.randomUUID().toString(), ticketId, "TestItem", category.id.toString(), 2, 1, 10.0))
+        db.execSQL("INSERT INTO stores (id, name, cuit, location) VALUES (?, ?, ?, ?)", arrayOf<Any>(storeId, "TestStore", 12345678901L, "TestLocation"))
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        db.execSQL("INSERT INTO tickets (id, date, store_id, total) VALUES (?, ?, ?, ?)", arrayOf(ticketId, today, storeId, 20.0))
+        db.execSQL("INSERT INTO ticket_items (id, ticket_id, name, category_id, quantity, isIntUnit, price) VALUES (?, ?, ?, ?, ?, ?, ?)", arrayOf<Any>(UUID.randomUUID().toString(), ticketId, "TestItem", category.id.toString(), 2, 1, 10.0))
         db.close()
         val stats = repo.getCategoryStats(Period.SEMANAL)
         assertTrue(stats.any { it.name == category.id.toString() })

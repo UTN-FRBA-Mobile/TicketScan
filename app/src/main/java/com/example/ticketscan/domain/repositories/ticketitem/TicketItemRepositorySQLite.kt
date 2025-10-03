@@ -54,33 +54,49 @@ class TicketItemRepositorySQLite(
         return items
     }
 
-    override suspend fun insertItem(item: TicketItem): Boolean {
-        val db = dbHelper.writableDatabase
-        val values = ContentValues().apply {
-            put("id", item.id.toString())
-            put("name", item.name)
-            put("category_id", item.category.id.toString())
-            put("quantity", item.quantity)
-            put("isIntUnit", if (item.isIntUnit) 1 else 0)
-            put("price", item.price)
+    override suspend fun insertItem(item: TicketItem, ticketId: UUID, db: SQLiteDatabase?): Boolean {
+        var ownDb: SQLiteDatabase? = null
+        val database = db ?: run {
+            ownDb = dbHelper.writableDatabase
+            ownDb
         }
-        val result = db.insert("ticket_items", null, values)
-        db.close()
-        return result != -1L
+        try {
+            val values = ContentValues().apply {
+                put("id", item.id.toString())
+                put("ticket_id", ticketId.toString())
+                put("name", item.name)
+                put("category_id", item.category.id.toString())
+                put("quantity", item.quantity)
+                put("isIntUnit", if (item.isIntUnit) 1 else 0)
+                put("price", item.price)
+            }
+            val result = database.insert("ticket_items", null, values)
+            return result != -1L
+        } finally {
+            // Solo cerramos la DB si la abrimos aquí
+            ownDb?.close()
+        }
     }
 
-    override suspend fun updateItem(item: TicketItem): Boolean {
-        val db = dbHelper.writableDatabase
-        val values = ContentValues().apply {
-            put("name", item.name)
-            put("category_id", item.category.id.toString())
-            put("quantity", item.quantity)
-            put("isIntUnit", if (item.isIntUnit) 1 else 0)
-            put("price", item.price)
+    override suspend fun updateItem(item: TicketItem, db: SQLiteDatabase?): Boolean {
+        var ownDb: SQLiteDatabase? = null
+        val database = db ?: run {
+            ownDb = dbHelper.writableDatabase
+            ownDb
         }
-        val result = db.update("ticket_items", values, "id = ?", arrayOf(item.id.toString()))
-        db.close()
-        return result > 0
+        try {
+            val values = ContentValues().apply {
+                put("name", item.name)
+                put("category_id", item.category.id.toString())
+                put("quantity", item.quantity)
+                put("isIntUnit", if (item.isIntUnit) 1 else 0)
+                put("price", item.price)
+            }
+            val result = database.update("ticket_items", values, "id = ?", arrayOf(item.id.toString()))
+            return result > 0
+        } finally {
+            ownDb?.close()
+        }
     }
 
     override suspend fun deleteItem(id: UUID): Boolean {

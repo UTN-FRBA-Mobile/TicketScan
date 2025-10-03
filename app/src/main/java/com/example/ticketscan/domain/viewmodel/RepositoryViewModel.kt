@@ -46,8 +46,9 @@ class RepositoryViewModel(
     suspend fun getAllTickets() = withContext(Dispatchers.IO) { ticketRepo.getAllTickets() }
 
     // TICKET ITEM
-    fun insertTicketItem(item: TicketItem, onResult: (Boolean) -> Unit) = viewModelScope.launch {
-        val result = withContext(Dispatchers.IO) { ticketItemRepo.insertItem(item) }
+    // Insertar un TicketItem asociándolo a un ticket existente por su id
+    fun insertTicketItem(item: TicketItem, ticketId: UUID, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val result = withContext(Dispatchers.IO) { ticketItemRepo.insertItem(item, ticketId) }
         onResult(result)
     }
     suspend fun getTicketsItemByTicketId(id: UUID) = withContext(Dispatchers.IO) { ticketItemRepo.getItemsByTicketId(id) }

@@ -105,9 +105,33 @@ class TicketRepositorySQLite(
             put("store_id", ticket.store.id.toString())
             put("total", ticket.total)
         }
-        val result = db.insert("tickets", null, values)
-        db.close()
-        return result != -1L
+        try {
+            db.beginTransaction()
+            val result = db.insert("tickets", null, values)
+            if (result == -1L) {
+                return false
+            }
+
+            // Insertar cada item llamando al repositorio de items, usando la misma conexión db
+            for (item in ticket.items) {
+                val ok = ticketItemRepository.insertItem(item, ticket.id, db)
+                if (!ok) {
+                    // Si falla alguna inserción, no marcamos la transacción como exitosa;
+                    // el endTransaction() en el finally hará rollback de todas las operaciones
+                    return false
+                }
+            }
+
+            db.setTransactionSuccessful()
+            return true
+        } finally {
+            try {
+                db.endTransaction()
+            } catch (_: Exception) {
+                // ignorar
+            }
+            db.close()
+        }
     }
 
     override suspend fun updateTicket(ticket: Ticket): Boolean {
