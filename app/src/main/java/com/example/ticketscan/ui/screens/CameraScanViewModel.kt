@@ -1,16 +1,23 @@
 package com.example.ticketscan.ui.screens
 
+import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ticketscan.domain.services.TicketAnalysisService
+import com.example.ticketscan.domain.services.TicketAnalysisServiceImpl
 import com.example.ticketscan.ia.AnalizedItem
 import com.example.ticketscan.ia.internal.IAServiceImpl
 import com.example.ticketscan.ia.internal.mock.MockIAApi
-import com.example.ticketscan.domain.services.TicketAnalysisService
-import com.example.ticketscan.domain.services.TicketAnalysisServiceImpl
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class CameraScanViewModel(
     private val service: TicketAnalysisService = TicketAnalysisServiceImpl(IAServiceImpl(MockIAApi()))
@@ -25,18 +32,41 @@ class CameraScanViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    private val _capturedThumbnail = MutableStateFlow<ImageBitmap?>(null)
+    val capturedThumbnail: StateFlow<ImageBitmap?> = _capturedThumbnail
+
+    val canContinue: StateFlow<Boolean> = combine(_items, _isLoading) { items, loading ->
+        !loading && items.meetsRequirements()
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     fun analyzeImage(file: File) {
-        _isLoading.value = true
-        _error.value = null
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.emit(true)
+            _error.emit(null)
+            _capturedThumbnail.emit(decodeThumbnail(file))
             try {
                 val result = service.analyzeTicketImage(file)
-                _items.value = result
+                _items.emit(result)
             } catch (e: Exception) {
-                _error.value = e.message
+                _error.emit(e.message ?: "Error al analizar la imagen")
             } finally {
-                _isLoading.value = false
+                if (file.exists()) {
+                    file.delete()
+                }
+                _isLoading.emit(false)
             }
         }
     }
+
+    fun onCaptureError(message: String) {
+        viewModelScope.launch {
+            _error.emit(message)
+        }
+    }
+
+    private fun List<AnalizedItem>.meetsRequirements(): Boolean =
+        isNotEmpty() && all { it.name.isNotBlank() && it.price > 0.0 }
+
+    private fun decodeThumbnail(file: File): ImageBitmap? =
+        BitmapFactory.decodeFile(file.absolutePath)?.asImageBitmap()
 }

@@ -19,15 +19,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import java.io.File
 import java.util.concurrent.Executor
 import java.util.Locale
+import com.example.ticketscan.ui.components.CaptureThumbnailPreview
+import com.example.ticketscan.ui.components.ErrorBadge
 
 @Composable
 fun CameraScan(
@@ -36,7 +38,7 @@ fun CameraScan(
     navController: NavController
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalContext.current as LifecycleOwner
+    val lifecycleOwner = LocalLifecycleOwner.current
     val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
 
     var hasCameraPermission by remember {
@@ -61,7 +63,7 @@ fun CameraScan(
     val previewView = remember { PreviewView(context) }
     var cameraBound by remember { mutableStateOf(false) }
 
-    LaunchedEffect(hasCameraPermission) {
+    LaunchedEffect(hasCameraPermission, lifecycleOwner) {
         if (hasCameraPermission) {
             val cameraProvider = ProcessCameraProvider.getInstance(context).get()
             val preview = Preview.Builder().build().apply {
@@ -85,6 +87,8 @@ fun CameraScan(
     val loading by vm.isLoading.collectAsState()
     val items by vm.items.collectAsState()
     val error by vm.error.collectAsState()
+    val capturedThumbnail by vm.capturedThumbnail.collectAsState()
+    val canContinue by vm.canContinue.collectAsState()
 
     Box(modifier = modifier.fillMaxSize()) {
         if (hasCameraPermission) {
@@ -109,9 +113,20 @@ fun CameraScan(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
             }
+
+            capturedThumbnail?.let { image ->
+                CaptureThumbnailPreview(
+                    image = image,
+                    modifier = Modifier
+                        .size(128.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                Spacer(Modifier.height(12.dp))
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = if (canContinue) Arrangement.SpaceEvenly else Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
@@ -125,6 +140,7 @@ fun CameraScan(
                             object : ImageCapture.OnImageSavedCallback {
                                 override fun onError(exception: ImageCaptureException) {
                                     Log.e("CameraScan", "Capture failed", exception)
+                                    vm.onCaptureError(exception.message ?: "Error al capturar la imagen")
                                 }
 
                                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
@@ -134,15 +150,20 @@ fun CameraScan(
                         )
                     }
                 ) { Text("Capturar y analizar") }
-                Button(
-                    enabled = items.isNotEmpty() && !loading,
-                    onClick = { navController.navigate("ticket") }
-                ) { Text("Continuar") }
+                if (canContinue) {
+                    Spacer(Modifier.width(12.dp))
+                    Button(
+                        onClick = { navController.navigate("ticket") }
+                    ) { Text("Continuar") }
+                }
             }
 
             if (error != null) {
                 Spacer(Modifier.height(8.dp))
-                Text(text = "Error: $error", color = MaterialTheme.colorScheme.error)
+                ErrorBadge(
+                    message = error?.let { "Error: $it" } ?: "Error desconocido",
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
 
             if (items.isNotEmpty()) {
