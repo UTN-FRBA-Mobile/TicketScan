@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.Build
-import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -114,21 +113,49 @@ fun RecordAudioScreen(
             Button(
                 onClick = {
                     if (!isRecording) {
-                        val file = File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), "grabacion_test.aac")
-                        audioFile = file
-                        recorder = MediaRecorder(context).apply {
-                            setAudioSource(MediaRecorder.AudioSource.MIC)
-                            setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-                            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                            setOutputFile(file.absolutePath)
-                            prepare()
-                            start()
+                        try {
+                            val file = File(context.filesDir, "recordings/grabacion_${System.currentTimeMillis()}.aac")
+                            file.parentFile?.mkdirs()  // Create directories if they don't exist
+                            audioFile = file
+                            
+                            MediaRecorder(context).apply {
+                                setAudioSource(MediaRecorder.AudioSource.MIC)
+                                setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+                                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                                setOutputFile(file.absolutePath)
+                                try {
+                                    prepare()
+                                    start()
+                                    recorder = this
+                                } catch (e: Exception) {
+                                    release()
+                                    throw e
+                                }
+                            }
+                        } catch (e: Exception) {
+                            // Handle any errors during initialization
+                            e.printStackTrace()
+                            // Reset state and show error to user
+                            isRecording = false
+                            audioFile = null
+                            return@Button
                         }
                         isRecording = true
                     } else {
-                        recorder?.apply {
-                            stop()
-                            release()
+                        try {
+                            recorder?.apply {
+                                try {
+                                    stop()
+                                } catch (e: Exception) {
+                                    // Handle case where stop fails (e.g., recording was too short)
+                                    e.printStackTrace()
+                                } finally {
+                                    release()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            // Handle any other errors during stop/release
+                            e.printStackTrace()
                         }
                         recorder = null
                         isRecording = false
