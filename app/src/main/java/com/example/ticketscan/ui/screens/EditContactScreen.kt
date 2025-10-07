@@ -88,19 +88,6 @@ fun EditContactScreen(
                     )
                 )
 
-                // Phone Field
-                OutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = { Text("Número de teléfono") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Phone,
-                        imeAction = ImeAction.Done
-                    )
-                )
-
                 Spacer(modifier = Modifier.weight(1f))
 
                 // Save Button
