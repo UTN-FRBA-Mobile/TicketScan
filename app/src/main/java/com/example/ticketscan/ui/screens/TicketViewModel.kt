@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Ticket
-import com.example.ticketscan.domain.repositories.TicketRepository
-import com.example.ticketscan.domain.repositories.TicketRepositoryMock
+import com.example.ticketscan.domain.repositories.ticket.TicketRepository
+import com.example.ticketscan.domain.repositories.ticket.TicketRepositoryMock
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

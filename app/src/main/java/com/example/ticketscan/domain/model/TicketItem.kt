@@ -10,4 +10,3 @@ data class TicketItem(
     val isIntUnit: Boolean,
     val price: Double,
 )
-
