@@ -7,5 +7,11 @@ data class Category(
     val id: UUID,
     val name: String,
     val color: Color
-)
+) {
+    companion object {
+        fun default(): Category {
+            return Category(UUID.randomUUID(), "Otros", Color.Gray)
+        }
+    }
+}
 
