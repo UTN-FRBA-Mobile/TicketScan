@@ -13,14 +13,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.ticketscan.R
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketOrigin
+import com.example.ticketscan.domain.repositories.category.CategoryRepositorySQLite
+import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepositorySQLite
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import kotlinx.coroutines.delay
 import java.util.Date
 import java.util.UUID
@@ -70,23 +78,13 @@ fun ProcessingScreen(
     }
 }
 
-//@RequiresApi(Build.VERSION_CODES.O)
-//@Preview
-//@Composable
-//fun ProcessingScreenPreview() {
-//    TicketScanThemeProvider {
-//        val navController = rememberNavController()
-//        val categoryRepository = CategoryRepositorySQLite(this@MainActivity)
-//        val ticketItemRepository = TicketItemRepositorySQLite(this@MainActivity, categoryRepository)
-//        val storeRepository = StoreRepositorySQLite(this@MainActivity)
-//        val repositoryViewModel = RepositoryViewModel(
-//            storeRepo = storeRepository,
-//            categoryRepo = categoryRepository,
-//            ticketRepo = TicketRepositorySQLite(this@, storeRepository, ticketItemRepository),
-//            ticketItemRepo = ticketItemRepository,
-//            statsRepo = StatsRepositorySQLite(this@MainActivity)
-//        )
-//
-//        ProcessingScreen(navController = navController, repository = repositoryViewModel, mode = TicketOrigin.TEXT)
-//    }
-//}
+@Preview
+@Composable
+fun ProcessingScreenPreview() {
+    TicketScanThemeProvider {
+        val navController = rememberNavController()
+        val repositoryViewModelFactory = RepositoryViewModelFactory(context = LocalContext.current)
+        val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
+        ProcessingScreen(navController = navController, repository = repositoryViewModel, mode = TicketOrigin.TEXT)
+    }
+}

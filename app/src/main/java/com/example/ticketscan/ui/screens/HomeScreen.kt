@@ -14,16 +14,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ui.components.UploadCard
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import com.example.ticketscan.ui.theme.TicketScanThemeProvider
+import java.util.UUID
 
 @Composable
 fun HomeScreen(
@@ -92,11 +99,13 @@ fun HomeScreen(
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun HomePreview() {
-//    TicketScanThemeProvider {
-//        val navController = rememberNavController()
-//        HomeScreen(navController = navController)
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun HomePreview() {
+    TicketScanThemeProvider {
+        val navController = rememberNavController()
+        val repositoryViewModelFactory = RepositoryViewModelFactory(context = LocalContext.current)
+        val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
+        HomeScreen(navController = navController, repositoryViewModel)
+    }
+}

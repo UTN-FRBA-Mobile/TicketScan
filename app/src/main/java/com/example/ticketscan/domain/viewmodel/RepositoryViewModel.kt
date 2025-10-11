@@ -42,6 +42,10 @@ class RepositoryViewModel(
         val result = withContext(Dispatchers.IO) { ticketRepo.insertTicket(ticket) }
         onResult(result)
     }
+    fun deleteTicket(ticket: Ticket, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val result = withContext(Dispatchers.IO) { ticketRepo.deleteTicket(ticket.id) }
+        onResult(result)
+    }
     fun updateTicket(ticket: Ticket, onResult: (Boolean) -> Unit) = viewModelScope.launch {
         val result = withContext(Dispatchers.IO) {
             ticketRepo.deleteTicket(ticket.id)

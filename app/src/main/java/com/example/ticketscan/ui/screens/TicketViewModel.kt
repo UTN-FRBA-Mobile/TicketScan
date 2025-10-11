@@ -78,8 +78,18 @@ class TicketViewModel (
     fun saveTicket() {
         val currentTicket = _ticket.value ?: return
         viewModelScope.launch {
-            repositoryViewModel.updateTicket(currentTicket) { }
-            loadTicket(ticketId)
+            repositoryViewModel.updateTicket(currentTicket) {
+                loadTicket(ticketId)
+            }
+        }
+    }
+
+    fun deleteTicket(onDeleted: () -> Unit) {
+        val currentTicket = _ticket.value ?: return
+        viewModelScope.launch {
+            repositoryViewModel.deleteTicket(currentTicket) {
+                onDeleted()
+            }
         }
     }
 }

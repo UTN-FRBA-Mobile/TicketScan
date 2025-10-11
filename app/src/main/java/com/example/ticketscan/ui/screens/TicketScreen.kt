@@ -1,5 +1,6 @@
 package com.example.ticketscan.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -33,15 +34,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.TicketItem
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.util.UUID
 
 @Suppress("UNUSED_PARAMETER")
@@ -147,9 +155,15 @@ fun TicketScreen(
                     )
                 }
             } else {
-                IconButton(onClick = { /* TODO eliminar ticket */ }) {
+                IconButton(onClick = {
+                    viewModel.deleteTicket {
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = false }
+                        }
+                    }
+                }) {
                     Icon(
-                        imageVector = TicketScanIcons.Close,
+                        imageVector = TicketScanIcons.Delete,
                         contentDescription = "Eliminar ticket",
                         tint = TicketScanTheme.colors.onBackground,
                         modifier = Modifier.size(40.dp)
@@ -393,14 +407,15 @@ fun CategorySection(
     }
 }
 
-//@RequiresApi(Build.VERSION_CODES.O)
-//@Preview(showBackground = true)
-//@Composable
-//fun TicketScreenPreview() {
-//    TicketScanThemeProvider {
-//        val navController = rememberNavController()
-//        val factory = remember { TicketViewModelFactory(TicketRepositoryMock, UUID.randomUUID()) }
-//        val viewModel: TicketViewModel = viewModel(factory = factory)
-//        TicketScreen(navController = navController, viewModel)
-//    }
-//}
+@Preview(showBackground = true)
+@Composable
+fun TicketScreenPreview() {
+    TicketScanThemeProvider {
+        val navController = rememberNavController()
+        val repositoryViewModelFactory = RepositoryViewModelFactory(context = LocalContext.current)
+        val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
+        val factory = remember { TicketViewModelFactory(repositoryViewModel, UUID.randomUUID()) }
+        val viewModel: TicketViewModel = viewModel(factory = factory)
+        TicketScreen(navController = navController, viewModel)
+    }
+}
