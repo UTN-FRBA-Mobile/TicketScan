@@ -42,6 +42,13 @@ class RepositoryViewModel(
         val result = withContext(Dispatchers.IO) { ticketRepo.insertTicket(ticket) }
         onResult(result)
     }
+    fun updateTicket(ticket: Ticket, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val result = withContext(Dispatchers.IO) {
+            ticketRepo.deleteTicket(ticket.id)
+            ticketRepo.insertTicket(ticket)
+        }
+        onResult(result)
+    }
     suspend fun getTicketById(id: UUID) = withContext(Dispatchers.IO) { ticketRepo.getTicketById(id) }
     suspend fun getAllTickets() = withContext(Dispatchers.IO) { ticketRepo.getAllTickets() }
 

@@ -17,6 +17,7 @@ import org.junit.runner.RunWith
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.graphics.Color
+import com.example.ticketscan.domain.model.TicketOrigin
 import com.example.ticketscan.domain.repositories.ticket.TicketRepositorySQLite
 import java.util.Date
 
@@ -38,7 +39,7 @@ class TicketRepositorySQLiteTest {
         val db = context.openOrCreateDatabase("ticketscan.db", Context.MODE_PRIVATE, null)
         db.execSQL("CREATE TABLE IF NOT EXISTS stores (id TEXT PRIMARY KEY, name TEXT NOT NULL, cuit INTEGER NOT NULL, location TEXT NOT NULL)")
         db.execSQL("CREATE TABLE IF NOT EXISTS categories (id TEXT PRIMARY KEY, name TEXT NOT NULL, color INTEGER NOT NULL)")
-        db.execSQL("CREATE TABLE IF NOT EXISTS tickets (id TEXT PRIMARY KEY, date TEXT NOT NULL, store_id TEXT NOT NULL, total REAL NOT NULL)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS tickets (id TEXT PRIMARY KEY, date TEXT NOT NULL, store_id TEXT, total REAL NOT NULL)")
         db.execSQL("CREATE TABLE IF NOT EXISTS ticket_items (id TEXT PRIMARY KEY, ticket_id TEXT NOT NULL, name TEXT NOT NULL, category_id TEXT NOT NULL, quantity INTEGER NOT NULL, isIntUnit INTEGER NOT NULL, price REAL NOT NULL)")
         db.close()
     }
@@ -53,11 +54,11 @@ class TicketRepositorySQLiteTest {
         val item = TicketItem(UUID.randomUUID(), "TestItem", category, 2, true, 10.0)
         // No insertar el ticket directamente en la base de datos
         // Insertar solo el ticket usando el repositorio
-        val ticket = Ticket(ticketId, java.util.Date(), store, listOf(item), 20.0)
+        val ticket = Ticket(ticketId, Date(), store, TicketOrigin.TEXT, listOf(item), 20.0)
         assertTrue(repo.insertTicket(ticket))
         val result = repo.getTicketById(ticket.id)
         assertNotNull(result)
-        assertEquals(ticket.store.name, result?.store?.name)
+        assertEquals(ticket.store?.name, result?.store?.name)
         assertEquals(ticket.total, result?.total)
     }
 }

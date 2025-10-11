@@ -1,40 +1,40 @@
 package com.example.ticketscan.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Ticket
-import com.example.ticketscan.domain.repositories.ticket.TicketRepository
-import com.example.ticketscan.domain.repositories.ticket.TicketRepositoryMock
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 class TicketViewModel (
-    private val repository: TicketRepository = TicketRepositoryMock,
+    private val repositoryViewModel: RepositoryViewModel,
     private val ticketId: UUID
 ) : ViewModel() {
 
     private val _ticket = MutableStateFlow<Ticket?>(null)
-    private val _categories = MutableStateFlow(Category.getAllCategories())
+    private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val ticket: StateFlow<Ticket?> = _ticket
     val categories: StateFlow<List<Category>> = _categories
 
     init {
         loadTicket(ticketId)
+        loadCategories()
     }
 
     private fun loadTicket(id: UUID) {
         viewModelScope.launch {
-            repository.getTicket(id).collectLatest { result ->
-                _ticket.value = result
-            }
+            _ticket.value = repositoryViewModel.getTicketById(id)
+        }
+    }
+
+    private fun loadCategories() {
+        viewModelScope.launch {
+            _categories.value = repositoryViewModel.getAllCategories()
         }
     }
 
@@ -78,21 +78,20 @@ class TicketViewModel (
     fun saveTicket() {
         val currentTicket = _ticket.value ?: return
         viewModelScope.launch {
-            repository.updateTicket(currentTicket)
+            repositoryViewModel.updateTicket(currentTicket) { }
             loadTicket(ticketId)
         }
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 class TicketViewModelFactory(
-    private val repository: TicketRepository,
+    private val repositoryViewModel: RepositoryViewModel,
     private val ticketId: UUID
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TicketViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TicketViewModel(repository, ticketId) as T
+            return TicketViewModel(repositoryViewModel, ticketId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

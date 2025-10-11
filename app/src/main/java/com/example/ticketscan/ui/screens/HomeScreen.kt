@@ -1,7 +1,5 @@
 package com.example.ticketscan.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,26 +16,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.ticketscan.domain.repositories.TicketRepositoryMock
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ui.components.UploadCard
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
-import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
     navController: NavController,
+    repositoryViewModel: RepositoryViewModel,
     modifier: Modifier = Modifier,
     ) {
 
-    val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(TicketRepositoryMock))
+    val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(repositoryViewModel))
     val tickets by viewModel.tickets.collectAsState()
 
     Surface(
@@ -97,12 +92,11 @@ fun HomeScreen(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    TicketScanThemeProvider {
-        val navController = rememberNavController()
-        HomeScreen(navController = navController)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HomePreview() {
+//    TicketScanThemeProvider {
+//        val navController = rememberNavController()
+//        HomeScreen(navController = navController)
+//    }
+//}

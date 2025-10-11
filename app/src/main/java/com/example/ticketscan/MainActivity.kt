@@ -16,8 +16,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.ticketscan.domain.model.TicketOrigin
-import com.example.ticketscan.domain.repositories.StatsRepositoryMock
-import com.example.ticketscan.domain.repositories.TicketRepositoryMock
+import com.example.ticketscan.domain.repositories.stats.StatsRepositoryMock
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
 import com.example.ticketscan.ui.screens.HomeScreen
 import com.example.ticketscan.ui.screens.ProcessingScreen
@@ -39,6 +40,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             TicketScanThemeProvider {
                 val navController = rememberNavController()
+                val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
+                val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
                 val repository = StatsRepositoryMock()
                 val statsFactory = StatsViewModelFactory(repository)
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
@@ -59,23 +62,23 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .fillMaxSize()
                     ) {
-                        composable("home") { HomeScreen(navController = navController) }
+                        composable("home") { HomeScreen(navController, repositoryViewModel) }
                         composable("expenses") { StatsScreen(navController = navController,
                             statsViewModel = statsViewModel
                         ) }
-                        composable("scan") { /* TODO: Scan screen */ HomeScreen(navController = navController) }
-                        composable("profile") { /* TODO: Profile screen */ HomeScreen(navController = navController) }
-                        composable("more") { /* TODO: More screen */ HomeScreen(navController = navController) }
+                        composable("scan") { /* TODO: Scan screen */ HomeScreen(navController, repositoryViewModel) }
+                        composable("profile") { /* TODO: Profile screen */ HomeScreen(navController, repositoryViewModel) }
+                        composable("more") { /* TODO: More screen */ HomeScreen(navController, repositoryViewModel) }
                         composable("ticket/{id}") { backStackEntry ->
                             val idArg = backStackEntry.arguments?.getString("id")
                             val uuid = UUID.fromString(idArg)
-                            val factoryWithId = remember(uuid) { TicketViewModelFactory(TicketRepositoryMock, uuid) }
+                            val factoryWithId = remember(uuid) { TicketViewModelFactory(repositoryViewModel, uuid) }
                             val viewModelWithId: TicketViewModel = viewModel(factory = factoryWithId)
                             TicketScreen(navController = navController, viewModelWithId)
                         }
                         composable("processing/{mode}") { backStackEntry ->
                             val mode = backStackEntry.arguments?.getString("mode") ?: "unknown"
-                            ProcessingScreen(navController = navController, mode = TicketOrigin.fromString(mode), repository = TicketRepositoryMock)
+                            ProcessingScreen(navController = navController, mode = TicketOrigin.fromString(mode), repository = repositoryViewModel)
                         }
                     }
                 }

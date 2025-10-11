@@ -25,7 +25,7 @@ class TicketRepositorySQLite(
                 CREATE TABLE IF NOT EXISTS tickets (
                     id TEXT PRIMARY KEY,
                     date TEXT NOT NULL,
-                    store_id TEXT NOT NULL,
+                    store_id TEXT,
                     total REAL NOT NULL
                 );
             """)
@@ -102,7 +102,7 @@ class TicketRepositorySQLite(
         val values = android.content.ContentValues().apply {
             put("id", ticket.id.toString())
             put("date", SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(ticket.date))
-            put("store_id", ticket.store.id.toString())
+            if (ticket.store != null) put("store_id", ticket.store.id.toString())
             put("total", ticket.total)
         }
         try {
@@ -138,7 +138,7 @@ class TicketRepositorySQLite(
         val db = dbHelper.writableDatabase
         val values = android.content.ContentValues().apply {
             put("date", SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(ticket.date))
-            put("store_id", ticket.store.id.toString())
+            if (ticket.store != null) put("store_id", ticket.store.id.toString())
             put("total", ticket.total)
         }
         val result = db.update("tickets", values, "id = ?", arrayOf(ticket.id.toString()))

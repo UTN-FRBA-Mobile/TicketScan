@@ -1,7 +1,5 @@
 package com.example.ticketscan.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -38,21 +36,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.TicketItem
-import com.example.ticketscan.domain.repositories.ticket.TicketRepositoryMock
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
-import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.util.UUID
 
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Suppress("UNUSED_PARAMETER")
 @Composable
 fun TicketScreen(
@@ -126,7 +117,7 @@ fun TicketScreen(
                 }
 
                 IconButton(onClick = {
-                    val defaultCategory = categories.firstOrNull() ?: Category.Other
+                    val defaultCategory = categories.firstOrNull() ?: Category.default()
                     creatingItem = TicketItem(
                         id = UUID.randomUUID(),
                         name = "",
@@ -402,14 +393,14 @@ fun CategorySection(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun TicketScreenPreview() {
-    TicketScanThemeProvider {
-        val navController = rememberNavController()
-        val factory = remember { TicketViewModelFactory(TicketRepositoryMock, UUID.randomUUID()) }
-        val viewModel: TicketViewModel = viewModel(factory = factory)
-        TicketScreen(navController = navController, viewModel)
-    }
-}
+//@RequiresApi(Build.VERSION_CODES.O)
+//@Preview(showBackground = true)
+//@Composable
+//fun TicketScreenPreview() {
+//    TicketScanThemeProvider {
+//        val navController = rememberNavController()
+//        val factory = remember { TicketViewModelFactory(TicketRepositoryMock, UUID.randomUUID()) }
+//        val viewModel: TicketViewModel = viewModel(factory = factory)
+//        TicketScreen(navController = navController, viewModel)
+//    }
+//}
