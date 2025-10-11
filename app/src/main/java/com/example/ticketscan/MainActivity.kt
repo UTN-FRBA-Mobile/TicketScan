@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.TicketOrigin
 import com.example.ticketscan.domain.repositories.stats.StatsRepositoryMock
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
@@ -35,6 +36,11 @@ import java.util.UUID
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Inicializar la base de datos
+        // Esto creará las tablas si no existen e insertará datos por defecto
+        DatabaseHelper.getInstance(this).writableDatabase
+
         enableEdgeToEdge()
 
         setContent {

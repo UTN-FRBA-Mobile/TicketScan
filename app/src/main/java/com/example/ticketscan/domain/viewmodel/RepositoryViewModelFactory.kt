@@ -17,7 +17,7 @@ class RepositoryViewModelFactory(
             val categoryRepository = CategoryRepositorySQLite(context)
             val ticketItemRepository = TicketItemRepositorySQLite(context, categoryRepository)
             val storeRepository = StoreRepositorySQLite(context)
-            val ticketRepository = TicketRepositorySQLite(context, storeRepository, ticketItemRepository)
+            val ticketRepository = TicketRepositorySQLite(context, ticketItemRepository)
             val statsRepository = StatsRepositorySQLite(context)
 
             @Suppress("UNCHECKED_CAST")
