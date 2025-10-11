@@ -1,6 +1,5 @@
 package com.example.ticketscan.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -222,14 +221,36 @@ fun EditItemDialog(
     var expanded by remember { mutableStateOf(false) }
     var showConfirmDelete by remember { mutableStateOf(false) }
 
+    // Estados para rastrear si el usuario ha interactuado con cada campo
+    var nameTouched by remember { mutableStateOf(false) }
+    var qtyTouched by remember { mutableStateOf(false) }
+    var priceTouched by remember { mutableStateOf(false) }
+    var attemptedSave by remember { mutableStateOf(false) }
+
+    // Validaciones
+    val isNameValid = name.trim().isNotEmpty()
+    val parsedQty = qtyText.toIntOrNull()
+    val isQtyValid = parsedQty != null && parsedQty > 0
+    val parsedPrice = priceText.toDoubleOrNull()
+    val isPriceValid = parsedPrice != null && parsedPrice > 0.0
+    val isFormValid = isNameValid && isQtyValid && isPriceValid
+
+    // Mostrar errores solo si se intentó guardar o si el campo fue tocado
+    val showNameError = !isNameValid && (nameTouched || attemptedSave)
+    val showQtyError = !isQtyValid && (qtyTouched || attemptedSave)
+    val showPriceError = !isPriceValid && (priceTouched || attemptedSave)
+
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = {
-                val parsedQty = qtyText.toIntOrNull()?.coerceAtLeast(0) ?: 0
-                val parsedPrice = priceText.toDoubleOrNull()?.coerceAtLeast(0.0) ?: 0.0
-                onSave(name, parsedPrice, parsedQty, category)
-            }) {
+            TextButton(
+                onClick = {
+                    attemptedSave = true
+                    if (isFormValid) {
+                        onSave(name.trim(), parsedPrice, parsedQty, category)
+                    }
+                }
+            ) {
                 Text("Guardar")
             }
         },
@@ -241,30 +262,58 @@ fun EditItemDialog(
             Column {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nombre") }
+                    onValueChange = {
+                        name = it
+                        nameTouched = true
+                    },
+                    label = { Text("Nombre") },
+                    isError = showNameError,
+                    supportingText = {
+                        if (showNameError) {
+                            Text("El nombre no puede estar vacío", color = Color.Red)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = qtyText,
-                    onValueChange = { if (it.all { c -> c.isDigit() }) qtyText = it },
+                    onValueChange = {
+                        if (it.all { c -> c.isDigit() }) qtyText = it
+                        qtyTouched = true
+                    },
                     label = { Text("Cantidad") },
+                    isError = showQtyError,
+                    supportingText = {
+                        if (showQtyError) {
+                            Text("La cantidad debe ser mayor a 0", color = Color.Red)
+                        }
+                    },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Next
-                    )
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = priceText,
                     onValueChange = {
                         if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*"))) priceText = it
+                        priceTouched = true
                     },
                     label = { Text("Precio") },
+                    isError = showPriceError,
+                    supportingText = {
+                        if (showPriceError) {
+                            Text("El precio debe ser mayor a 0", color = Color.Red)
+                        }
+                    },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Decimal,
                         imeAction = ImeAction.Next
-                    )
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(8.dp))
                 ExposedDropdownMenuBox(
