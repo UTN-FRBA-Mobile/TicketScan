@@ -17,15 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.CategoryPieChart
-import com.example.ticketscan.ui.components.ComparisonSection
-import com.example.ticketscan.ui.components.FormattedCurrencyText
 import com.example.ticketscan.ui.components.PeriodSelector
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @Composable
 fun StatsScreen(
     statsViewModel: StatsViewModel,
-    navController: NavController
+    navController: NavController,
+    onCategoryClick: (String) -> Unit
 ) {
     val state by statsViewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
@@ -50,31 +49,25 @@ fun StatsScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            FormattedCurrencyText(
-                label = "Total",
-                amount = state.totalAmount,
-                textStyle = TicketScanTheme.typography.bodyLarge
-            )
-            FormattedCurrencyText(
+            /*FormattedCurrencyText(
                 label = "Promedio por compra",
                 amount = state.averageAmount,
                 textStyle = TicketScanTheme.typography.bodyLarge
-            )
+            )*/
 
             Spacer(Modifier.height(16.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
+                /*Text(
                     "Distribución por Categoría",
                     style = TicketScanTheme.typography.titleLarge
+                )*/
+                CategoryPieChart(
+                    stats = state.categoryStats,
+                    totalAmount = state.totalAmount,
+                    onCategoryClick = onCategoryClick
                 )
-                CategoryPieChart(stats = state.categoryStats)
             }
-
-            /*ComparisonSection(
-                current = state.totalAmount,
-                previous = state.previousAmount
-            )*/
         }
     }
 }

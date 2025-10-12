@@ -1,8 +1,7 @@
 package com.example.ticketscan.domain.repositories.ticket
 
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
+import com.example.ticketscan.domain.db.DatabaseHelper
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.repositories.store.StoreRepository
@@ -19,22 +18,7 @@ class TicketRepositorySQLite(
     private val storeRepository: StoreRepository,
     private val ticketItemRepository: TicketItemRepository
 ) : TicketRepository {
-    private val dbHelper = object : SQLiteOpenHelper(context, "ticketscan.db", null, 1) {
-        override fun onCreate(db: SQLiteDatabase) {
-            db.execSQL("""
-                CREATE TABLE IF NOT EXISTS tickets (
-                    id TEXT PRIMARY KEY,
-                    date TEXT NOT NULL,
-                    store_id TEXT NOT NULL,
-                    total REAL NOT NULL
-                );
-            """)
-        }
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            db.execSQL("DROP TABLE IF EXISTS tickets;")
-            onCreate(db)
-        }
-    }
+    private val dbHelper = DatabaseHelper(context)
 
     override suspend fun processTicket(): Flow<Ticket> = flow {
         val db = dbHelper.readableDatabase
@@ -53,7 +37,6 @@ class TicketRepositorySQLite(
             emit(Ticket(id = id, date = date, store = store ?: Store(storeId, "", 0L, ""), items = items, total = total))
         }
         cursor.close()
-        db.close()
     }
 
     override suspend fun getTicketById(id: UUID): Ticket? {
@@ -71,7 +54,6 @@ class TicketRepositorySQLite(
             Ticket(id = id, date = date, store = store ?: Store(storeId, "", 0L, ""), items = items, total = total)
         } else null
         cursor.close()
-        db.close()
         return ticket
     }
 
@@ -93,7 +75,6 @@ class TicketRepositorySQLite(
             tickets.add(Ticket(id = id, date = date, store = store ?: Store(storeId, "", 0L, ""), items = items, total = total))
         }
         cursor.close()
-        db.close()
         return tickets
     }
 
@@ -112,12 +93,9 @@ class TicketRepositorySQLite(
                 return false
             }
 
-            // Insertar cada item llamando al repositorio de items, usando la misma conexión db
             for (item in ticket.items) {
                 val ok = ticketItemRepository.insertItem(item, ticket.id, db)
                 if (!ok) {
-                    // Si falla alguna inserción, no marcamos la transacción como exitosa;
-                    // el endTransaction() en el finally hará rollback de todas las operaciones
                     return false
                 }
             }
@@ -128,9 +106,7 @@ class TicketRepositorySQLite(
             try {
                 db.endTransaction()
             } catch (_: Exception) {
-                // ignorar
             }
-            db.close()
         }
     }
 
@@ -142,14 +118,19 @@ class TicketRepositorySQLite(
             put("total", ticket.total)
         }
         val result = db.update("tickets", values, "id = ?", arrayOf(ticket.id.toString()))
-        db.close()
         return result > 0
     }
 
     override suspend fun deleteTicket(id: UUID): Boolean {
         val db = dbHelper.writableDatabase
         val result = db.delete("tickets", "id = ?", arrayOf(id.toString()))
-        db.close()
         return result > 0
+    }
+
+    override suspend fun getTicketsByCategory(categoryName: String): List<Ticket> {
+        val allTickets = getAllTickets()
+        return allTickets.filter { ticket ->
+            ticket.items.any { item -> item.category.name == categoryName }
+        }
     }
 }

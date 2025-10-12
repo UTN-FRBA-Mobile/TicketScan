@@ -11,4 +11,5 @@ interface TicketRepository {
     suspend fun insertTicket(ticket: Ticket): Boolean
     suspend fun updateTicket(ticket: Ticket): Boolean
     suspend fun deleteTicket(id: UUID): Boolean
+    suspend fun getTicketsByCategory(categoryName: String): List<Ticket>
 }

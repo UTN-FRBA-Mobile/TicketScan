@@ -2,29 +2,14 @@ package com.example.ticketscan.domain.repositories.category
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
-import com.example.ticketscan.domain.model.Category
-import java.util.UUID
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.example.ticketscan.domain.db.DatabaseHelper
+import com.example.ticketscan.domain.model.Category
+import java.util.UUID
 
 class CategoryRepositorySQLite(context: Context) : CategoryRepository {
-    private val dbHelper = object : SQLiteOpenHelper(context, "ticketscan.db", null, 1) {
-        override fun onCreate(db: SQLiteDatabase) {
-            db.execSQL("""
-                CREATE TABLE IF NOT EXISTS categories (
-                    id TEXT PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    color INTEGER NOT NULL
-                );
-            """)
-        }
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            db.execSQL("DROP TABLE IF EXISTS categories;")
-            onCreate(db)
-        }
-    }
+    private val dbHelper = DatabaseHelper(context)
 
     override suspend fun getAllCategories(): List<Category> {
         val db = dbHelper.readableDatabase
@@ -38,7 +23,6 @@ class CategoryRepositorySQLite(context: Context) : CategoryRepository {
             categories.add(Category(id, name, color))
         }
         cursor.close()
-        db.close()
         return categories
     }
 
@@ -52,7 +36,6 @@ class CategoryRepositorySQLite(context: Context) : CategoryRepository {
             Category(id, name, color)
         } else null
         cursor.close()
-        db.close()
         return category
     }
 
@@ -64,7 +47,6 @@ class CategoryRepositorySQLite(context: Context) : CategoryRepository {
             put("color", category.color.toArgb())
         }
         val result = db.insert("categories", null, values)
-        db.close()
         return result != -1L
     }
 
@@ -75,14 +57,12 @@ class CategoryRepositorySQLite(context: Context) : CategoryRepository {
             put("color", category.color.toArgb())
         }
         val result = db.update("categories", values, "id = ?", arrayOf(category.id.toString()))
-        db.close()
         return result > 0
     }
 
     override suspend fun deleteCategory(id: UUID): Boolean {
         val db = dbHelper.writableDatabase
         val result = db.delete("categories", "id = ?", arrayOf(id.toString()))
-        db.close()
         return result > 0
     }
 }

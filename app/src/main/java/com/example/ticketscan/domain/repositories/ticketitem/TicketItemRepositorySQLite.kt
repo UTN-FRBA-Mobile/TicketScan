@@ -3,7 +3,7 @@ package com.example.ticketscan.domain.repositories.ticketitem
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
+import com.example.ticketscan.domain.db.DatabaseHelper
 import com.example.ticketscan.domain.model.TicketItem
 import java.util.UUID
 
@@ -11,28 +11,7 @@ class TicketItemRepositorySQLite(
     private val context: Context,
     private val categoryRepository: com.example.ticketscan.domain.repositories.category.CategoryRepository
 ) : TicketItemRepository {
-    private val dbHelper = object : SQLiteOpenHelper(context, "ticketscan.db", null, 1) {
-        override fun onCreate(db: SQLiteDatabase) {
-            db.execSQL("""
-                CREATE TABLE IF NOT EXISTS ticket_items (
-                    id TEXT PRIMARY KEY,
-                    ticket_id TEXT NOT NULL,
-                    name TEXT NOT NULL,
-                    category_id TEXT NOT NULL,
-                    quantity INTEGER NOT NULL,
-                    isIntUnit INTEGER NOT NULL,
-                    price REAL NOT NULL,
-                    FOREIGN KEY(ticket_id) REFERENCES tickets(id),
-                    FOREIGN KEY(category_id) REFERENCES categories(id)
-                );
-            """)
-        }
-
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            db.execSQL("DROP TABLE IF EXISTS ticket_items;")
-            onCreate(db)
-        }
-    }
+    private val dbHelper = DatabaseHelper(context)
 
     override suspend fun getItemsByTicketId(ticketId: UUID): List<TicketItem> {
         val db = dbHelper.readableDatabase
@@ -50,7 +29,6 @@ class TicketItemRepositorySQLite(
             items.add(TicketItem(id, name, category, quantity, isIntUnit, price))
         }
         cursor.close()
-        db.close()
         return items
     }
 
@@ -73,7 +51,6 @@ class TicketItemRepositorySQLite(
             val result = database.insert("ticket_items", null, values)
             return result != -1L
         } finally {
-            // Solo cerramos la DB si la abrimos aquí
             ownDb?.close()
         }
     }
@@ -102,7 +79,6 @@ class TicketItemRepositorySQLite(
     override suspend fun deleteItem(id: UUID): Boolean {
         val db = dbHelper.writableDatabase
         val result = db.delete("ticket_items", "id = ?", arrayOf(id.toString()))
-        db.close()
         return result > 0
     }
 }
