@@ -7,7 +7,6 @@ import com.example.ticketscan.domain.model.Category
 import java.util.UUID
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import com.example.ticketscan.data.model.Category
 
 class CategoryRepositorySQLite(context: Context) : CategoryRepository {
     private val dbHelper = DatabaseHelper.getInstance(context)

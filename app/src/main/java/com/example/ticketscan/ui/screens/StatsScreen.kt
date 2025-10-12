@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.CategoryPieChart
+import com.example.ticketscan.ui.components.ComparisonSection
 import com.example.ticketscan.ui.components.PeriodSelector
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
@@ -49,13 +50,12 @@ fun StatsScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            /*FormattedCurrencyText(
-                label = "Promedio por compra",
-                amount = state.averageAmount,
-                textStyle = TicketScanTheme.typography.bodyLarge
-            )*/
+            ComparisonSection(
+                current = state.totalAmount,
+                previous = state.previousAmount
+            )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 /*Text(

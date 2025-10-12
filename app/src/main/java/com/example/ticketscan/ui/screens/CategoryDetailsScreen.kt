@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.repositories.stats.MonthlyExpense
-import com.example.ticketscan.domain.repositories.stats.StatsRepository
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
@@ -47,11 +47,12 @@ import java.text.NumberFormat
 @Composable
 fun CategoryDetailsScreen(
     categoryName: String,
-    statsRepository: StatsRepository,
+    repositoryViewModel: RepositoryViewModel,
+    maxPeriods: Int,
     onBack: () -> Unit
 ) {
     val viewModel: CategoryDetailsViewModel = viewModel(
-        factory = CategoryDetailsViewModelFactory(statsRepository, categoryName)
+        factory = CategoryDetailsViewModelFactory(repositoryViewModel, categoryName, maxPeriods)
     )
     val uiState by viewModel.uiState.collectAsState()
 
@@ -73,7 +74,7 @@ fun CategoryDetailsScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            MonthlyExpensesChart(monthlyExpenses = uiState.monthlyExpenses)
+            MonthlyExpensesChart(monthlyExpenses = uiState.monthlyExpenses, maxPeriods = maxPeriods)
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(uiState.transactions) {
                     TransactionItem(ticket = it)
@@ -84,7 +85,7 @@ fun CategoryDetailsScreen(
 }
 
 @Composable
-fun MonthlyExpensesChart(monthlyExpenses: List<MonthlyExpense>) {
+fun MonthlyExpensesChart(monthlyExpenses: List<MonthlyExpense>, maxPeriods: Int) {
     val chartEntryModelProducer = ChartEntryModelProducer(
         monthlyExpenses.mapIndexed { index, expense ->
             entryOf(index.toFloat(), expense.amount.toFloat())
@@ -118,7 +119,7 @@ fun MonthlyExpensesChart(monthlyExpenses: List<MonthlyExpense>) {
                 chartModelProducer = chartEntryModelProducer,
                 startAxis = rememberStartAxis(
                     valueFormatter = startAxisValueFormatter,
-                    itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = 5)
+                    itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = maxPeriods)
                 ),
                 bottomAxis = rememberBottomAxis(valueFormatter = bottomAxisValueFormatter),
                 modifier = Modifier
@@ -144,7 +145,7 @@ fun TransactionItem(ticket: Ticket) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = ticket.store.name, fontWeight = FontWeight.Bold)
+                Text(text = ticket.store?.name ?: "", fontWeight = FontWeight.Bold)
                 Text(text = ticket.date.toString(), style = MaterialTheme.typography.bodySmall)
             }
             Text(

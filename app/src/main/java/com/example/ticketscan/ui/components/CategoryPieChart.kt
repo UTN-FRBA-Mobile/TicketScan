@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.ticketscan.domain.model.CategoryStat
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import java.math.BigDecimal
 import java.math.RoundingMode

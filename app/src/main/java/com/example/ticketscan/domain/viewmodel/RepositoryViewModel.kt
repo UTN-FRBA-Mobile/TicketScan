@@ -57,7 +57,6 @@ class RepositoryViewModel(
     suspend fun getAllTickets() = withContext(Dispatchers.IO) { ticketRepo.getAllTickets() }
 
     // TICKET ITEM
-    // Insertar un TicketItem asociándolo a un ticket existente por su id
     fun insertTicketItem(item: TicketItem, ticketId: UUID, onResult: (Boolean) -> Unit) = viewModelScope.launch {
         val result = withContext(Dispatchers.IO) { ticketItemRepo.insertItem(item, ticketId) }
         onResult(result)
@@ -65,5 +64,16 @@ class RepositoryViewModel(
     suspend fun getTicketsItemByTicketId(id: UUID) = withContext(Dispatchers.IO) { ticketItemRepo.getItemsByTicketId(id) }
 
     // STATS
-    suspend fun getCategoryStats(period: Period) = withContext(Dispatchers.IO) { statsRepo.getCategoryStats(period) }
+    suspend fun getCategoryStats(period: Period, periodOffset: Int = 0) = withContext(Dispatchers.IO) { statsRepo.getCategoryStats(period, periodOffset) }
+    suspend fun getMonthlyCategoryHistory(categoryName: String, periodQuantity: Int) = withContext(Dispatchers.IO) { statsRepo.getMonthlyCategoryHistory(categoryName, periodQuantity) }
+    suspend fun getTicketsByFilters(categoryName: String, period: Period, periodQuantity: Int) = withContext(Dispatchers.IO) {
+        val calendar = Calendar.getInstance()
+        when (period) {
+            Period.MENSUAL -> calendar.add(Calendar.MONTH, -periodQuantity)
+            Period.SEMANAL -> calendar.add(Calendar.WEEK_OF_YEAR, -periodQuantity)
+        }
+        val minDate = calendar.time
+        ticketRepo.getTicketsByFilters(categoryName = categoryName, minDate = minDate)
+    }
+
 }

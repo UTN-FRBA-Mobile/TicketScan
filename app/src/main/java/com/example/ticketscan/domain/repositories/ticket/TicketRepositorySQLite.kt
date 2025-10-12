@@ -15,6 +15,7 @@ class TicketRepositorySQLite(
     private val ticketItemRepository: TicketItemRepository
 ) : TicketRepository {
     private val dbHelper = DatabaseHelper.getInstance(context)
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
     override suspend fun getTicketById(id: UUID): Ticket? {
         val db = dbHelper.readableDatabase
@@ -22,7 +23,6 @@ class TicketRepositorySQLite(
         val cursor = db.rawQuery("SELECT t.id, t.date, t.store_id, s.name as store_name, s.cuit as store_cuit, s.location as store_location, t.total FROM tickets t LEFT JOIN stores s ON s.id = t.store_id WHERE t.id = ?", arrayOf(id.toString()))
         val ticket = if (cursor.moveToFirst()) {
             val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
-            val date = dateFormat.parse(dateStr) ?: Date()
             val storeId: String? = cursor.getString(cursor.getColumnIndexOrThrow("store_id"))
             val store = if (storeId != null) {
                 val storeName = cursor.getString(cursor.getColumnIndexOrThrow("store_name"))
@@ -32,7 +32,7 @@ class TicketRepositorySQLite(
             } else null
             val total = cursor.getDouble(cursor.getColumnIndexOrThrow("total"))
             val items = ticketItemRepository.getItemsByTicketId(id)
-            Ticket(id = id, date = date, store = store, items = items, total = total)
+            Ticket(id = id, dateFormat.parse(dateStr) ?: Date(), store = store, items = items, total = total)
         } else null
         cursor.close()
         return ticket
@@ -127,10 +127,40 @@ class TicketRepositorySQLite(
         }
     }
 
-    override suspend fun getTicketsByCategory(categoryName: String): List<Ticket> {
-        val allTickets = getAllTickets()
-        return allTickets.filter { ticket ->
-            ticket.items.any { item -> item.category.name == categoryName }
+    override suspend fun getTicketsByFilters(categoryName: String?, minDate: Date?): List<Ticket> {
+        val db = dbHelper.readableDatabase
+        val tickets = mutableListOf<Ticket>()
+        val selectionArgs = mutableListOf<String>()
+
+        var query = "SELECT DISTINCT t.id FROM tickets t"
+
+        if (categoryName != null) {
+            query += " JOIN ticket_items ti ON t.id = ti.ticket_id JOIN categories c ON ti.category_id = c.id"
         }
+
+        val whereClauses = mutableListOf<String>()
+        if (categoryName != null) {
+            whereClauses.add("c.name = ?")
+            selectionArgs.add(categoryName)
+        }
+        if (minDate != null) {
+            whereClauses.add("t.date >= ?")
+            selectionArgs.add(dateFormat.format(minDate))
+        }
+
+        if (whereClauses.isNotEmpty()) {
+            query += " WHERE " + whereClauses.joinToString(separator = " AND ")
+        }
+
+        query += " ORDER BY t.date DESC"
+
+        val cursor = db.rawQuery(query, selectionArgs.toTypedArray())
+
+        while (cursor.moveToNext()) {
+            val ticketId = cursor.getString(cursor.getColumnIndexOrThrow("id"))
+            getTicketById(UUID.fromString(ticketId))?.let { tickets.add(it) }
+        }
+        cursor.close()
+        return tickets
     }
 }
