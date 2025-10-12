@@ -2,14 +2,15 @@ package com.example.ticketscan.domain.repositories.category
 
 import android.content.ContentValues
 import android.content.Context
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import com.example.ticketscan.domain.db.DatabaseHelper
+import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.Category
 import java.util.UUID
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import com.example.ticketscan.data.model.Category
 
 class CategoryRepositorySQLite(context: Context) : CategoryRepository {
-    private val dbHelper = DatabaseHelper(context)
+    private val dbHelper = DatabaseHelper.getInstance(context)
 
     override suspend fun getAllCategories(): List<Category> {
         val db = dbHelper.readableDatabase

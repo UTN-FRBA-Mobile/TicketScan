@@ -2,12 +2,12 @@ package com.example.ticketscan.domain.repositories.store
 
 import android.content.ContentValues
 import android.content.Context
-import com.example.ticketscan.domain.db.DatabaseHelper
+import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.Store
 import java.util.UUID
 
 class StoreRepositorySQLite(context: Context) : StoreRepository {
-    private val dbHelper = DatabaseHelper(context)
+    private val dbHelper = DatabaseHelper.getInstance(context)
 
     override suspend fun getAllStores(): List<Store> {
         val db = dbHelper.readableDatabase

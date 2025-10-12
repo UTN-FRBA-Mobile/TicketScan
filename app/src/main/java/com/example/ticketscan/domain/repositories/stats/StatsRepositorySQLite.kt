@@ -1,8 +1,8 @@
 package com.example.ticketscan.domain.repositories.stats
 
 import android.content.Context
+import com.example.ticketscan.data.database.DatabaseHelper
 import androidx.compose.ui.graphics.Color
-import com.example.ticketscan.domain.db.DatabaseHelper
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.repositories.category.CategoryRepository
 import com.example.ticketscan.domain.repositories.ticket.TicketRepository

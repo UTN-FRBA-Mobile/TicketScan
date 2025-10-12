@@ -3,7 +3,7 @@ package com.example.ticketscan.domain.repositories.ticketitem
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import com.example.ticketscan.domain.db.DatabaseHelper
+import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.TicketItem
 import java.util.UUID
 
@@ -11,7 +11,7 @@ class TicketItemRepositorySQLite(
     private val context: Context,
     private val categoryRepository: com.example.ticketscan.domain.repositories.category.CategoryRepository
 ) : TicketItemRepository {
-    private val dbHelper = DatabaseHelper(context)
+    private val dbHelper = DatabaseHelper.getInstance(context)
 
     override suspend fun getItemsByTicketId(ticketId: UUID): List<TicketItem> {
         val db = dbHelper.readableDatabase
