@@ -4,18 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.ticketscan.domain.model.Ticket
-import com.example.ticketscan.domain.repositories.stats.MonthlyExpense
+import com.example.ticketscan.domain.repositories.stats.PeriodExpense
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ui.components.Period
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class CategoryDetailsUiState(
     val categoryName: String = "",
-    val monthlyExpenses: List<MonthlyExpense> = emptyList(),
+    val periodExpenses: List<PeriodExpense> = emptyList(),
     val transactions: List<Ticket> = emptyList(),
-    val selectedPeriod: Period = Period.MENSUAL,
+    val period: Period = Period.MENSUAL,
     val maxPeriods: Int = 4
 )
 
@@ -40,29 +42,30 @@ class CategoryDetailsViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CategoryDetailsUiState(categoryName = categoryName))
-    val uiState: StateFlow<CategoryDetailsUiState> = _uiState
+    val uiState: StateFlow<CategoryDetailsUiState> = _uiState.asStateFlow()
 
     init {
-        loadMonthlyExpenses()
+        loadPeriodExpenses()
         loadTransactions()
     }
 
-    fun onPeriodChanged(period: Period) {
-        _uiState.value = _uiState.value.copy(selectedPeriod = period)
+    fun setPeriod(period: Period) {
+        _uiState.update { it.copy(period = period) }
+        loadPeriodExpenses()
         loadTransactions()
     }
 
-    private fun loadMonthlyExpenses() {
+    private fun loadPeriodExpenses() {
         viewModelScope.launch {
-            val monthlyExpenses = repositoryViewModel.getMonthlyCategoryHistory(categoryName, maxPeriods)
-            _uiState.value = _uiState.value.copy(monthlyExpenses = monthlyExpenses)
+            val periodExpenses = repositoryViewModel.getPeriodCategoryHistory(categoryName, _uiState.value.period, maxPeriods)
+            _uiState.update { it.copy(periodExpenses = periodExpenses) }
         }
     }
 
     private fun loadTransactions() {
         viewModelScope.launch {
-            val transactions = repositoryViewModel.getTicketsByFilters(categoryName, _uiState.value.selectedPeriod, maxPeriods)
-            _uiState.value = _uiState.value.copy(transactions = transactions)
+            val transactions = repositoryViewModel.getTicketsByFilters(categoryName, _uiState.value.period, maxPeriods)
+            _uiState.update { it.copy(transactions = transactions) }
         }
     }
 }

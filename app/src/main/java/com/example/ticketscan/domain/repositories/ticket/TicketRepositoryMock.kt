@@ -1,25 +1,31 @@
 package com.example.ticketscan.domain.repositories.ticket
 
+import android.content.Context
 import androidx.compose.ui.graphics.Color
 import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.model.TicketOrigin
+import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepository
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 
-class TicketRepositoryMock : TicketRepository {
+class TicketRepositoryMock (
+    private val context: Context,
+    private val ticketItemRepository: TicketItemRepository
+) : TicketRepository {
 
     private val mockTickets by lazy { generateMockTickets() }
 
     private val categories = listOf(
-        Category(UUID.randomUUID(), "Alimentación", Color(0xFFEF5350)),
-        Category(UUID.randomUUID(), "Transporte", Color(0xFFAB47BC)),
-        Category(UUID.randomUUID(), "Salud", Color(0xFF26A69A)),
-        Category(UUID.randomUUID(), "Entretenimiento", Color(0xFF42A5F5)),
-        Category(UUID.randomUUID(), "Otros", Color(0xFF66BB6A))
+        Category(UUID.randomUUID(), "Alimentación", Color(red = 0, green = 150, blue = 136, alpha = 255)),
+        Category(UUID.randomUUID(), "Transporte", Color(red = 33, green = 150, blue = 243, alpha = 255)),
+        Category(UUID.randomUUID(), "Entretenimiento", Color(0xFFFF9800)),
+        Category(UUID.randomUUID(), "Salud", Color(0xFFF44336)),
+        Category(UUID.randomUUID(), "Hogar", Color(0xFF9C27B0)),
+        Category(UUID.randomUUID(), "Otros", Color.Gray)
     )
 
     private fun generateMockTickets(): List<Ticket> {

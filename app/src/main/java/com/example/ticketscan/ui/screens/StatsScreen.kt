@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.CategoryPieChart
 import com.example.ticketscan.ui.components.ComparisonSection
+import com.example.ticketscan.ui.components.Period
 import com.example.ticketscan.ui.components.PeriodSelector
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
@@ -50,6 +51,15 @@ fun StatsScreen(
 
             Spacer(Modifier.height(16.dp))
 
+            val periodDescription = when (state.selectedPeriod) {
+                Period.MENSUAL -> "el mes"
+                Period.SEMANAL -> "la semana"
+            }
+            Text(
+                "Comparación con $periodDescription anterior",
+                style = TicketScanTheme.typography.titleLarge
+            )
+            Spacer(Modifier.height(12.dp))
             ComparisonSection(
                 current = state.totalAmount,
                 previous = state.previousAmount
@@ -58,10 +68,11 @@ fun StatsScreen(
             Spacer(Modifier.height(24.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
-                /*Text(
+                Text(
                     "Distribución por Categoría",
                     style = TicketScanTheme.typography.titleLarge
-                )*/
+                )
+                Spacer(Modifier.height(12.dp))
                 CategoryPieChart(
                     stats = state.categoryStats,
                     totalAmount = state.totalAmount,

@@ -20,17 +20,20 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ticketscan.domain.model.Ticket
-import com.example.ticketscan.domain.repositories.stats.MonthlyExpense
+import com.example.ticketscan.domain.repositories.stats.PeriodExpense
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
+import com.example.ticketscan.ui.components.PeriodSelector
+import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
@@ -59,7 +62,7 @@ fun CategoryDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Gastos de la categoría") },
+                title = { Text(text = categoryName) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
@@ -74,7 +77,8 @@ fun CategoryDetailsScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            MonthlyExpensesChart(monthlyExpenses = uiState.monthlyExpenses, maxPeriods = maxPeriods)
+            PeriodSelector(selectedPeriod = uiState.period, onPeriodChange = { viewModel.setPeriod(it) })
+            PeriodExpensesChart(periodExpenses = uiState.periodExpenses, maxPeriods = maxPeriods)
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(uiState.transactions) {
                     TransactionItem(ticket = it)
@@ -85,14 +89,18 @@ fun CategoryDetailsScreen(
 }
 
 @Composable
-fun MonthlyExpensesChart(monthlyExpenses: List<MonthlyExpense>, maxPeriods: Int) {
-    val chartEntryModelProducer = ChartEntryModelProducer(
-        monthlyExpenses.mapIndexed { index, expense ->
-            entryOf(index.toFloat(), expense.amount.toFloat())
-        }
-    )
+fun PeriodExpensesChart(periodExpenses: List<PeriodExpense>, maxPeriods: Int) {
+    val chartEntryModelProducer = remember { ChartEntryModelProducer() }
+    LaunchedEffect(periodExpenses) {
+        chartEntryModelProducer.setEntries(
+            periodExpenses.mapIndexed { index, expense ->
+                entryOf(index.toFloat(), expense.amount.toFloat())
+            }
+        )
+    }
+
     val bottomAxisValueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { value, _ ->
-        monthlyExpenses.getOrNull(value.toInt())?.month ?: ""
+        periodExpenses.getOrNull(value.toInt())?.periodName ?: ""
     }
 
     val currencyFormat = NumberFormat.getCurrencyInstance().apply {
@@ -111,10 +119,10 @@ fun MonthlyExpensesChart(monthlyExpenses: List<MonthlyExpense>, maxPeriods: Int)
             modifier = Modifier
                 .padding(16.dp)
         ) {
-            Text(text = "Gastos por mes", style = MaterialTheme.typography.titleMedium)
+            Text(text = "Gastos por período", style = MaterialTheme.typography.titleMedium)
             Chart(
                 chart = columnChart(
-                    columns = listOf(lineComponent(color = MaterialTheme.colorScheme.primary))
+                    columns = listOf(lineComponent(color = TicketScanTheme.colors.primary))
                 ),
                 chartModelProducer = chartEntryModelProducer,
                 startAxis = rememberStartAxis(
@@ -151,7 +159,7 @@ fun TransactionItem(ticket: Ticket) {
             Text(
                 text = "$${ticket.total}",
                 fontWeight = FontWeight.Bold,
-                color = if (ticket.total > 0) Color.Green else Color.Red
+                color = TicketScanTheme.colors.primary
             )
         }
     }

@@ -44,27 +44,30 @@ class StatsRepositorySQLite(context: Context) : StatsRepository {
         return stats
     }
 
-    override suspend fun getMonthlyCategoryHistory(categoryName: String, periodQuantity: Int): List<MonthlyExpense> {
+    override suspend fun getPeriodCategoryHistory(categoryName: String, period: Period, periodQuantity: Int): List<PeriodExpense> {
         val db = dbHelper.readableDatabase
-        val monthlyExpenses = mutableListOf<MonthlyExpense>()
-        val monthFormat = SimpleDateFormat("MMM", Locale.forLanguageTag("es-ES"))
-        val yearMonthFormat = SimpleDateFormat("yyyy-MM", Locale.getDefault())
+        val periodExpenses = mutableListOf<PeriodExpense>()
+
+        val (viewName, periodLabelFormat, dbPeriodFormat) = when (period) {
+            Period.MENSUAL -> Triple("vw_monthly_expenses", SimpleDateFormat("MMM", Locale.forLanguageTag("es-ES")), SimpleDateFormat("yyyy-MM", Locale.getDefault()))
+            Period.SEMANAL -> Triple("vw_weekly_expenses", SimpleDateFormat("'S'w", Locale.getDefault()), SimpleDateFormat("yyyy-WW", Locale.getDefault()))
+        }
 
         val cursor = db.rawQuery(
-            "SELECT period, total FROM vw_monthly_expenses WHERE category_name = ? ORDER BY period DESC LIMIT ?",
+            "SELECT period, total FROM $viewName WHERE category_name = ? ORDER BY period DESC LIMIT ?",
             arrayOf(categoryName, periodQuantity.toString())
         )
 
         while (cursor.moveToNext()) {
-            val monthStr = cursor.getString(cursor.getColumnIndexOrThrow("period"))
+            val periodStr = cursor.getString(cursor.getColumnIndexOrThrow("period"))
             val total = cursor.getDouble(cursor.getColumnIndexOrThrow("total"))
 
-            val date = yearMonthFormat.parse(monthStr)
-            val shortMonthName = date?.let { monthFormat.format(it) } ?: ""
+            val date = dbPeriodFormat.parse(periodStr)
+            val shortPeriodName = date?.let { periodLabelFormat.format(it) } ?: ""
 
-            monthlyExpenses.add(MonthlyExpense(shortMonthName, BigDecimal.valueOf(total)))
+            periodExpenses.add(PeriodExpense(shortPeriodName, BigDecimal.valueOf(total)))
         }
         cursor.close()
-        return monthlyExpenses.reversed()
+        return periodExpenses.reversed()
     }
 }

@@ -3,11 +3,11 @@ package com.example.ticketscan.domain.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ticketscan.domain.model.*
-import com.example.ticketscan.domain.repositories.category.CategoryRepositorySQLite
-import com.example.ticketscan.domain.repositories.store.StoreRepositorySQLite
-import com.example.ticketscan.domain.repositories.ticket.TicketRepositorySQLite
-import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepositorySQLite
-import com.example.ticketscan.domain.repositories.stats.StatsRepositorySQLite
+import com.example.ticketscan.domain.repositories.category.CategoryRepository
+import com.example.ticketscan.domain.repositories.stats.StatsRepository
+import com.example.ticketscan.domain.repositories.store.StoreRepository
+import com.example.ticketscan.domain.repositories.ticket.TicketRepository
+import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepository
 import com.example.ticketscan.ui.components.Period
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
@@ -15,11 +15,11 @@ import kotlinx.coroutines.withContext
 import java.util.*
 
 class RepositoryViewModel(
-    private val storeRepo: StoreRepositorySQLite,
-    private val categoryRepo: CategoryRepositorySQLite,
-    private val ticketRepo: TicketRepositorySQLite,
-    private val ticketItemRepo: TicketItemRepositorySQLite,
-    private val statsRepo: StatsRepositorySQLite
+    private val storeRepo: StoreRepository,
+    private val categoryRepo: CategoryRepository,
+    private val ticketRepo: TicketRepository,
+    private val ticketItemRepo: TicketItemRepository,
+    private val statsRepo: StatsRepository
 ) : ViewModel() {
     // STORE
     fun insertStore(store: Store, onResult: (Boolean) -> Unit) = viewModelScope.launch {
@@ -65,7 +65,7 @@ class RepositoryViewModel(
 
     // STATS
     suspend fun getCategoryStats(period: Period, periodOffset: Int = 0) = withContext(Dispatchers.IO) { statsRepo.getCategoryStats(period, periodOffset) }
-    suspend fun getMonthlyCategoryHistory(categoryName: String, periodQuantity: Int) = withContext(Dispatchers.IO) { statsRepo.getMonthlyCategoryHistory(categoryName, periodQuantity) }
+    suspend fun getPeriodCategoryHistory(categoryName: String, period: Period, periodQuantity: Int) = withContext(Dispatchers.IO) { statsRepo.getPeriodCategoryHistory(categoryName, period, periodQuantity) }
     suspend fun getTicketsByFilters(categoryName: String, period: Period, periodQuantity: Int) = withContext(Dispatchers.IO) {
         val calendar = Calendar.getInstance()
         when (period) {
