@@ -30,15 +30,8 @@ import com.example.ticketscan.ui.screens.TicketScreen
 import com.example.ticketscan.ui.screens.TicketViewModel
 import com.example.ticketscan.ui.screens.TicketViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.example.ticketscan.domain.repositories.StatsRepositoryMock
 import com.example.ticketscan.ia.internal.IAServiceImpl
 import com.example.ticketscan.ui.screens.RecordAudioScreen
-import com.example.ticketscan.ui.screens.StatsScreen
-import com.example.ticketscan.ui.screens.StatsViewModel
-import com.example.ticketscan.ui.screens.StatsViewModelFactory
 import java.util.UUID
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -86,6 +79,7 @@ class MainActivity : ComponentActivity() {
                             RecordAudioScreen(
                                 navController = navController,
                                 iaService = iaService,
+                                repositoryViewModel = repositoryViewModel,
                                 onResult = { result -> navController.navigate("ticket") {}
                                 }
                             )

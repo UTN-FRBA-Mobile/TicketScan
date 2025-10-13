@@ -18,7 +18,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.ticketscan.domain.model.TicketItem
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ia.internal.IAServiceImpl
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
@@ -27,13 +30,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun RecordAudioScreen(
     navController: NavController,
     iaService: IAServiceImpl,
-    onResult: (List<com.example.ticketscan.ia.AnalizedItem>) -> Unit
+    repositoryViewModel: RepositoryViewModel = viewModel(),
+    onResult: (List<TicketItem>) -> Unit
 ) {
     val context = LocalContext.current
     var isRecording by remember { mutableStateOf(false) }
@@ -173,8 +176,11 @@ fun RecordAudioScreen(
                 onClick = {
                     audioFile?.let { file ->
                         coroutineScope.launch {
+                            val categories = withContext(Dispatchers.IO) {
+                                repositoryViewModel.getAllCategories()
+                            }
                             val result = withContext(Dispatchers.IO) {
-                                iaService.analizeTicketAudio(file)
+                                iaService.analyzeTicketAudio(file, categories)
                             }
                             onResult(result)
                         }
