@@ -153,7 +153,7 @@ fun TransactionItem(ticket: Ticket) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = ticket.store?.name ?: "", fontWeight = FontWeight.Bold)
+                Text(text = ticket.store?.name ?: ticket.id.toString().take(8), fontWeight = FontWeight.Bold)
                 Text(text = ticket.date.toString(), style = MaterialTheme.typography.bodySmall)
             }
             Text(
