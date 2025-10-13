@@ -12,17 +12,36 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ui.components.UploadCard
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import com.example.ticketscan.ui.theme.TicketScanThemeProvider
+import java.util.UUID
 
 @Composable
-fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    navController: NavController,
+    repositoryViewModel: RepositoryViewModel,
+    modifier: Modifier = Modifier,
+    ) {
+
+    val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(repositoryViewModel))
+    val tickets by viewModel.tickets.collectAsState()
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = TicketScanTheme.colors.background
@@ -40,37 +59,53 @@ fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
             ) {
                 UploadOption(label = "Audio", icon = TicketScanIcons.Audio) { navController.navigate("record_audio") }
                 UploadOption(label = "Cámara", icon = TicketScanIcons.Camera) { /* TODO */ }
-                UploadOption(label = "Texto", icon = TicketScanIcons.Text) { /* TODO */ }
+                UploadOption(label = "Texto", icon = TicketScanIcons.Text) { navController.navigate("processing/texto") }
             }
             Spacer(modifier = Modifier.height(32.dp))
             Text(
                 text = "Últimas cargas",
                 style = TicketScanTheme.typography.headlineSmall,
                 modifier = Modifier.padding(vertical = 16.dp),
-                color = TicketScanTheme.colors.onBackground
-            )
             // TODO: Add filter dropdown here
+            )
             Column(
                 modifier = Modifier
                 .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                UploadCard(
-                    title = "Por audio",
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket") }
-                )
-                UploadCard(
-                    title = "Por texto",
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket") }
-                )
-                UploadCard(
-                    title = "Por fotos",
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { navController.navigate("ticket") }
-                )
+                if (tickets.isEmpty()) {
+                    Text(
+                        text = "No hay tickets cargados aún",
+                        style = TicketScanTheme.typography.bodyMedium,
+                        color = TicketScanTheme.colors.onBackground
+                    )
+                } else {
+                    tickets.forEach { ticket ->
+                        UploadCard(
+                            title = ticket.store?.name ?: "Ticket ${ticket.id.toString().take(8)}",
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { navController.navigate("ticket/${ticket.id}") }
+                        ) {
+                            Text(
+                                text = "Fecha: ${ticket.date}  •  Total: $${ticket.total}",
+                                style = TicketScanTheme.typography.bodyMedium,
+                                color = TicketScanTheme.colors.onBackground
+                            )
+                        }
+                    }
+                }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomePreview() {
+    TicketScanThemeProvider {
+        val navController = rememberNavController()
+        val repositoryViewModelFactory = RepositoryViewModelFactory(context = LocalContext.current)
+        val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
+        HomeScreen(navController = navController, repositoryViewModel)
     }
 }

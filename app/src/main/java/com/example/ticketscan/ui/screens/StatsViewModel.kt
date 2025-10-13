@@ -3,7 +3,7 @@ package com.example.ticketscan.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.ticketscan.domain.repositories.StatsRepository
+import com.example.ticketscan.domain.repositories.stats.StatsRepository
 import com.example.ticketscan.ui.components.CategoryStat
 import com.example.ticketscan.ui.components.Period
 import kotlinx.coroutines.flow.MutableStateFlow
