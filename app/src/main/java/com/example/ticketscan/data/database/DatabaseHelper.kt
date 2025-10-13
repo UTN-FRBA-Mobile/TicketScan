@@ -11,7 +11,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
 
     companion object {
         private const val DATABASE_NAME = "ticketscan.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -68,7 +68,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         CREATE TABLE IF NOT EXISTS tickets (
             id TEXT PRIMARY KEY,
             date TEXT NOT NULL,
-            store_id TEXT NOT NULL,
+            store_id TEXT,
             total REAL NOT NULL,
             FOREIGN KEY(store_id) REFERENCES stores(id)
         );
