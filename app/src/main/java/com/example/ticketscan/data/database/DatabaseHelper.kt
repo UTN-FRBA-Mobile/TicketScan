@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 
 class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -100,12 +101,12 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         if (count == 0) {
             // Insertar categorías por defecto
             val defaultCategories = listOf(
-                "('${java.util.UUID.randomUUID()}', 'Alimentación', ${Color.Green})",
-                "('${java.util.UUID.randomUUID()}', 'Transporte', ${Color.Magenta})",
-                "('${java.util.UUID.randomUUID()}', 'Entretenimiento', ${Color(0xFFFF9800)})",
-                "('${java.util.UUID.randomUUID()}', 'Salud', ${Color(0xFFF44336)})",
-                "('${java.util.UUID.randomUUID()}', 'Hogar', ${Color(0xFF9C27B0)})",
-                "('${java.util.UUID.randomUUID()}', 'Otros', ${Color.Gray})"
+                "('${java.util.UUID.randomUUID()}', 'Alimentación', ${Color.Green.toArgb()})",
+                "('${java.util.UUID.randomUUID()}', 'Transporte', ${Color.Magenta.toArgb()})",
+                "('${java.util.UUID.randomUUID()}', 'Entretenimiento', ${Color(0xFFFF9800).toArgb()})",
+                "('${java.util.UUID.randomUUID()}', 'Salud', ${Color(0xFFF44336).toArgb()})",
+                "('${java.util.UUID.randomUUID()}', 'Hogar', ${Color(0xFF9C27B0).toArgb()})",
+                "('${java.util.UUID.randomUUID()}', 'Otros', ${Color.Gray.toArgb()})"
             )
 
             for (category in defaultCategories) {
