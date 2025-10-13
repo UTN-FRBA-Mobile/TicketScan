@@ -30,6 +30,8 @@ import com.example.ticketscan.ui.screens.TicketScreen
 import com.example.ticketscan.ui.screens.TicketViewModel
 import com.example.ticketscan.ui.screens.TicketViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
+import com.example.ticketscan.ia.internal.IAServiceImpl
+import com.example.ticketscan.ui.screens.RecordAudioScreen
 import java.util.UUID
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -51,6 +53,7 @@ class MainActivity : ComponentActivity() {
                 val repository = StatsRepositoryMock()
                 val statsFactory = StatsViewModelFactory(repository)
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
+                val iaService = remember { IAServiceImpl("https://your-api-base-url.com") }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
@@ -72,6 +75,15 @@ class MainActivity : ComponentActivity() {
                         composable("expenses") { StatsScreen(navController = navController,
                             statsViewModel = statsViewModel
                         ) }
+                        composable("record_audio") {
+                            RecordAudioScreen(
+                                navController = navController,
+                                iaService = iaService,
+                                repositoryViewModel = repositoryViewModel,
+                                onResult = { result -> navController.navigate("ticket") {}
+                                }
+                            )
+                        }
                         composable("scan") { /* TODO: Scan screen */ HomeScreen(navController, repositoryViewModel) }
                         composable("profile") { /* TODO: Profile screen */ HomeScreen(navController, repositoryViewModel) }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController, repositoryViewModel) }

@@ -57,7 +57,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                UploadOption(label = "Audio", icon = TicketScanIcons.Audio) { /* TODO */ }
+                UploadOption(label = "Audio", icon = TicketScanIcons.Audio) { navController.navigate("record_audio") }
                 UploadOption(label = "Cámara", icon = TicketScanIcons.Camera) { /* TODO */ }
                 UploadOption(label = "Texto", icon = TicketScanIcons.Text) { navController.navigate("processing/texto") }
             }
