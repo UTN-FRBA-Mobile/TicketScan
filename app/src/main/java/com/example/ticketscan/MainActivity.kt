@@ -12,16 +12,31 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.TicketOrigin
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
+import com.example.ticketscan.ia.internal.IAService
+import com.example.ticketscan.ia.internal.IAServiceImpl
+import com.example.ticketscan.ia.internal.mock.MockIAApi
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
+import com.example.ticketscan.ui.screens.AppearanceSettingsScreen
+import com.example.ticketscan.ui.screens.CameraScanScreen
+import com.example.ticketscan.ui.screens.CameraScanViewModel
+import com.example.ticketscan.ui.screens.CameraScanViewModelFactory
+import com.example.ticketscan.ui.screens.CategoryDetailsScreen
+import com.example.ticketscan.ui.screens.DefaultTicketEntryScreen
+import com.example.ticketscan.ui.screens.EditContactScreen
 import com.example.ticketscan.ui.screens.HomeScreen
+import com.example.ticketscan.ui.screens.NotificationSettingsScreen
 import com.example.ticketscan.ui.screens.ProcessingScreen
+import com.example.ticketscan.ui.screens.ProfileScreen
+import com.example.ticketscan.ui.screens.RecordAudioScreen
 import com.example.ticketscan.ui.screens.StatsScreen
 import com.example.ticketscan.ui.screens.StatsViewModel
 import com.example.ticketscan.ui.screens.StatsViewModelFactory
@@ -36,6 +51,7 @@ import com.example.ticketscan.ui.screens.*
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -50,6 +66,10 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
+                val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
+
+                val cameraScanFactory = CameraScanViewModelFactory(iaService, repositoryViewModel)
+                val cameraScanViewModel: CameraScanViewModel = viewModel(factory = cameraScanFactory)
 
                 val statsFactory = remember { StatsViewModelFactory(repositoryViewModel) }
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
@@ -91,8 +111,34 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() }
                             )
                         }
-                        composable("scan") { /* TODO: Scan screen */ HomeScreen(navController, repositoryViewModel) }
-                        composable("profile") { /* TODO: Profile screen */ HomeScreen(navController, repositoryViewModel) }
+                        composable("record_audio") {
+                            RecordAudioScreen(
+                                navController = navController,
+                                iaService = iaService,
+                                repositoryViewModel = repositoryViewModel,
+                                onResult = { result -> navController.navigate("ticket") {}
+                                }
+                            )
+                        }
+                        composable("scan") { CameraScanScreen(navController = navController, vm = cameraScanViewModel) }
+                        composable("profile") { ProfileScreen(navController = navController) }
+                        composable("edit_contact") {
+                            EditContactScreen(
+                                navController = navController,
+                                onSave = { name, lastName, email, phone ->
+                                    // TODO: Save the contact information
+                                }
+                            )
+                        }
+                        composable("notification_settings") {
+                            NotificationSettingsScreen(navController = navController)
+                        }
+                        composable("appearance_settings") {
+                            AppearanceSettingsScreen(navController = navController)
+                        }
+                        composable("default_ticket_entry") {
+                            DefaultTicketEntryScreen(navController = navController)
+                        }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController, repositoryViewModel) }
                         composable("ticket/{id}") { backStackEntry ->
                             val idArg = backStackEntry.arguments?.getString("id")

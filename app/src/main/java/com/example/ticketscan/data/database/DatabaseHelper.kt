@@ -15,11 +15,11 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         private const val TAG = "DatabaseHelper"
 
         @Volatile
-        private var INSTANCE: DatabaseHelper? = null
+        private var instance: DatabaseHelper? = null
 
         fun getInstance(context: Context): DatabaseHelper {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: DatabaseHelper(context.applicationContext).also { INSTANCE = it }
+            return instance ?: synchronized(this) {
+                instance ?: DatabaseHelper(context.applicationContext).also { instance = it }
             }
         }
     }
