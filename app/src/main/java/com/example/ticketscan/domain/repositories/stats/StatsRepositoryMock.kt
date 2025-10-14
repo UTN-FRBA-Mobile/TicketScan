@@ -1,4 +1,4 @@
-package com.example.ticketscan.domain.repositories
+package com.example.ticketscan.domain.repositories.stats
 
 import androidx.compose.ui.graphics.Color
 import com.example.ticketscan.ui.components.CategoryStat
