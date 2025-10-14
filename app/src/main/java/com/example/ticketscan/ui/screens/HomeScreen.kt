@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,7 +29,6 @@ import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
-import java.util.UUID
 
 @Composable
 fun HomeScreen(
@@ -58,7 +56,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 UploadOption(label = "Audio", icon = TicketScanIcons.Audio) { navController.navigate("record_audio") }
-                UploadOption(label = "Cámara", icon = TicketScanIcons.Camera) { roller.navigate("scan") }
+                UploadOption(label = "Cámara", icon = TicketScanIcons.Camera) { navController.navigate("scan") }
                 UploadOption(label = "Texto", icon = TicketScanIcons.Text) { navController.navigate("processing/texto") }
             }
             Spacer(modifier = Modifier.height(32.dp))

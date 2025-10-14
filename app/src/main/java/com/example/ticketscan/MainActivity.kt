@@ -20,9 +20,16 @@ import com.example.ticketscan.domain.model.TicketOrigin
 import com.example.ticketscan.domain.repositories.stats.StatsRepositoryMock
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
+import com.example.ticketscan.ia.internal.IAService
+import com.example.ticketscan.ia.internal.IAServiceImpl
+import com.example.ticketscan.ia.internal.mock.MockIAApi
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
+import com.example.ticketscan.ui.screens.CameraScanScreen
+import com.example.ticketscan.ui.screens.CameraScanViewModel
+import com.example.ticketscan.ui.screens.CameraScanViewModelFactory
 import com.example.ticketscan.ui.screens.HomeScreen
 import com.example.ticketscan.ui.screens.ProcessingScreen
+import com.example.ticketscan.ui.screens.RecordAudioScreen
 import com.example.ticketscan.ui.screens.StatsScreen
 import com.example.ticketscan.ui.screens.StatsViewModel
 import com.example.ticketscan.ui.screens.StatsViewModelFactory
@@ -30,20 +37,11 @@ import com.example.ticketscan.ui.screens.TicketScreen
 import com.example.ticketscan.ui.screens.TicketViewModel
 import com.example.ticketscan.ui.screens.TicketViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.example.ticketscan.domain.repositories.StatsRepositoryMock
-import com.example.ticketscan.ui.screens.StatsScreen
-import com.example.ticketscan.ui.screens.StatsViewModel
-import com.example.ticketscan.ui.screens.StatsViewModelFactory
-import com.example.ticketscan.ui.screens.CameraScan
-import com.example.ticketscan.ia.internal.IAServiceImpl
-import com.example.ticketscan.ui.screens.RecordAudioScreen
 import java.util.UUID
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,10 +56,14 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
+                val iaService: IAService = remember { IAServiceImpl(MockIAApi()) }
+
+                val cameraScanFactory = CameraScanViewModelFactory(iaService, repositoryViewModel)
+                val cameraScanViewModel: CameraScanViewModel = viewModel(factory = cameraScanFactory)
+
                 val repository = StatsRepositoryMock()
                 val statsFactory = StatsViewModelFactory(repository)
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
-                val iaService = remember { IAServiceImpl("https://your-api-base-url.com") }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
@@ -92,7 +94,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-                        composable("scan") { CameraScan(navController = navController) }
+                        composable("scan") { CameraScanScreen(navController = navController, vm = cameraScanViewModel) }
                         composable("profile") { /* TODO: Profile screen */ HomeScreen(navController, repositoryViewModel) }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController, repositoryViewModel) }
                         composable("ticket/{id}") { backStackEntry ->

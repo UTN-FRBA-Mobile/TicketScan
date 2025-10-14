@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import java.io.File
 import java.util.concurrent.Executor
@@ -32,9 +31,9 @@ import com.example.ticketscan.ui.components.CaptureThumbnailPreview
 import com.example.ticketscan.ui.components.ErrorBadge
 
 @Composable
-fun CameraScan(
+fun CameraScanScreen(
     modifier: Modifier = Modifier,
-    vm: CameraScanViewModel = viewModel(),
+    vm: CameraScanViewModel,
     navController: NavController
 ) {
     val context = LocalContext.current
@@ -177,7 +176,7 @@ fun CameraScan(
                     items(items) { it ->
                         ListItem(
                             headlineContent = { Text(it.name) },
-                            supportingContent = { Text(it.category) },
+                            supportingContent = { Text(it.category.name) },
                             trailingContent = {
                                 val priceText = "$" + String.format(Locale.US, "%.2f", it.price)
                                 Text(priceText)
