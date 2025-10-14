@@ -88,6 +88,14 @@ fun CameraScanScreen(
     val error by vm.error.collectAsState()
     val capturedThumbnail by vm.capturedThumbnail.collectAsState()
     val canContinue by vm.canContinue.collectAsState()
+    val createdTicket by vm.createdTicket.collectAsState()
+
+    createdTicket?.let { ticketId ->
+        LaunchedEffect(ticketId) {
+            navController.navigate("ticket/$ticketId")
+            vm.onTicketNavigationHandled()
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         if (hasCameraPermission) {
@@ -152,9 +160,10 @@ fun CameraScanScreen(
                 if (canContinue) {
                     Spacer(Modifier.width(12.dp))
                     Button(
-                        onClick = { navController.navigate("ticket") }
+                        onClick = { vm.saveTicket(items) }
                     ) { Text("Continuar") }
                 }
+
             }
 
             if (error != null) {

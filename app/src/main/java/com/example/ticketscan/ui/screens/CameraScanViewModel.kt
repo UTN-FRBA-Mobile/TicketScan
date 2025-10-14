@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ia.internal.IAService
@@ -19,6 +20,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Date
+import java.util.UUID
 
 class CameraScanViewModel(
     private val service: IAService = IAServiceImpl(MockIAApi()),
@@ -27,6 +30,9 @@ class CameraScanViewModel(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _createdTicket = MutableStateFlow<UUID?>(null)
+    val createdTicket: StateFlow<UUID?> = _createdTicket
 
     private val _items = MutableStateFlow<List<TicketItem>>(emptyList())
     val items: StateFlow<List<TicketItem>> = _items
@@ -58,6 +64,34 @@ class CameraScanViewModel(
                 }
                 _isLoading.emit(false)
             }
+        }
+    }
+
+    fun saveTicket(items: List<TicketItem>) {
+        viewModelScope.launch {
+            val ticket = Ticket(
+                id = UUID.randomUUID(),
+                date = Date(),
+                items = items,
+                total = items.sumOf { it.price },
+                store = null
+            )
+            repositoryViewModel.insertTicket(
+                ticket,
+                onResult = { result ->
+                    if (result) {
+                        viewModelScope.launch {
+                            _createdTicket.emit(ticket.id)
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    fun onTicketNavigationHandled() {
+        viewModelScope.launch {
+            _createdTicket.emit(null)
         }
     }
 
