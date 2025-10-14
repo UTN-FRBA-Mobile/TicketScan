@@ -45,9 +45,6 @@ import com.example.ticketscan.ui.screens.TicketViewModel
 import com.example.ticketscan.ui.screens.TicketViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.util.UUID
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import com.example.ticketscan.ui.screens.*
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : ComponentActivity() {
