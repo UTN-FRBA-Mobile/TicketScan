@@ -106,7 +106,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         SELECT
             c.name AS category_name,
             c.color AS category_color,
-            strftime('%Y-%w', t.date) AS period,
+            strftime('%Y-%W', t.date) AS period,
             SUM(ti.price * ti.quantity) AS total
         FROM ticket_items ti
         JOIN tickets t ON ti.ticket_id = t.id
