@@ -18,14 +18,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.CategoryPieChart
 import com.example.ticketscan.ui.components.ComparisonSection
-import com.example.ticketscan.ui.components.FormattedCurrencyText
+import com.example.ticketscan.ui.components.Period
 import com.example.ticketscan.ui.components.PeriodSelector
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @Composable
 fun StatsScreen(
     statsViewModel: StatsViewModel,
-    navController: NavController
+    navController: NavController,
+    onCategoryClick: (String) -> Unit
 ) {
     val state by statsViewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
@@ -50,31 +51,34 @@ fun StatsScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            FormattedCurrencyText(
-                label = "Total",
-                amount = state.totalAmount,
-                textStyle = TicketScanTheme.typography.bodyLarge
+            val periodDescription = when (state.selectedPeriod) {
+                Period.MENSUAL -> "el mes"
+                Period.SEMANAL -> "la semana"
+            }
+            Text(
+                "Comparación con $periodDescription anterior",
+                style = TicketScanTheme.typography.titleLarge
             )
-            FormattedCurrencyText(
-                label = "Promedio por compra",
-                amount = state.averageAmount,
-                textStyle = TicketScanTheme.typography.bodyLarge
+            Spacer(Modifier.height(12.dp))
+            ComparisonSection(
+                current = state.totalAmount,
+                previous = state.previousAmount
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     "Distribución por Categoría",
                     style = TicketScanTheme.typography.titleLarge
                 )
-                CategoryPieChart(stats = state.categoryStats)
+                Spacer(Modifier.height(12.dp))
+                CategoryPieChart(
+                    stats = state.categoryStats,
+                    totalAmount = state.totalAmount,
+                    onCategoryClick = onCategoryClick
+                )
             }
-
-            /*ComparisonSection(
-                current = state.totalAmount,
-                previous = state.previousAmount
-            )*/
         }
     }
 }

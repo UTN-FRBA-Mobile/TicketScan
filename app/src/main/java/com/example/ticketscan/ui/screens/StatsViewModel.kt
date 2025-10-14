@@ -3,9 +3,10 @@ package com.example.ticketscan.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.ticketscan.domain.repositories.stats.StatsRepository
-import com.example.ticketscan.ui.components.CategoryStat
+import com.example.ticketscan.domain.model.CategoryStat
+import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ui.components.Period
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -20,7 +21,7 @@ data class StatsUiState(
 )
 
 class StatsViewModelFactory(
-    private val repository: StatsRepository
+    private val repository: RepositoryViewModel
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(StatsViewModel::class.java)) {
@@ -32,7 +33,7 @@ class StatsViewModelFactory(
 }
 
 class StatsViewModel(
-    private val repository: StatsRepository
+    private val repository: RepositoryViewModel
 ) : ViewModel() {
 
     val uiState = MutableStateFlow(StatsUiState())
@@ -42,17 +43,26 @@ class StatsViewModel(
     }
 
     fun onPeriodChanged(period: Period) {
-        uiState.value = uiState.value.copy(selectedPeriod = period)
-        loadStats()
+        viewModelScope.launch {
+            loadStats(period)
+        }
     }
 
-    private fun loadStats() {
+    private fun loadStats(period: Period = uiState.value.selectedPeriod) {
         viewModelScope.launch {
-            val stats = repository.getCategoryStats(uiState.value.selectedPeriod)
+            // Lanza ambas peticiones en paralelo para mayor eficiencia
+            val currentStatsDeferred = async { repository.getCategoryStats(period, periodOffset = 0) }
+            val previousStatsDeferred = async { repository.getCategoryStats(period, periodOffset = 1) }
 
-            val total: BigDecimal = stats
-                .map { BigDecimal.valueOf(it.amount.toDouble()) }
-                .reduceOrNull { acc, amount -> acc.add(amount) } ?: BigDecimal.ZERO
+            // Espera a que ambas peticiones terminen
+            val stats = currentStatsDeferred.await()
+            val previousStats = previousStatsDeferred.await()
+
+            // Calcula el total del período actual
+            val total: BigDecimal = stats.map { it.amount }.fold(BigDecimal.ZERO, BigDecimal::add)
+
+            // Calcula el total del período anterior
+            val previousTotal: BigDecimal = previousStats.map { it.amount }.fold(BigDecimal.ZERO, BigDecimal::add)
 
             val average: BigDecimal = if (stats.isNotEmpty()) {
                 total.divide(
@@ -67,7 +77,7 @@ class StatsViewModel(
             uiState.value = uiState.value.copy(
                 totalAmount = total,
                 averageAmount = average,
-                previousAmount = total.subtract(BigDecimal.valueOf(100)), // TODO
+                previousAmount = previousTotal,
                 categoryStats = stats
             )
         }

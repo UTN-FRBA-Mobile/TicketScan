@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.ticketscan.domain.repositories.category.CategoryRepositorySQLite
+import com.example.ticketscan.domain.repositories.stats.StatsRepositorySQLite
 import com.example.ticketscan.domain.repositories.store.StoreRepositorySQLite
 import com.example.ticketscan.domain.repositories.ticket.TicketRepositorySQLite
 import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepositorySQLite
-import com.example.ticketscan.domain.repositories.stats.StatsRepositorySQLite
 
 class RepositoryViewModelFactory(
     private val context: Context,

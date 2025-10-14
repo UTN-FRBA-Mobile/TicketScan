@@ -52,7 +52,6 @@ class TicketItemRepositorySQLite(
             val result = database.insert("ticket_items", null, values)
             return result != -1L
         } finally {
-            // Solo cerramos la DB si la abrimos aquí
             ownDb?.close()
         }
     }

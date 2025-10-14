@@ -12,12 +12,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.TicketOrigin
-import com.example.ticketscan.domain.repositories.stats.StatsRepositoryMock
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ia.internal.IAService
@@ -28,6 +29,7 @@ import com.example.ticketscan.ui.screens.AppearanceSettingsScreen
 import com.example.ticketscan.ui.screens.CameraScanScreen
 import com.example.ticketscan.ui.screens.CameraScanViewModel
 import com.example.ticketscan.ui.screens.CameraScanViewModelFactory
+import com.example.ticketscan.ui.screens.CategoryDetailsScreen
 import com.example.ticketscan.ui.screens.DefaultTicketEntryScreen
 import com.example.ticketscan.ui.screens.EditContactScreen
 import com.example.ticketscan.ui.screens.HomeScreen
@@ -66,16 +68,14 @@ class MainActivity : ComponentActivity() {
                 val cameraScanFactory = CameraScanViewModelFactory(iaService, repositoryViewModel)
                 val cameraScanViewModel: CameraScanViewModel = viewModel(factory = cameraScanFactory)
 
-                val repository = StatsRepositoryMock()
-                val statsFactory = StatsViewModelFactory(repository)
+                val statsFactory = remember { StatsViewModelFactory(repositoryViewModel) }
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
                         TicketScanBottomNavigation(navController) {
-                            navController.navigate(
-                                "scan"
-                            )
+                            navController.navigate("scan")
                         }
                     }
                 ) { innerPadding ->
@@ -87,9 +87,27 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                     ) {
                         composable("home") { HomeScreen(navController, repositoryViewModel) }
-                        composable("expenses") { StatsScreen(navController = navController,
-                            statsViewModel = statsViewModel
-                        ) }
+                        composable("expenses") {
+                            StatsScreen(
+                                navController = navController,
+                                statsViewModel = statsViewModel,
+                                onCategoryClick = { categoryName ->
+                                    navController.navigate("categoryDetails/$categoryName")
+                                }
+                            )
+                        }
+                        composable(
+                            "categoryDetails/{categoryName}",
+                            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val categoryName = backStackEntry.arguments?.getString("categoryName") ?: ""
+                            CategoryDetailsScreen(
+                                categoryName = categoryName,
+                                repositoryViewModel = repositoryViewModel,
+                                maxPeriods = 4,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
                         composable("record_audio") {
                             RecordAudioScreen(
                                 navController = navController,

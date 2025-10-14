@@ -14,8 +14,7 @@ class StoreRepositorySQLite(context: Context) : StoreRepository {
         val cursor = db.rawQuery("SELECT id, name, cuit, location FROM stores", null)
         val stores = mutableListOf<Store>()
         while (cursor.moveToNext()) {
-            val idStr = cursor.getString(cursor.getColumnIndexOrThrow("id"))
-            val id = UUID.fromString(idStr)
+            val id = UUID.fromString(cursor.getString(cursor.getColumnIndexOrThrow("id")))
             val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
             val cuit = cursor.getLong(cursor.getColumnIndexOrThrow("cuit"))
             val location = cursor.getString(cursor.getColumnIndexOrThrow("location"))
