@@ -1,6 +1,7 @@
 package com.example.ticketscan.domain.repositories.ticket
 
 import android.content.Context
+import android.util.Log
 import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
@@ -9,6 +10,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+
+private const val TAG = "TicketRepositorySQLite"
 
 class TicketRepositorySQLite(
     private val context: Context,
@@ -75,15 +78,14 @@ class TicketRepositorySQLite(
             db.beginTransaction()
             val result = db.insert("tickets", null, values)
             if (result == -1L) {
+                Log.e(TAG, "Failed to insert ticket: ${ticket.id}")
                 return false
             }
 
-            // Insertar cada item llamando al repositorio de items, usando la misma conexión db
             for (item in ticket.items) {
                 val ok = ticketItemRepository.insertItem(item, ticket.id, db)
                 if (!ok) {
-                    // Si falla alguna inserción, no marcamos la transacción como exitosa;
-                    // el endTransaction() en el finally hará rollback de todas las operaciones
+                    Log.e(TAG, "Failed to insert ticket item for ticket: ${ticket.id}")
                     return false
                 }
             }
