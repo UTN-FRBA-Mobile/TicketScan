@@ -23,13 +23,13 @@ import java.math.RoundingMode
 
 @Composable
 fun ComparisonSection(current: BigDecimal, previous: BigDecimal) {
-    val percentageChange = if (previous != BigDecimal.ZERO) {
+    val percentageChange = if (previous.compareTo(BigDecimal.ZERO) != 0 && current.compareTo(BigDecimal.ZERO) != 0) {
         current.subtract(previous).divide(previous, 4, RoundingMode.HALF_UP)
     } else {
         BigDecimal.ZERO
     }
 
-    val isPositive = percentageChange > BigDecimal.ZERO
+    val isPositive = percentageChange.compareTo(BigDecimal.ZERO) > 0
     val isNeutral = percentageChange.compareTo(BigDecimal.ZERO) == 0
 
     val backgroundColor = when {

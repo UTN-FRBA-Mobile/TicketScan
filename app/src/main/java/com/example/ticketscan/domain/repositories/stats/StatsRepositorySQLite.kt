@@ -18,16 +18,16 @@ class StatsRepositorySQLite(context: Context) : StatsRepository {
         val stats = mutableListOf<CategoryStat>()
         val calendar = Calendar.getInstance()
 
-        val (viewName, periodFormat, periodValue) = when (period) {
+        val (viewName, periodValue) = when (period) {
             Period.MENSUAL -> {
                 calendar.add(Calendar.MONTH, -periodOffset)
                 val format = SimpleDateFormat("yyyy-MM", Locale.getDefault())
-                Triple("vw_monthly_expenses", format, format.format(calendar.time))
+                Pair("vw_monthly_expenses", format.format(calendar.time))
             }
             Period.SEMANAL -> {
                 calendar.add(Calendar.WEEK_OF_YEAR, -periodOffset)
                 val format = SimpleDateFormat("yyyy-WW", Locale.getDefault())
-                Triple("vw_weekly_expenses", format, format.format(calendar.time))
+                Pair("vw_weekly_expenses", format.format(calendar.time))
             }
         }
 
