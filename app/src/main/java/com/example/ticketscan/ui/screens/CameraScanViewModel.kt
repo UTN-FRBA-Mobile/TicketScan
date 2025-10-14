@@ -10,8 +10,6 @@ import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ia.internal.IAService
-import com.example.ticketscan.ia.internal.IAServiceImpl
-import com.example.ticketscan.ia.internal.mock.MockIAApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,7 +22,7 @@ import java.util.Date
 import java.util.UUID
 
 class CameraScanViewModel(
-    private val service: IAService = IAServiceImpl(MockIAApi()),
+    private val service: IAService,
     private val repositoryViewModel: RepositoryViewModel
 ) : ViewModel() {
 

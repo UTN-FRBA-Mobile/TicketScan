@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
-                val iaService: IAService = remember { IAServiceImpl(MockIAApi()) }
+                val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
 
                 val cameraScanFactory = CameraScanViewModelFactory(iaService, repositoryViewModel)
                 val cameraScanViewModel: CameraScanViewModel = viewModel(factory = cameraScanFactory)
