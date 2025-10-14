@@ -11,7 +11,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
 
     companion object {
         private const val DATABASE_NAME = "ticketscan.db"
-        private const val DATABASE_VERSION = 6
+        private const val DATABASE_VERSION = 1
         private const val TAG = "DatabaseHelper"
 
         @Volatile

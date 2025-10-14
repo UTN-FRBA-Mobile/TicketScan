@@ -29,7 +29,7 @@ class StatsRepositorySQLite(context: Context) : StatsRepository {
                 Pair("vw_monthly_expenses", format.format(calendar.time))
             }
             Period.SEMANAL -> {
-                calendar.add(Calendar.WEEK_OF_YEAR, -periodOffset)
+                calendar.add(Calendar.WEEK_OF_YEAR, -periodOffset-1)
                 val format = SimpleDateFormat("yyyy-ww", Locale.getDefault())
                 Pair("vw_weekly_expenses", format.format(calendar.time))
             }
