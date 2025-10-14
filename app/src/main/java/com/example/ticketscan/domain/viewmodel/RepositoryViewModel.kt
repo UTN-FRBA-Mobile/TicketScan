@@ -64,7 +64,9 @@ class RepositoryViewModel(
     suspend fun getTicketsItemByTicketId(id: UUID) = withContext(Dispatchers.IO) { ticketItemRepo.getItemsByTicketId(id) }
 
     // STATS
-    suspend fun getCategoryStats(period: Period, periodOffset: Int = 0) = withContext(Dispatchers.IO) { statsRepo.getCategoryStats(period, periodOffset) }
+    suspend fun getCategoryStats(period: Period, periodOffset: Int = 0) = withContext(Dispatchers.IO) {
+        statsRepo.getCategoryStats(period, periodOffset)
+    }
     suspend fun getPeriodCategoryHistory(categoryName: String, period: Period, periodQuantity: Int) = withContext(Dispatchers.IO) { statsRepo.getPeriodCategoryHistory(categoryName, period, periodQuantity) }
     suspend fun getTicketsByFilters(categoryName: String, period: Period, periodQuantity: Int) = withContext(Dispatchers.IO) {
         val calendar = Calendar.getInstance()

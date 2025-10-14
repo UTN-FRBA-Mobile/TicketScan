@@ -43,15 +43,16 @@ class StatsViewModel(
     }
 
     fun onPeriodChanged(period: Period) {
-        uiState.value = uiState.value.copy(selectedPeriod = period)
-        loadStats()
+        viewModelScope.launch {
+            loadStats(period)
+        }
     }
 
-    private fun loadStats() {
+    private fun loadStats(period: Period = uiState.value.selectedPeriod) {
         viewModelScope.launch {
             // Lanza ambas peticiones en paralelo para mayor eficiencia
-            val currentStatsDeferred = async { repository.getCategoryStats(uiState.value.selectedPeriod, periodOffset = 0) }
-            val previousStatsDeferred = async { repository.getCategoryStats(uiState.value.selectedPeriod, periodOffset = 1) }
+            val currentStatsDeferred = async { repository.getCategoryStats(period, periodOffset = 0) }
+            val previousStatsDeferred = async { repository.getCategoryStats(period, periodOffset = 1) }
 
             // Espera a que ambas peticiones terminen
             val stats = currentStatsDeferred.await()
