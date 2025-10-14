@@ -5,11 +5,12 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.TicketItem
+import com.example.ticketscan.domain.repositories.category.CategoryRepository
 import java.util.UUID
 
 class TicketItemRepositorySQLite(
     private val context: Context,
-    private val categoryRepository: com.example.ticketscan.domain.repositories.category.CategoryRepository
+    private val categoryRepository: CategoryRepository
 ) : TicketItemRepository {
     private val dbHelper = DatabaseHelper.getInstance(context)
 
