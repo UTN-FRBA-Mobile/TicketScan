@@ -24,11 +24,16 @@ import com.example.ticketscan.ia.internal.IAService
 import com.example.ticketscan.ia.internal.IAServiceImpl
 import com.example.ticketscan.ia.internal.mock.MockIAApi
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
+import com.example.ticketscan.ui.screens.AppearanceSettingsScreen
 import com.example.ticketscan.ui.screens.CameraScanScreen
 import com.example.ticketscan.ui.screens.CameraScanViewModel
 import com.example.ticketscan.ui.screens.CameraScanViewModelFactory
+import com.example.ticketscan.ui.screens.DefaultTicketEntryScreen
+import com.example.ticketscan.ui.screens.EditContactScreen
 import com.example.ticketscan.ui.screens.HomeScreen
+import com.example.ticketscan.ui.screens.NotificationSettingsScreen
 import com.example.ticketscan.ui.screens.ProcessingScreen
+import com.example.ticketscan.ui.screens.ProfileScreen
 import com.example.ticketscan.ui.screens.RecordAudioScreen
 import com.example.ticketscan.ui.screens.StatsScreen
 import com.example.ticketscan.ui.screens.StatsViewModel
@@ -95,7 +100,24 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("scan") { CameraScanScreen(navController = navController, vm = cameraScanViewModel) }
-                        composable("profile") { /* TODO: Profile screen */ HomeScreen(navController, repositoryViewModel) }
+                        composable("profile") { ProfileScreen(navController = navController) }
+                        composable("edit_contact") {
+                            EditContactScreen(
+                                navController = navController,
+                                onSave = { name, lastName, email, phone ->
+                                    // TODO: Save the contact information
+                                }
+                            )
+                        }
+                        composable("notification_settings") {
+                            NotificationSettingsScreen(navController = navController)
+                        }
+                        composable("appearance_settings") {
+                            AppearanceSettingsScreen(navController = navController)
+                        }
+                        composable("default_ticket_entry") {
+                            DefaultTicketEntryScreen(navController = navController)
+                        }
                         composable("more") { /* TODO: More screen */ HomeScreen(navController, repositoryViewModel) }
                         composable("ticket/{id}") { backStackEntry ->
                             val idArg = backStackEntry.arguments?.getString("id")
