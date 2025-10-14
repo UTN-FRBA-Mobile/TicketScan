@@ -11,7 +11,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
 
     companion object {
         private const val DATABASE_NAME = "ticketscan.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 6
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -106,7 +106,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         SELECT
             c.name AS category_name,
             c.color AS category_color,
-            strftime('%Y-%W', t.date) AS period,
+            strftime('%Y-%w', t.date) AS period,
             SUM(ti.price * ti.quantity) AS total
         FROM ticket_items ti
         JOIN tickets t ON ti.ticket_id = t.id
