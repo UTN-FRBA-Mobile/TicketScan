@@ -94,7 +94,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
             c.name AS category_name,
             c.color AS category_color,
             strftime('%Y-%m', t.date) AS period,
-            SUM(ti.price * ti.quantity) AS total
+            SUM(ti.price) AS total
         FROM ticket_items ti
         JOIN tickets t ON ti.ticket_id = t.id
         JOIN categories c ON c.id = ti.category_id
@@ -107,7 +107,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
             c.name AS category_name,
             c.color AS category_color,
             strftime('%Y-%W', t.date) AS period,
-            SUM(ti.price * ti.quantity) AS total
+            SUM(ti.price) AS total
         FROM ticket_items ti
         JOIN tickets t ON ti.ticket_id = t.id
         JOIN categories c ON c.id = ti.category_id
