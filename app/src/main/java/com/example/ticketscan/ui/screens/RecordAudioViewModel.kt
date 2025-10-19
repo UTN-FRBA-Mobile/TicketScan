@@ -1,8 +1,5 @@
 package com.example.ticketscan.ui.screens
 
-import android.graphics.BitmapFactory
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -12,9 +9,10 @@ import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ia.internal.IAService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -23,120 +21,94 @@ import java.util.UUID
 
 class RecordAudioViewModel(
     private val service: IAService,
-    private val repository: RepositoryViewModel
+    private val repositoryViewModel: RepositoryViewModel
 ) : ViewModel() {
 
-    private val _isRecording = MutableStateFlow(false)
-    val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
-
-    private val _hasAudioPermission = MutableStateFlow(false)
-    val hasAudioPermission: StateFlow<Boolean> = _hasAudioPermission.asStateFlow()
-
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
-
-    private val _items = MutableStateFlow<List<TicketItem>>(emptyList())
-    val items: StateFlow<List<TicketItem>> = _items.asStateFlow()
-
-    private val _canContinue = MutableStateFlow(false)
-    val canContinue: StateFlow<Boolean> = _canContinue.asStateFlow()
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _createdTicket = MutableStateFlow<UUID?>(null)
     val createdTicket: StateFlow<UUID?> = _createdTicket
 
-    private var audioFile: File? = null
+    private val _items = MutableStateFlow<List<TicketItem>>(emptyList())
+    val items: StateFlow<List<TicketItem>> = _items
 
-    fun onPermissionResult(granted: Boolean) {
-        _hasAudioPermission.value = granted
-        if (!granted) {
-            _error.value = "Se requiere permiso de grabación de audio para continuar"
-        }
-    }
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
-    fun onStartRecording(file: File) {
-        audioFile = file
-        _isRecording.value = true
-        _error.value = null
-    }
+    val canContinue: StateFlow<Boolean> = combine(_items, _isLoading) { items, loading ->
+        !loading && items.meetsRequirements()
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    fun onStopRecording() {
-        _isRecording.value = false
-    }
-
-    fun onRecordingError(message: String) {
-        _error.value = message
-        _isRecording.value = false
-    }
-
-    fun analyzeAudio() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
-
+    fun analyzeAudio(file: File) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.emit(true)
+            _error.emit(null)
             try {
-                val file = audioFile ?: throw IllegalStateException("No hay archivo de audio para analizar")
-                val categories = withContext(Dispatchers.IO) {
-                    repository.getAllCategories()
-                }
-
-                val result = withContext(Dispatchers.IO) {
-                    service.analyzeTicketAudio(file, categories)
-                }
-
-                _items.value = result
-                _canContinue.value = result.isNotEmpty()
+                val categories = repositoryViewModel.getAllCategories()
+                val result = service.analyzeTicketAudio(file, categories)
+                _items.emit(result)
             } catch (e: Exception) {
-                _error.value = "Error al analizar el audio: ${e.message}"
+                _error.emit(e.message ?: "Error al analizar el audio")
             } finally {
-                _isLoading.value = false
+                if (file.exists()) {
+                    // Opcional: eliminar el archivo temporal para no acumular
+                    file.delete()
+                }
+                _isLoading.emit(false)
             }
         }
     }
 
-    fun saveTicket() {
+    fun saveTicket(items: List<TicketItem>) {
         viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
-
-            try {
-                val ticket = Ticket(
-                    id = UUID.randomUUID(),
-                    date = Date(),
-                    items = _items.value,
-                    total = _items.value.sumOf { it.price },
-                    store = null
-                )
-
-                repository.insertTicket(ticket) { success ->
-                    if (!success) {
-                        _error.value = "Error al guardar el ticket"
+            val ticket = Ticket(
+                id = UUID.randomUUID(),
+                date = Date(),
+                items = items,
+                total = items.sumOf { it.price },
+                store = null
+            )
+            repositoryViewModel.insertTicket(
+                ticket,
+                onResult = { result ->
+                    if (result) {
+                        viewModelScope.launch {
+                            _createdTicket.emit(ticket.id)
+                        }
+                    } else {
+                        viewModelScope.launch {
+                            _error.emit("Error al guardar el ticket")
+                        }
                     }
                 }
-
-                _createdTicket.value = ticket.id
-            } catch (e: Exception) {
-                _error.value = "Error al guardar el ticket: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
+            )
         }
     }
 
     fun onTicketNavigationHandled() {
-        _createdTicket.value = null
+        viewModelScope.launch {
+            _createdTicket.emit(null)
+        }
     }
+
+    fun onAnalyzeError(message: String) {
+        viewModelScope.launch {
+            _error.emit(message)
+        }
+    }
+
+    private fun List<TicketItem>.meetsRequirements(): Boolean =
+        isNotEmpty() && all { it.name.isNotBlank() && it.price > 0.0 }
 }
 
 class RecordAudioViewModelFactory(
     private val iaService: IAService,
     private val repository: RepositoryViewModel
 ) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RecordAudioViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
             return RecordAudioViewModel(iaService, repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

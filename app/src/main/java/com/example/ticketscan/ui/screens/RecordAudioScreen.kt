@@ -18,14 +18,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.ErrorBadge
 import com.example.ticketscan.ui.components.UploadOption
@@ -37,43 +35,39 @@ import java.io.File
 @Composable
 fun RecordAudioScreen(
     navController: NavController,
-    viewModel: RecordAudioViewModel = viewModel(),
+    vm: RecordAudioViewModel,
     onBack: () -> Unit = { navController.navigateUp() }
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    
+
     // State from ViewModel
-    val isRecording by viewModel.isRecording.collectAsState()
-    val hasAudioPermission by viewModel.hasAudioPermission.collectAsState()
-    val items by viewModel.items.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val canContinue by viewModel.canContinue.collectAsState()
-    val createdTicket by viewModel.createdTicket.collectAsState()
-    
-    // Local state
+    val isLoading by vm.isLoading.collectAsState()
+    val items by vm.items.collectAsState()
+    val error by vm.error.collectAsState()
+    val canContinue by vm.canContinue.collectAsState()
+    val createdTicket by vm.createdTicket.collectAsState()
+
+    // Local UI state for recording
+    var isRecording by remember { mutableStateOf(false) }
     var recorder: MediaRecorder? by remember { mutableStateOf(null) }
-    
+    var currentFile: File? by remember { mutableStateOf(null) }
+
     // Handle navigation when ticket is created
     LaunchedEffect(createdTicket) {
         createdTicket?.let { ticketId ->
             navController.navigate("ticket/$ticketId")
-            viewModel.onTicketNavigationHandled()
+            vm.onTicketNavigationHandled()
         }
     }
-    
-    // Request permission on first launch
+
+    // Permission
+    var hasAudioPermission by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        viewModel.onPermissionResult(granted)
-    }
-    
+    ) { granted -> hasAudioPermission = granted }
+
     LaunchedEffect(Unit) {
-        if (!viewModel.hasAudioPermission.value) {
-            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        }
+        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
     Scaffold(
@@ -99,24 +93,22 @@ fun RecordAudioScreen(
                     .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Title with audio icon
                 Spacer(modifier = Modifier.height(32.dp))
+
                 UploadOption(
                     label = if (isRecording) "Grabando..." else "Grabar Audio",
                     icon = TicketScanIcons.Audio,
                     modifier = Modifier.size(160.dp),
-                    onClick = {}
+                    onClick = { /* decorative */ }
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Loading indicator
                 if (isLoading) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // Error message
                 error?.let { errorMessage ->
                     ErrorBadge(
                         message = errorMessage,
@@ -124,7 +116,6 @@ fun RecordAudioScreen(
                     )
                 }
 
-                // Items list if available
                 if (items.isNotEmpty()) {
                     LazyColumn(
                         modifier = Modifier
@@ -146,54 +137,53 @@ fun RecordAudioScreen(
                     Spacer(modifier = Modifier.weight(1f))
                 }
 
-                // Recording controls
                 Button(
                     onClick = {
                         if (!isRecording) {
                             try {
                                 val file = File(context.filesDir, "recordings/grabacion_${System.currentTimeMillis()}.aac")
                                 file.parentFile?.mkdirs()
-                                
-                                MediaRecorder(context).apply {
-                                    setAudioSource(MediaRecorder.AudioSource.MIC)
-                                    setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-                                    setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                                    setOutputFile(file.absolutePath)
-                                    try {
-                                        prepare()
-                                        start()
-                                        recorder = this
-                                        viewModel.onStartRecording(file)
-                                    } catch (e: Exception) {
-                                        release()
-                                        viewModel.onRecordingError(e.message ?: "Error al iniciar la grabación")
-                                    }
+                                val m = MediaRecorder(context)
+                                m.setAudioSource(MediaRecorder.AudioSource.MIC)
+                                m.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+                                m.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                                m.setOutputFile(file.absolutePath)
+                                try {
+                                    m.prepare()
+                                    m.start()
+                                    recorder = m
+                                    currentFile = file
+                                    isRecording = true
+                                } catch (e: Exception) {
+                                    m.release()
+                                    vm.onAnalyzeError(e.message ?: "Error al iniciar la grabación")
                                 }
                             } catch (e: Exception) {
-                                e.printStackTrace()
-                                viewModel.onRecordingError(e.message ?: "Error al configurar la grabación")
+                                vm.onAnalyzeError(e.message ?: "Error al configurar la grabación")
                             }
                         } else {
                             try {
                                 recorder?.apply {
                                     try {
                                         stop()
-                                        viewModel.onStopRecording()
                                     } catch (e: Exception) {
-                                        viewModel.onRecordingError("Error al detener la grabación: ${e.message}")
+                                        // ignore stop errors
                                     } finally {
                                         release()
                                     }
                                 }
-                            } catch (e: Exception) {
-                                viewModel.onRecordingError("Error: ${e.message}")
-                            } finally {
+                                isRecording = false
                                 recorder = null
-                                viewModel.onStopRecording()
+                                currentFile?.let { file ->
+                                    vm.analyzeAudio(file)
+                                }
+                                currentFile = null
+                            } catch (e: Exception) {
+                                vm.onAnalyzeError(e.message ?: "Error al detener la grabación")
                             }
                         }
                     },
-                    enabled = hasAudioPermission && !isLoading,
+                    enabled = /* no explicit permission check here, system will request */ !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
@@ -203,7 +193,7 @@ fun RecordAudioScreen(
 
                 if (canContinue) {
                     Button(
-                        onClick = { viewModel.saveTicket() },
+                        onClick = { vm.saveTicket(items) },
                         enabled = items.isNotEmpty() && !isLoading,
                         modifier = Modifier
                             .fillMaxWidth()

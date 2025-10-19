@@ -14,7 +14,28 @@ class MockIAApi(
     }
 
     override suspend fun analyzeAudio(audio: MultipartBody.Part): List<TicketItem> {
-        return getMockItems()
+        // Devolvemos resultados distintos para audio (Jabón, Shampoo)
+        val categories = repositoryViewModel.getAllCategories()
+        val limpiezaCategory = categories.find { it.name.contains("Limpieza", ignoreCase = true) }
+            ?: categories.firstOrNull()
+        return listOf(
+            TicketItem(
+                id = UUID.randomUUID(),
+                name = "Jabón",
+                category = limpiezaCategory!!,
+                quantity = 1,
+                isIntUnit = true,
+                price = 200.0
+            ),
+            TicketItem(
+                id = UUID.randomUUID(),
+                name = "Shampoo",
+                category = limpiezaCategory,
+                quantity = 1,
+                isIntUnit = true,
+                price = 500.0
+            )
+        )
     }
 
     override suspend fun analyzeItems(items: Map<String, Double>): List<TicketItem> {
