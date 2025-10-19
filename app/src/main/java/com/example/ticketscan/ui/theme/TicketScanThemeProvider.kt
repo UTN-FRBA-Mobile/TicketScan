@@ -15,7 +15,13 @@ private val LightColors = TicketScanColors(
     onPrimary = Color.White,
     onSurface = Color(0xFF1B1B1B),
     background = Color(0xFFF6F6F6),
-    onBackground = Color(0xFF1B1B1B)
+    onBackground = Color(0xFF1B1B1B),
+    surfaceVariant = Color(0xFFF2F3F2),
+    onSurfaceVariant = Color(0xFF6F6F6F),
+    outline = Color(0xFFBDBDBD),
+    primaryContainer = Color(0xFFB2DFDB),
+    errorContainer = Color(0xFFFDECEA),
+    onErrorContainer = Color(0xFF610E0E)
 )
 
 private val DarkColors = TicketScanColors(
@@ -25,7 +31,13 @@ private val DarkColors = TicketScanColors(
     onPrimary = Color.Black,
     onSurface = Color(0xFFEDEDED),
     background = Color(0xFF000000),
-    onBackground = Color(0xFFEDEDED)
+    onBackground = Color(0xFFEDEDED),
+    surfaceVariant = Color(0xFF1E1E1E),
+    onSurfaceVariant = Color(0xFFBDBDBD),
+    outline = Color(0xFF444444),
+    primaryContainer = Color(0xFF004D40),
+    errorContainer = Color(0xFF2A0A0A),
+    onErrorContainer = Color(0xFFFFDAD6)
 )
 
 private val DefaultTypography = Typography()
