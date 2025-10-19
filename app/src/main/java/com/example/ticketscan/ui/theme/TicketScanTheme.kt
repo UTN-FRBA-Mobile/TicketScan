@@ -18,7 +18,18 @@ data class TicketScanColors(
     val onPrimary: Color,
     val onSurface: Color,
     val background: Color,
-    val onBackground: Color
+    val onBackground: Color,
+    // Additional tokens used across the app
+    val surfaceVariant: Color,
+    val onSurfaceVariant: Color,
+    val outline: Color,
+    val primaryContainer: Color,
+    // Error tokens
+    val errorContainer: Color,
+    val onErrorContainer: Color,
+    // Simple semantic colors
+    val error: Color,
+    val success: Color
 )
 
 data class TicketScanThemeData(
