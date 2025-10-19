@@ -85,7 +85,9 @@ fun HomeScreen(
                             onClick = { navController.navigate("ticket/${ticket.id}") }
                         ) {
                             Text(
-                                text = "Fecha: ${ticket.date}  •  Total: $${ticket.total}",
+                                text = "Fecha: ${ticket?.date?.let {
+                                    java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(it)
+                                } ?: "Fecha xx/xx/xxxx HH:mm"}  •  Total: $${ticket.total}",
                                 style = TicketScanTheme.typography.bodyMedium,
                                 color = TicketScanTheme.colors.onBackground
                             )

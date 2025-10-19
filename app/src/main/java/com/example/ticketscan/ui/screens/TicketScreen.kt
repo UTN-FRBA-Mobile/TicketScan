@@ -466,9 +466,8 @@ fun CategorySection(
         Spacer(Modifier.height(8.dp))
         val categoryTotal = items.sumOf { it.price * it.quantity }
         Text(
-            text = "Total: $${"%.2f".format(categoryTotal)}",
+            text = "Total ${category.name}: $${"%.2f".format(categoryTotal)}",
             style = TicketScanTheme.typography.bodyLarge,
-            color = TicketScanTheme.colors.primary,
             modifier = Modifier
                 .padding(top = 4.dp)
                 .fillMaxWidth(),
