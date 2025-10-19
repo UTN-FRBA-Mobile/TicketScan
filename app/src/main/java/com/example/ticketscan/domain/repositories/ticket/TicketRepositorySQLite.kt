@@ -6,6 +6,8 @@ import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -18,11 +20,17 @@ class TicketRepositorySQLite(
     private val ticketItemRepository: TicketItemRepository
 ) : TicketRepository {
     private val dbHelper = DatabaseHelper.getInstance(context)
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    private val _ticketsChanged = MutableSharedFlow<Unit>(replay = 1)
+    override val ticketsChanged: Flow<Unit> = _ticketsChanged
+
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    private suspend fun notifyChanges() {
+        _ticketsChanged.emit(Unit)
+    }
 
     override suspend fun getTicketById(id: UUID): Ticket? {
         val db = dbHelper.readableDatabase
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val cursor = db.rawQuery("SELECT t.id, t.date, t.store_id, s.name as store_name, s.cuit as store_cuit, s.location as store_location, t.total FROM tickets t LEFT JOIN stores s ON s.id = t.store_id WHERE t.id = ?", arrayOf(id.toString()))
         val ticket = if (cursor.moveToFirst()) {
             val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
@@ -41,10 +49,15 @@ class TicketRepositorySQLite(
         return ticket
     }
 
-    override suspend fun getAllTickets(): List<Ticket> {
+    override suspend fun getAllTickets(limit: Int?): List<Ticket> {
         val db = dbHelper.readableDatabase
-        val cursor = db.rawQuery("SELECT t.id, t.date, t.store_id, s.name as store_name, s.cuit as store_cuit, s.location as store_location, t.total FROM tickets t LEFT JOIN stores s ON s.id = t.store_id", null)
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        var query = "SELECT t.id, t.date, t.store_id, s.name as store_name, s.cuit as store_cuit, s.location as store_location, t.total FROM tickets t LEFT JOIN stores s ON s.id = t.store_id ORDER BY t.date DESC"
+        val selectionArgs = mutableListOf<String>()
+        if (limit != null) {
+            query += " LIMIT ?"
+            selectionArgs.add(limit.toString())
+        }
+        val cursor = db.rawQuery(query, selectionArgs.toTypedArray())
         val tickets = mutableListOf<Ticket>()
         while (cursor.moveToNext()) {
             val idStr = cursor.getString(cursor.getColumnIndexOrThrow("id"))
@@ -70,7 +83,7 @@ class TicketRepositorySQLite(
         val db = dbHelper.writableDatabase
         val values = android.content.ContentValues().apply {
             put("id", ticket.id.toString())
-            put("date", SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(ticket.date))
+            put("date", dateFormat.format(ticket.date))
             if (ticket.store != null) put("store_id", ticket.store.id.toString())
             put("total", ticket.total)
         }
@@ -91,6 +104,7 @@ class TicketRepositorySQLite(
             }
 
             db.setTransactionSuccessful()
+            notifyChanges()
             return true
         } finally {
             try {
@@ -104,11 +118,16 @@ class TicketRepositorySQLite(
     override suspend fun updateTicket(ticket: Ticket): Boolean {
         val db = dbHelper.writableDatabase
         val values = android.content.ContentValues().apply {
-            put("date", SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(ticket.date))
+            put("date", dateFormat.format(ticket.date))
             if (ticket.store != null) put("store_id", ticket.store.id.toString())
             put("total", ticket.total)
         }
         val result = db.update("tickets", values, "id = ?", arrayOf(ticket.id.toString()))
+
+        if (result > 0) {
+            notifyChanges()
+        }
+
         return result > 0
     }
 
@@ -119,6 +138,11 @@ class TicketRepositorySQLite(
             db.delete("ticket_items", "ticket_id = ?", arrayOf(id.toString()))
             val result = db.delete("tickets", "id = ?", arrayOf(id.toString()))
             db.setTransactionSuccessful()
+
+            if (result > 0) {
+                notifyChanges()
+            }
+
             return result > 0
         } finally {
             try {
