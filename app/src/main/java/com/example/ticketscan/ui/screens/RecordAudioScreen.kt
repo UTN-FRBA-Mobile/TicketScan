@@ -1,216 +1,218 @@
 package com.example.ticketscan.ui.screens
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.ticketscan.domain.model.TicketItem
-import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
-import com.example.ticketscan.ia.internal.IAService
+import com.example.ticketscan.ui.components.ErrorBadge
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
-import com.example.ticketscan.ui.theme.TicketScanTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.S)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordAudioScreen(
     navController: NavController,
-    iaService: IAService,
-    repositoryViewModel: RepositoryViewModel = viewModel(),
-    onResult: (List<TicketItem>) -> Unit
+    viewModel: RecordAudioViewModel = viewModel(),
+    onBack: () -> Unit = { navController.navigateUp() }
 ) {
     val context = LocalContext.current
-    var isRecording by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    
+    // State from ViewModel
+    val isRecording by viewModel.isRecording.collectAsState()
+    val hasAudioPermission by viewModel.hasAudioPermission.collectAsState()
+    val items by viewModel.items.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val canContinue by viewModel.canContinue.collectAsState()
+    val createdTicket by viewModel.createdTicket.collectAsState()
+    
+    // Local state
     var recorder: MediaRecorder? by remember { mutableStateOf(null) }
-    var audioFile by remember { mutableStateOf<File?>(null) }
-    var hasPermission by remember { mutableStateOf(false) }
+    
+    // Handle navigation when ticket is created
+    LaunchedEffect(createdTicket) {
+        createdTicket?.let { ticketId ->
+            navController.navigate("ticket/$ticketId")
+            viewModel.onTicketNavigationHandled()
+        }
+    }
+    
+    // Request permission on first launch
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        hasPermission = granted
+        viewModel.onPermissionResult(granted)
     }
-    val coroutineScope = rememberCoroutineScope()
-
+    
     LaunchedEffect(Unit) {
-        hasPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
-        if (!hasPermission) {
+        if (!viewModel.hasAudioPermission.value) {
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = TicketScanTheme.colors.background
-    ) {
-        Column(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Grabar Audio") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(padding)
         ) {
-            // Title with audio icon
-            Spacer(modifier = Modifier.height(64.dp))
-            UploadOption(
-                label = "Ingresar Audio",
-                icon = TicketScanIcons.Audio,
-                modifier = Modifier.size(160.dp),
-                onClick = {}
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Other methods section
-            Text(
-                text = "Otros Métodos",
-                style = LocalTextStyle.current.copy(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                textAlign = TextAlign.Center,
-                color = TicketScanTheme.colors.onBackground,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-
-            // Other upload options
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                UploadOption(
-                    label = "Cámara",
-                    icon = TicketScanIcons.Camera,
-                    onClick = { navController.navigate("record_audio") }
-                )
-                UploadOption(
-                    label = "Texto",
-                    icon = TicketScanIcons.Text,
-                    onClick = { navController.navigate("record_audio") }
-                )
-            }
-
-            // Recording controls
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = {
-                    if (!isRecording) {
-                        try {
-                            val file = File(context.filesDir, "recordings/grabacion_${System.currentTimeMillis()}.aac")
-                            file.parentFile?.mkdirs()  // Create directories if they don't exist
-                            audioFile = file
-                            
-                            MediaRecorder(context).apply {
-                                setAudioSource(MediaRecorder.AudioSource.MIC)
-                                setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-                                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                                setOutputFile(file.absolutePath)
-                                try {
-                                    prepare()
-                                    start()
-                                    recorder = this
-                                } catch (e: Exception) {
-                                    release()
-                                    throw e
-                                }
-                            }
-                        } catch (e: Exception) {
-                            // Handle any errors during initialization
-                            e.printStackTrace()
-                            // Reset state and show error to user
-                            isRecording = false
-                            audioFile = null
-                            return@Button
-                        }
-                        isRecording = true
-                    } else {
-                        try {
-                            recorder?.apply {
-                                try {
-                                    stop()
-                                } catch (e: Exception) {
-                                    // Handle case where stop fails (e.g., recording was too short)
-                                    e.printStackTrace()
-                                } finally {
-                                    release()
-                                }
-                            }
-                        } catch (e: Exception) {
-                            // Handle any other errors during stop/release
-                            e.printStackTrace()
-                        }
-                        recorder = null
-                        isRecording = false
-                    }
-                },
-                enabled = hasPermission,
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(if (isRecording) "Detener grabación" else "Iniciar grabación")
-            }
+                // Title with audio icon
+                Spacer(modifier = Modifier.height(32.dp))
+                UploadOption(
+                    label = if (isRecording) "Grabando..." else "Grabar Audio",
+                    icon = TicketScanIcons.Audio,
+                    modifier = Modifier.size(160.dp),
+                    onClick = {}
+                )
 
-            Button(
-                onClick = {
-                    audioFile?.let { file ->
-                        coroutineScope.launch {
-                            val categories = withContext(Dispatchers.IO) {
-                                repositoryViewModel.getAllCategories()
-                            }
-                            val result = withContext(Dispatchers.IO) {
-                                iaService.analyzeTicketAudio(file, categories)
-                            }
-                            onResult(result)
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Loading indicator
+                if (isLoading) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // Error message
+                error?.let { errorMessage ->
+                    ErrorBadge(
+                        message = errorMessage,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
+                // Items list if available
+                if (items.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        items(items) { item ->
+                            ListItem(
+                                headlineContent = { Text(item.name) },
+                                supportingContent = { Text(item.category.name) },
+                                trailingContent = {
+                                    Text("$${String.format("%.2f", item.price)}")
+                                }
+                            )
+                            Divider()
                         }
                     }
-                },
-                enabled = audioFile != null && !isRecording,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Analizar audio")
-            }
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                // Recording controls
+                Button(
+                    onClick = {
+                        if (!isRecording) {
+                            try {
+                                val file = File(context.filesDir, "recordings/grabacion_${System.currentTimeMillis()}.aac")
+                                file.parentFile?.mkdirs()
+                                
+                                MediaRecorder(context).apply {
+                                    setAudioSource(MediaRecorder.AudioSource.MIC)
+                                    setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+                                    setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                                    setOutputFile(file.absolutePath)
+                                    try {
+                                        prepare()
+                                        start()
+                                        recorder = this
+                                        viewModel.onStartRecording(file)
+                                    } catch (e: Exception) {
+                                        release()
+                                        viewModel.onRecordingError(e.message ?: "Error al iniciar la grabación")
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                viewModel.onRecordingError(e.message ?: "Error al configurar la grabación")
+                            }
+                        } else {
+                            try {
+                                recorder?.apply {
+                                    try {
+                                        stop()
+                                        viewModel.onStopRecording()
+                                    } catch (e: Exception) {
+                                        viewModel.onRecordingError("Error al detener la grabación: ${e.message}")
+                                    } finally {
+                                        release()
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                viewModel.onRecordingError("Error: ${e.message}")
+                            } finally {
+                                recorder = null
+                                viewModel.onStopRecording()
+                            }
+                        }
+                    },
+                    enabled = hasAudioPermission && !isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    Text(if (isRecording) "Detener grabación" else "Iniciar grabación")
+                }
+
+                if (canContinue) {
+                    Button(
+                        onClick = { viewModel.saveTicket() },
+                        enabled = items.isNotEmpty() && !isLoading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    ) {
+                        Text("Guardar Ticket")
+                    }
+                }
+            }
         }
     }
 }
