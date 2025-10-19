@@ -9,6 +9,7 @@ import com.example.ticketscan.domain.repositories.store.StoreRepository
 import com.example.ticketscan.domain.repositories.ticket.TicketRepository
 import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepository
 import com.example.ticketscan.ui.components.Period
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,6 +39,8 @@ class RepositoryViewModel(
     suspend fun getAllCategories() = withContext(Dispatchers.IO) { categoryRepo.getAllCategories() }
 
     // TICKET
+    val ticketsChanged: Flow<Unit> = ticketRepo.ticketsChanged
+
     fun insertTicket(ticket: Ticket, onResult: (Boolean) -> Unit) = viewModelScope.launch {
         val result = withContext(Dispatchers.IO) { ticketRepo.insertTicket(ticket) }
         onResult(result)
@@ -54,7 +57,8 @@ class RepositoryViewModel(
         onResult(result)
     }
     suspend fun getTicketById(id: UUID) = withContext(Dispatchers.IO) { ticketRepo.getTicketById(id) }
-    suspend fun getAllTickets() = withContext(Dispatchers.IO) { ticketRepo.getAllTickets() }
+
+    suspend fun getAllTickets(limit: Int? = null) = withContext(Dispatchers.IO) { ticketRepo.getAllTickets(limit) }
 
     // TICKET ITEM
     fun insertTicketItem(item: TicketItem, ticketId: UUID, onResult: (Boolean) -> Unit) = viewModelScope.launch {

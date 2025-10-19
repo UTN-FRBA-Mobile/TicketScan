@@ -40,19 +40,25 @@ class StatsViewModel(
 
     init {
         loadStats()
-    }
-
-    fun onPeriodChanged(period: Period) {
         viewModelScope.launch {
-            loadStats(period)
+            repository.ticketsChanged.collect {
+                loadStats()
+            }
         }
     }
 
-    private fun loadStats(period: Period = uiState.value.selectedPeriod) {
+    fun onPeriodChanged(period: Period) {
+        if (period == uiState.value.selectedPeriod) return
+
+        uiState.value = uiState.value.copy(selectedPeriod = period)
+        loadStats()
+    }
+
+    private fun loadStats() {
         viewModelScope.launch {
             // Lanza ambas peticiones en paralelo para mayor eficiencia
-            val currentStatsDeferred = async { repository.getCategoryStats(period, periodOffset = 0) }
-            val previousStatsDeferred = async { repository.getCategoryStats(period, periodOffset = 1) }
+            val currentStatsDeferred = async { repository.getCategoryStats(uiState.value.selectedPeriod, periodOffset = 0) }
+            val previousStatsDeferred = async { repository.getCategoryStats(uiState.value.selectedPeriod, periodOffset = 1) }
 
             // Espera a que ambas peticiones terminen
             val stats = currentStatsDeferred.await()

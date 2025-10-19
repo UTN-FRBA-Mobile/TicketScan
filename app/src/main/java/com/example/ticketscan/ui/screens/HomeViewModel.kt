@@ -17,7 +17,7 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch {
-            _tickets.value = repository.getAllTickets()
+            _tickets.value = repository.getAllTickets(limit = 5)
         }
     }
 }

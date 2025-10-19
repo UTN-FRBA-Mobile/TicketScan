@@ -23,8 +23,10 @@ import java.math.RoundingMode
 
 @Composable
 fun ComparisonSection(current: BigDecimal, previous: BigDecimal) {
-    val percentageChange = if (previous.compareTo(BigDecimal.ZERO) != 0 && current.compareTo(BigDecimal.ZERO) != 0) {
+    val percentageChange = if (previous.compareTo(BigDecimal.ZERO) != 0) {
         current.subtract(previous).divide(previous, 4, RoundingMode.HALF_UP)
+    } else if (current.compareTo(BigDecimal.ZERO) != 0) {
+        BigDecimal.ONE
     } else {
         BigDecimal.ZERO
     }

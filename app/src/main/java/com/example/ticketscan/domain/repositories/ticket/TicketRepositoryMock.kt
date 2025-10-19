@@ -8,13 +8,15 @@ import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.model.TicketOrigin
 import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepository
+import kotlinx.coroutines.flow.Flow
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 
 class TicketRepositoryMock (
     private val context: Context,
-    private val ticketItemRepository: TicketItemRepository
+    private val ticketItemRepository: TicketItemRepository,
+    override val ticketsChanged: Flow<Unit>
 ) : TicketRepository {
 
     private val mockTickets by lazy { generateMockTickets() }
@@ -78,7 +80,10 @@ class TicketRepositoryMock (
 
     override suspend fun getTicketById(id: UUID): Ticket? = mockTickets.find { it.id == id }
 
-    override suspend fun getAllTickets(): List<Ticket> = mockTickets
+    override suspend fun getAllTickets(limit: Int?): List<Ticket> {
+        if (limit != null) return mockTickets.take(limit)
+        return mockTickets
+    }
 
     override suspend fun getTicketsByFilters(categoryName: String?, minDate: Date?): List<Ticket> {
         return mockTickets.filter { ticket ->

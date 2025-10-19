@@ -50,6 +50,7 @@ class CategoryDetailsViewModel(
     }
 
     fun setPeriod(period: Period) {
+        if (period == uiState.value.period) return
         _uiState.update { it.copy(period = period) }
         loadPeriodExpenses()
         loadTransactions()
