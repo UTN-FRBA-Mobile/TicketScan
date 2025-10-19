@@ -70,12 +70,16 @@ fun TicketScreen(
         Spacer(Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = if (isEditing) "Editar Ticket ###" else "Ticket ###",
+                text = if (isEditing) "Editar Ticket" else "Ticket",
                 style = TicketScanTheme.typography.headlineLarge,
                 color = TicketScanTheme.colors.onBackground
             )
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = ticket?.date?.toString() ?: "Fecha xx/xx/xxxx",
+                text = ticket?.date?.let {
+                    java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(it)
+                } ?: "Fecha xx/xx/xxxx HH:mm",
                 style = TicketScanTheme.typography.bodyLarge,
                 color = TicketScanTheme.colors.onBackground
             )
@@ -103,6 +107,18 @@ fun TicketScreen(
             )
             Spacer(Modifier.height(12.dp))
         }
+
+        // Total general del ticket (suma de price * quantity sobre todos los items)
+        val ticketTotal = ticket?.items?.sumOf { it.price * it.quantity } ?: 0.0
+        Text(
+            text = "Total ticket: $${"%.2f".format(ticketTotal)}",
+            style = TicketScanTheme.typography.headlineSmall,
+            color = TicketScanTheme.colors.primary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            textAlign = TextAlign.End
+        )
 
         Spacer(Modifier.weight(1f))
 
@@ -270,12 +286,13 @@ fun EditItemDialog(
                     isError = showNameError,
                     supportingText = {
                         if (showNameError) {
-                            Text("El nombre no puede estar vacío", color = Color.Red)
+                            Text("El nombre no puede estar vacío", color = TicketScanTheme.colors.error)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    textStyle = TicketScanTheme.typography.bodyLarge,
+                    modifier = Modifier.fillMaxWidth().height(64.dp)
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = qtyText,
                     onValueChange = {
@@ -286,16 +303,17 @@ fun EditItemDialog(
                     isError = showQtyError,
                     supportingText = {
                         if (showQtyError) {
-                            Text("La cantidad debe ser mayor a 0", color = Color.Red)
+                            Text("La cantidad debe ser mayor a 0", color = TicketScanTheme.colors.error)
                         }
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Next
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    textStyle = TicketScanTheme.typography.bodyLarge,
+                    modifier = Modifier.fillMaxWidth().height(64.dp)
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = priceText,
                     onValueChange = {
@@ -306,16 +324,17 @@ fun EditItemDialog(
                     isError = showPriceError,
                     supportingText = {
                         if (showPriceError) {
-                            Text("El precio debe ser mayor a 0", color = Color.Red)
+                            Text("El precio debe ser mayor a 0", color = TicketScanTheme.colors.error)
                         }
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Decimal,
                         imeAction = ImeAction.Next
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    textStyle = TicketScanTheme.typography.bodyLarge,
+                    modifier = Modifier.fillMaxWidth().height(64.dp)
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -326,7 +345,8 @@ fun EditItemDialog(
                         readOnly = true,
                         label = { Text("Categoría") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                        textStyle = TicketScanTheme.typography.bodyLarge,
+                        modifier = Modifier.fillMaxWidth().menuAnchor().height(64.dp)
                     )
                     DropdownMenu(
                         expanded = expanded,
@@ -350,7 +370,7 @@ fun EditItemDialog(
                     TextButton(
                         onClick = { showConfirmDelete = true },
                     ) {
-                        Text("Eliminar", color = Color.Red)
+                        Text("Eliminar", color = TicketScanTheme.colors.error)
                     }
 
                     if (showConfirmDelete) {
@@ -363,7 +383,7 @@ fun EditItemDialog(
                                     onDelete(initial.id)
                                     showConfirmDelete = false
                                     onDismiss()
-                                }) { Text("Eliminar", color = Color.Red) }
+                                }) { Text("Eliminar", color = TicketScanTheme.colors.error) }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showConfirmDelete = false }) { Text("Cancelar") }
@@ -399,28 +419,28 @@ fun CategorySection(
         items.forEach { item ->
             Row(
                 modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 10.dp)
-                    .border(BorderStroke(1.dp, TicketScanTheme.colors.primary), TicketScanTheme.shapes.small),
+                    .padding(vertical = 14.dp)
+                     .border(BorderStroke(1.dp, TicketScanTheme.colors.primary), TicketScanTheme.shapes.small),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
                     text = "${item.name} (${item.quantity} u.) - $${item.price}",
-                    style = TicketScanTheme.typography.bodyMedium,
+                    style = TicketScanTheme.typography.bodyLarge,
                     color = TicketScanTheme.colors.onBackground,
-                    modifier = Modifier.padding(PaddingValues(horizontal = 15.dp))
+                    modifier = Modifier.padding(PaddingValues(horizontal = 18.dp, vertical = 12.dp))
                 )
                 if (isEditable) {
                     Spacer(Modifier.width(8.dp))
                     IconButton(
                         onClick = { editingItem = item },
-                        modifier = Modifier.padding(0.dp).size(24.dp),
+                        modifier = Modifier.padding(0.dp).size(36.dp),
 
                     ) {
                         Icon(
                             imageVector = TicketScanIcons.Edit,
                             contentDescription = "Editar",
                             tint = TicketScanTheme.colors.onBackground,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -444,8 +464,9 @@ fun CategorySection(
         }
 
         Spacer(Modifier.height(8.dp))
+        val categoryTotal = items.sumOf { it.price * it.quantity }
         Text(
-            text = "Total: $${items.sumOf { it.price }}",
+            text = "Total: $${"%.2f".format(categoryTotal)}",
             style = TicketScanTheme.typography.bodyLarge,
             color = TicketScanTheme.colors.primary,
             modifier = Modifier

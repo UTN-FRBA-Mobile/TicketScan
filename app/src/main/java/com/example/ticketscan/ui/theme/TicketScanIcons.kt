@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION", "unused")
+
 package com.example.ticketscan.ui.theme
 
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,7 +29,6 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowBack
 
-@Suppress("unused")
 object TicketScanIcons {
     val Home: ImageVector = Icons.Filled.Home
     // Use AutoMirrored for icons that should mirror in RTL

@@ -1,14 +1,14 @@
 package com.example.ticketscan.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.SettingDropdown
+import com.example.ticketscan.ui.theme.TicketScanIcons
+import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,17 +24,18 @@ fun AppearanceSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         text = "Apariencia",
-                        style = MaterialTheme.typography.titleLarge
-                    ) 
+                        style = TicketScanTheme.typography.titleLarge
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
+                            imageVector = TicketScanIcons.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = TicketScanTheme.colors.onSurface
                         )
                     }
                 }

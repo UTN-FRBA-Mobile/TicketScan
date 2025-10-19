@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.ProfileSection
+import com.example.ticketscan.ui.components.ProfileHeader
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
@@ -24,11 +25,13 @@ fun ProfileScreen(
             .padding(16.dp)
     ) {
         // Header
-        Text(
-            text = "Perfil",
-            style = TicketScanTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 24.dp)
+        ProfileHeader(
+            name = "Juan Pérez",
+            subtitle = "Mi cuenta",
+            onEditClick = { navController.navigate("edit_contact") }
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Gestión de datos section
         ProfileSection(

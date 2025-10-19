@@ -26,7 +26,10 @@ data class TicketScanColors(
     val primaryContainer: Color,
     // Error tokens
     val errorContainer: Color,
-    val onErrorContainer: Color
+    val onErrorContainer: Color,
+    // Simple semantic colors
+    val error: Color,
+    val success: Color
 )
 
 data class TicketScanThemeData(

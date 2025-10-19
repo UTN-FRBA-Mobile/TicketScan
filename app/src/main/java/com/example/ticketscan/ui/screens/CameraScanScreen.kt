@@ -29,6 +29,7 @@ import java.util.concurrent.Executor
 import java.util.Locale
 import com.example.ticketscan.ui.components.CaptureThumbnailPreview
 import com.example.ticketscan.ui.components.ErrorBadge
+import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @Composable
 fun CameraScanScreen(
@@ -176,7 +177,7 @@ fun CameraScanScreen(
 
             if (items.isNotEmpty()) {
                 Spacer(Modifier.height(12.dp))
-                Text("Resultados", style = MaterialTheme.typography.titleMedium)
+                Text("Resultados", style = TicketScanTheme.typography.titleMedium)
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -198,5 +199,3 @@ fun CameraScanScreen(
         }
     }
 }
-
-

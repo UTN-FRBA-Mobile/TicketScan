@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanIcons
@@ -33,14 +32,14 @@ fun ComparisonSection(current: BigDecimal, previous: BigDecimal) {
 
     val backgroundColor = when {
         isNeutral -> TicketScanTheme.colors.surfaceVariant
-        isPositive -> Color(0xFFFBE9E7) // A light red color
-        else -> Color(0xFFE8F5E9) // A light green color
+        isPositive -> TicketScanTheme.colors.errorContainer
+        else -> TicketScanTheme.colors.success
     }
 
     val contentColor = when {
         isNeutral -> TicketScanTheme.colors.onSurfaceVariant
-        isPositive -> Color(0xFFD32F2F) // A dark red color
-        else -> Color(0xFF388E3C) // A dark green color
+        isPositive -> TicketScanTheme.colors.error
+        else -> TicketScanTheme.colors.onPrimary // on success use onPrimary for contrast
     }
 
     val icon = when {
@@ -54,19 +53,18 @@ fun ComparisonSection(current: BigDecimal, previous: BigDecimal) {
         horizontalArrangement = Arrangement.Center
     ) {
         Card(
-            colors = CardDefaults.cardColors(containerColor = backgroundColor)
+            colors = CardDefaults.cardColors(containerColor = backgroundColor, contentColor = contentColor)
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (icon != null) {
-                    Icon(icon, contentDescription = null, tint = contentColor)
+                    Icon(icon, contentDescription = null)
                 }
                 val formattedPercentage = percentageChange.abs().multiply(BigDecimal(100)).setScale(2, RoundingMode.HALF_UP).toPlainString()
                 Text(
                     text = if(isNeutral) "Sin cambios" else "$formattedPercentage%",
-                    color = contentColor,
                     style = TicketScanTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = if (icon != null) 8.dp else 0.dp)
                 )
