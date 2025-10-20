@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.ticketscan.domain.model.Category
+import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
+import java.util.Date
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -73,6 +75,40 @@ class TicketViewModel (
         _ticket.value = currentTicket.copy(items = updatedItems, total = updatedItems.sumOf {
             it.price
         })
+    }
+
+    fun updateTicketDate(newDate: Date) {
+        val currentTicket = _ticket.value ?: return
+        _ticket.value = currentTicket.copy(date = newDate)
+    }
+
+    fun updateTicketStore(name: String, cuit: Long, location: String) {
+        viewModelScope.launch {
+            val currentTicket = _ticket.value ?: return@launch
+
+            // Buscar tienda existente por nombre o CUIT
+            val allStores = repositoryViewModel.getAllStores()
+            var store = allStores.find { it.name == name || it.cuit == cuit }
+
+            if (store == null) {
+                // Si no existe, crear nueva tienda
+                val newStore = Store(
+                    id = UUID.randomUUID(),
+                    name = name,
+                    cuit = cuit,
+                    location = location
+                )
+                repositoryViewModel.insertStore(newStore) { success ->
+                    if (success) {
+                        store = newStore
+                    }
+                }
+                store = newStore
+            }
+
+            // Actualizar el ticket con la tienda
+            _ticket.value = currentTicket.copy(store = store)
+        }
     }
 
     fun saveTicket() {
