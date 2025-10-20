@@ -27,8 +27,8 @@ fun TicketHeader(
     date: Date,
     store: Store? = null,
     isEditing: Boolean = false,
-    onEditDate: () -> Unit = {},
-    onEditStore: () -> Unit = {},
+    onEditDateClick: () -> Unit = {},
+    onEditStoreClick: () -> Unit = {},
 ) {
     Column(modifier = modifier) {
         Spacer(Modifier.height(8.dp))
@@ -56,7 +56,7 @@ fun TicketHeader(
             )
             if (isEditing) {
                 IconButton(
-                    onClick = onEditDate,
+                    onClick = onEditDateClick,
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -83,7 +83,7 @@ fun TicketHeader(
                 )
                 if (isEditing) {
                     IconButton(
-                        onClick = onEditStore,
+                        onClick = onEditStoreClick,
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(

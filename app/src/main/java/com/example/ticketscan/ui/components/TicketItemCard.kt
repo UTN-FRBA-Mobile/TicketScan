@@ -24,7 +24,7 @@ import com.example.ticketscan.ui.theme.TicketScanTheme
 fun TicketItemCard(
     item: TicketItem,
     isEditable: Boolean,
-    onEdit: () -> Unit,
+    onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -46,7 +46,7 @@ fun TicketItemCard(
         if (isEditable) {
             Spacer(Modifier.width(8.dp))
             IconButton(
-                onClick = onEdit,
+                onClick = onEditClick,
                 modifier = Modifier
                     .padding(0.dp)
                     .size(36.dp),

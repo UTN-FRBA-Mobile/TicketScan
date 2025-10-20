@@ -26,7 +26,6 @@ import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
-import com.example.ticketscan.ui.components.CategorySection
 import com.example.ticketscan.ui.components.EditItemDialog
 import com.example.ticketscan.ui.components.EditStoreDialog
 import com.example.ticketscan.ui.components.TicketActionButtons
@@ -46,6 +45,7 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import com.example.ticketscan.domain.model.Ticket
+import com.example.ticketscan.ui.components.TicketItemCard
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
@@ -57,8 +57,10 @@ fun TicketScreen(
     val ticket by viewModel.ticket.collectAsState()
     val categories by viewModel.categories.collectAsState()
     var isEditing by remember { mutableStateOf(false) }
+    var editingItem by remember { mutableStateOf<TicketItem?>(null) }
     var creatingItem by remember { mutableStateOf<TicketItem?>(null) }
     var editingStore by remember { mutableStateOf(false) }
+    var editingDate by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -70,55 +72,49 @@ fun TicketScreen(
             date = ticket?.date ?: Date(),
             store = ticket?.store,
             isEditing = isEditing,
-            onEditDate = {
-                ticket?.date?.let { currentDate ->
-                    val calendar = Calendar.getInstance().apply { time = currentDate }
-                    DatePickerDialog(
-                        context,
-                        { _, year, month, dayOfMonth ->
-                            val newCalendar = Calendar.getInstance().apply {
-                                time = currentDate
-                                set(Calendar.YEAR, year)
-                                set(Calendar.MONTH, month)
-                                set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                            }
-                            viewModel.updateTicketDate(newCalendar.time)
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)
-                    ).show()
-                }
-            },
-            onEditStore = { editingStore = true }
+            onEditDateClick = { editingDate = true },
+            onEditStoreClick = { editingStore = true }
         )
 
         Spacer(Modifier.height(20.dp))
 
         val itemsByCategory = ticket?.items?.groupBy { it.category } ?: emptyMap()
         itemsByCategory.forEach { (category, items) ->
-            CategorySection(
-                category = category,
-                items = items,
-                isEditable = isEditing,
-                categories = categories,
-                onItemChange = { id, name, price, quantity, categoryValue ->
-                    viewModel.updateTicketItem(
-                        itemId = id,
-                        name = name,
-                        price = price,
-                        quantity = quantity,
-                        category = categoryValue
+            Column {
+                Text(
+                    text = category.name,
+                    style = TicketScanTheme.typography.headlineMedium,
+                    color = TicketScanTheme.colors.onBackground,
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .fillMaxWidth(),
+                )
+
+                items.forEach { item ->
+                    TicketItemCard(
+                        item = item,
+                        isEditable = isEditing,
+                        onEditClick = { editingItem = item }
                     )
-                },
-                onItemDelete = { id -> viewModel.removeTicketItem(id) }
-            )
+                }
+
+                Spacer(Modifier.height(8.dp))
+                val categoryTotal = items.sumOf { it.price }
+                Text(
+                    text = "Total: $${"%.2f".format(categoryTotal)}",
+                    style = TicketScanTheme.typography.headlineSmall,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.End
+                )
+            }
             Spacer(Modifier.height(12.dp))
         }
 
         val ticketTotal = ticket?.items?.sumOf { it.price } ?: 0.0
         Text(
-            text = "Total ticket: $${"%.2f".format(ticketTotal)}",
+            text = "Total: $${"%.2f".format(ticketTotal)}",
             style = TicketScanTheme.typography.headlineMedium,
             color = TicketScanTheme.colors.primary,
             modifier = Modifier
@@ -157,7 +153,8 @@ fun TicketScreen(
                     }
                 }
             },
-            onEdit = { isEditing = true }
+            onEdit = { isEditing = true },
+            onShare = { exportTicketToPdf(context, ticket) }
         )
 
         // Diálogo para crear/editar artículo
@@ -182,6 +179,25 @@ fun TicketScreen(
             )
         }
 
+        if (editingItem != null) {
+            EditItemDialog(
+                initial = editingItem!!,
+                categories = categories,
+                onDismiss = { editingItem = null },
+                onSave = { name, price, quantity, categoryValue ->
+                    viewModel.updateTicketItem(
+                        editingItem!!.id,
+                        name = name,
+                        price = price,
+                        quantity = quantity,
+                        category = categoryValue
+                    )
+                    editingItem = null
+                },
+                onDelete = { id -> viewModel.removeTicketItem(id) }
+            )
+        }
+
         // Diálogo para editar/crear tienda
         if (editingStore) {
             EditStoreDialog(
@@ -192,6 +208,26 @@ fun TicketScreen(
                     editingStore = false
                 }
             )
+        }
+
+        if (editingDate) {
+            val calendar = Calendar.getInstance().apply { time = ticket!!.date }
+            DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    val newCalendar = Calendar.getInstance().apply {
+                        time = ticket!!.date
+                        set(Calendar.YEAR, year)
+                        set(Calendar.MONTH, month)
+                        set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    }
+                    viewModel.updateTicketDate(newCalendar.time)
+                    editingDate = false
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
         }
     }
 }

@@ -20,6 +20,7 @@ fun TicketActionButtons(
     onSave: () -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
+    onShare: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -63,6 +64,18 @@ fun TicketActionButtons(
                 )
             }
 
+            // Botón para exportar ticket a PDF (junto a Eliminar y Editar)
+            IconButton(onClick = {
+                onShare()
+            }) {
+                Icon(
+                    imageVector = TicketScanIcons.Share,
+                    contentDescription = "Exportar ticket",
+                    tint = TicketScanTheme.colors.onBackground,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+
             IconButton(onClick = onEdit) {
                 Icon(
                     imageVector = TicketScanIcons.Edit,
@@ -74,4 +87,3 @@ fun TicketActionButtons(
         }
     }
 }
-
