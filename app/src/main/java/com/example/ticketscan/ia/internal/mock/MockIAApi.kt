@@ -16,13 +16,11 @@ class MockIAApi(
     override suspend fun analyzeAudio(audio: MultipartBody.Part): List<TicketItem> {
         // Devolvemos resultados distintos para audio (Jabón, Shampoo)
         val categories = repositoryViewModel.getAllCategories()
-        val limpiezaCategory = categories.find { it.name.contains("Limpieza", ignoreCase = true) }
-            ?: categories.firstOrNull()
         return listOf(
             TicketItem(
                 id = UUID.randomUUID(),
                 name = "Jabón",
-                category = limpiezaCategory!!,
+                category = categories.find { it.name == "Hogar" }!!,
                 quantity = 1,
                 isIntUnit = true,
                 price = 200.0
@@ -30,7 +28,7 @@ class MockIAApi(
             TicketItem(
                 id = UUID.randomUUID(),
                 name = "Shampoo",
-                category = limpiezaCategory,
+                category = categories.find { it.name == "Hogar" }!!,
                 quantity = 1,
                 isIntUnit = true,
                 price = 500.0

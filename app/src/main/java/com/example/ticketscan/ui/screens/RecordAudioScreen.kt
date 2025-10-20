@@ -188,7 +188,7 @@ fun RecordAudioScreen(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                 ) {
-                    Text(if (isRecording) "Detener grabación" else "Iniciar grabación")
+                    Text(if (isRecording) "Detener grabación" else "Grabar Audio")
                 }
 
                 if (canContinue) {
