@@ -36,6 +36,16 @@ import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
+import android.content.Context
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.graphics.pdf.PdfDocument
+import android.widget.Toast
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Locale
+import com.example.ticketscan.domain.model.Ticket
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
@@ -199,3 +209,54 @@ fun TicketScreenPreview() {
     }
 }
 
+// Función auxiliar para exportar un ticket sencillo a PDF y guardarlo en filesDir.
+private fun exportTicketToPdf(context: Context, ticket: Ticket?) {
+    if (ticket == null) {
+        Toast.makeText(context, "No hay ticket para exportar", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    try {
+        val doc = PdfDocument()
+        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 tamaño en pts
+        val page = doc.startPage(pageInfo)
+        val canvas = page.canvas
+        val paint = Paint().apply {
+            color = android.graphics.Color.BLACK
+            textSize = 12f
+            typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
+        }
+
+        var y = 40f
+        val left = 20f
+        val df = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
+        canvas.drawText("Ticket: ${ticket.id}", left, y, paint)
+        y += 20f
+        canvas.drawText("Fecha: ${df.format(ticket.date)}", left, y, paint)
+        y += 24f
+
+        // Items
+        ticket.items.forEach { item ->
+            val line = "${item.name} (${item.quantity} u.) - $${item.price}"
+            canvas.drawText(line, left, y, paint)
+            y += 18f
+        }
+
+        y += 8f
+        canvas.drawText("Total: $${ticket.total}", left, y, paint)
+
+        doc.finishPage(page)
+
+        val filename = "ticket_${ticket.id}.pdf"
+        val file = File(context.filesDir, filename)
+        FileOutputStream(file).use { out ->
+            doc.writeTo(out)
+        }
+        doc.close()
+
+        Toast.makeText(context, "Ticket exportado: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+    } catch (e: Exception) {
+        Toast.makeText(context, "Error exportando PDF: ${e.message}", Toast.LENGTH_LONG).show()
+    }
+}
