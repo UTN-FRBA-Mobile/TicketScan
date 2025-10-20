@@ -1,17 +1,20 @@
 package com.example.ticketscan.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,60 +51,104 @@ fun EditStoreDialog(
         }
     }
 
-    AlertDialog(
+    val isInputValid = name.trim().isNotEmpty()
+    val saveButtonColors = if (isInputValid) {
+        ButtonDefaults.buttonColors(
+            containerColor = TicketScanTheme.colors.primary,
+            contentColor = TicketScanTheme.colors.onPrimary
+        )
+    } else {
+        ButtonDefaults.buttonColors(
+            containerColor = TicketScanTheme.colors.primary.copy(alpha = 0.4f),
+            contentColor = TicketScanTheme.colors.onPrimary.copy(alpha = 0.6f)
+        )
+    }
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedContainerColor = TicketScanTheme.colors.surfaceVariant,
+        unfocusedContainerColor = TicketScanTheme.colors.surfaceVariant,
+        disabledContainerColor = TicketScanTheme.colors.surfaceVariant,
+        focusedBorderColor = TicketScanTheme.colors.primary,
+        unfocusedBorderColor = TicketScanTheme.colors.outline.copy(alpha = 0.6f),
+        focusedLabelColor = TicketScanTheme.colors.primary,
+        unfocusedLabelColor = TicketScanTheme.colors.onSurfaceVariant,
+        cursorColor = TicketScanTheme.colors.primary,
+        errorCursorColor = TicketScanTheme.colors.error,
+        errorBorderColor = TicketScanTheme.colors.error,
+        errorContainerColor = TicketScanTheme.colors.errorContainer,
+        errorLabelColor = TicketScanTheme.colors.error,
+        focusedSupportingTextColor = TicketScanTheme.colors.onSurfaceVariant,
+        unfocusedSupportingTextColor = TicketScanTheme.colors.onSurfaceVariant
+    )
+
+    TicketScanDialog(
         onDismissRequest = onDismiss,
-        confirmButton = {
+        title = "Seleccionar tienda",
+        subtitle = "Busca y selecciona una tienda existente o crea una nueva.",
+        actions = {
             TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = TicketScanTheme.colors.onSurfaceVariant)
+            ) {
+                Text("Cancelar")
+            }
+            TicketScanDialogActionSpacer()
+            Button(
                 onClick = {
-                    if (name.trim().isNotEmpty()) {
+                    if (isInputValid) {
                         onSave(name.trim())
                     }
                 },
-                enabled = name.trim().isNotEmpty()
+                colors = saveButtonColors,
+                shape = TicketScanTheme.shapes.small
             ) {
                 Text("Guardar")
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        },
-        title = { Text("Seleccionar tienda") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nombre de la tienda") },
-                    textStyle = TicketScanTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    singleLine = true
-                )
+        }
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.md)
+        ) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Nombre de la tienda") },
+                textStyle = TicketScanTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                singleLine = true,
+                colors = textFieldColors
+            )
 
-                // Mostrar sugerencias
-                if (showSuggestions && suggestions.isNotEmpty()) {
-                    Card(
+            if (showSuggestions && suggestions.isNotEmpty()) {
+                TicketScanCard(
+                    style = TicketScanCardStyle.Outline,
+                    contentPadding = PaddingValues(vertical = TicketScanTheme.spacing.xs)
+                ) {
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp)
-                            .heightIn(max = 200.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = TicketScanTheme.colors.surface
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                            .heightIn(max = 200.dp)
                     ) {
-                        LazyColumn {
-                            items(suggestions) { store ->
-                                Text(
-                                    text = store.name,
-                                    style = TicketScanTheme.typography.bodyLarge,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            // Al hacer clic, guardar la tienda seleccionada
-                                            onSave(store.name)
-                                        }
-                                        .padding(16.dp)
+                        itemsIndexed(suggestions) { index, store ->
+                            Text(
+                                text = store.name,
+                                style = TicketScanTheme.typography.bodyLarge,
+                                color = TicketScanTheme.colors.onSurface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onSave(store.name)
+                                        onDismiss()
+                                    }
+                                    .padding(
+                                        horizontal = TicketScanTheme.spacing.lg,
+                                        vertical = TicketScanTheme.spacing.md
+                                    )
+                            )
+                            if (index < suggestions.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = TicketScanTheme.colors.outline.copy(alpha = 0.2f)
                                 )
                             }
                         }
@@ -109,6 +156,6 @@ fun EditStoreDialog(
                 }
             }
         }
-    )
+    }
 }
 

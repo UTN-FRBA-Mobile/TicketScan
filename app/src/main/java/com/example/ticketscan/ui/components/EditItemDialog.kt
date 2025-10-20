@@ -1,23 +1,25 @@
 package com.example.ticketscan.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -70,161 +72,238 @@ fun EditItemDialog(
     val showQtyError = !isQtyValid && (qtyTouched || attemptedSave)
     val showPriceError = !isPriceValid && (priceTouched || attemptedSave)
 
-    AlertDialog(
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedContainerColor = TicketScanTheme.colors.surfaceVariant,
+        unfocusedContainerColor = TicketScanTheme.colors.surfaceVariant,
+        disabledContainerColor = TicketScanTheme.colors.surfaceVariant,
+        focusedBorderColor = TicketScanTheme.colors.primary,
+        unfocusedBorderColor = TicketScanTheme.colors.outline.copy(alpha = 0.6f),
+        focusedLabelColor = TicketScanTheme.colors.primary,
+        unfocusedLabelColor = TicketScanTheme.colors.onSurfaceVariant,
+        cursorColor = TicketScanTheme.colors.primary,
+        errorCursorColor = TicketScanTheme.colors.error,
+        errorBorderColor = TicketScanTheme.colors.error,
+        errorContainerColor = TicketScanTheme.colors.errorContainer,
+        errorLabelColor = TicketScanTheme.colors.error,
+        errorSupportingTextColor = TicketScanTheme.colors.error,
+        focusedSupportingTextColor = TicketScanTheme.colors.onSurfaceVariant,
+        unfocusedSupportingTextColor = TicketScanTheme.colors.onSurfaceVariant
+    )
+
+    TicketScanDialog(
         onDismissRequest = onDismiss,
-        confirmButton = {
+        title = if (initial.name.isBlank()) "Agregar artículo" else "Editar artículo",
+        subtitle = "Actualiza la información del artículo del ticket.",
+        actions = {
+            val saveButtonColors = if (isFormValid) {
+                ButtonDefaults.buttonColors(
+                    containerColor = TicketScanTheme.colors.primary,
+                    contentColor = TicketScanTheme.colors.onPrimary
+                )
+            } else {
+                ButtonDefaults.buttonColors(
+                    containerColor = TicketScanTheme.colors.primary.copy(alpha = 0.4f),
+                    contentColor = TicketScanTheme.colors.onPrimary.copy(alpha = 0.6f)
+                )
+            }
             TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = TicketScanTheme.colors.onSurfaceVariant)
+            ) {
+                Text("Cancelar")
+            }
+            TicketScanDialogActionSpacer()
+            Button(
                 onClick = {
                     attemptedSave = true
                     if (isFormValid) {
                         onSave(name.trim(), parsedPrice, parsedQty, category)
                     }
-                }
+                },
+                colors = saveButtonColors,
+                shape = TicketScanTheme.shapes.small
             ) {
                 Text("Guardar")
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        },
-        title = { Text("Editar artículo") },
-        text = {
-            Column {
+        }
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.md)
+        ) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = {
+                    name = it
+                    nameTouched = true
+                },
+                label = { Text("Nombre") },
+                isError = showNameError,
+                supportingText = {
+                    if (showNameError) {
+                        Text(
+                            text = "El nombre no puede estar vacío",
+                            style = TicketScanTheme.typography.bodySmall,
+                            color = TicketScanTheme.colors.error
+                        )
+                    }
+                },
+                textStyle = TicketScanTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth(),
+                colors = textFieldColors
+            )
+            OutlinedTextField(
+                value = qtyText,
+                onValueChange = {
+                    if (it.all { c -> c.isDigit() }) qtyText = it
+                    qtyTouched = true
+                },
+                label = { Text("Cantidad") },
+                isError = showQtyError,
+                supportingText = {
+                    if (showQtyError) {
+                        Text(
+                            text = "La cantidad debe ser mayor a 0",
+                            style = TicketScanTheme.typography.bodySmall,
+                            color = TicketScanTheme.colors.error
+                        )
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
+                textStyle = TicketScanTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth(),
+                colors = textFieldColors
+            )
+            OutlinedTextField(
+                value = priceText,
+                onValueChange = {
+                    if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*"))) priceText = it
+                    priceTouched = true
+                },
+                label = { Text("Precio") },
+                isError = showPriceError,
+                supportingText = {
+                    if (showPriceError) {
+                        Text(
+                            text = "El precio debe ser mayor a 0",
+                            style = TicketScanTheme.typography.bodySmall,
+                            color = TicketScanTheme.colors.error
+                        )
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Next
+                ),
+                textStyle = TicketScanTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth(),
+                colors = textFieldColors
+            )
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = {
-                        name = it
-                        nameTouched = true
-                    },
-                    label = { Text("Nombre") },
-                    isError = showNameError,
-                    supportingText = {
-                        if (showNameError) {
-                            Text("El nombre no puede estar vacío", color = TicketScanTheme.colors.error)
-                        }
-                    },
+                    value = category.name,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Categoría") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     textStyle = TicketScanTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    colors = textFieldColors
                 )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = qtyText,
-                    onValueChange = {
-                        if (it.all { c -> c.isDigit() }) qtyText = it
-                        qtyTouched = true
-                    },
-                    label = { Text("Cantidad") },
-                    isError = showQtyError,
-                    supportingText = {
-                        if (showQtyError) {
-                            Text("La cantidad debe ser mayor a 0", color = TicketScanTheme.colors.error)
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    ),
-                    textStyle = TicketScanTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = priceText,
-                    onValueChange = {
-                        if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*"))) priceText = it
-                        priceTouched = true
-                    },
-                    label = { Text("Precio") },
-                    isError = showPriceError,
-                    supportingText = {
-                        if (showPriceError) {
-                            Text(
-                                text = "El precio debe ser mayor a 0",
-                                color = TicketScanTheme.colors.error,
-                                )
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Next
-                    ),
-                    textStyle = TicketScanTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(8.dp))
-                ExposedDropdownMenuBox(
+                DropdownMenu(
                     expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier
+                        .exposedDropdownSize(true)
+                        .heightIn(max = 240.dp)
                 ) {
-                    OutlinedTextField(
-                        value = category.name,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Categoría") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        textStyle = TicketScanTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth().menuAnchor()
-                    )
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier.exposedDropdownSize(true)
-                    ) {
-                        categories.forEach { cat ->
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(16.dp)
-                                                .background(
-                                                    color = cat.color,
-                                                    shape = CircleShape
-                                                )
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Text(cat.name)
-                                    }
-                                },
-                                onClick = {
-                                    category = cat
-                                    expanded = false
+                    categories.forEach { cat ->
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.md)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .background(
+                                                color = cat.color,
+                                                shape = CircleShape
+                                            )
+                                    )
+                                    Text(
+                                        text = cat.name,
+                                        style = TicketScanTheme.typography.bodyMedium,
+                                        color = TicketScanTheme.colors.onSurface
+                                    )
                                 }
-                            )
-                        }
-                    }
-                }
-
-                if (onDelete != null) {
-                    Spacer(Modifier.height(12.dp))
-                    TextButton(
-                        onClick = { showConfirmDelete = true },
-                    ) {
-                        Text("Eliminar", color = TicketScanTheme.colors.error)
-                    }
-
-                    if (showConfirmDelete) {
-                        AlertDialog(
-                            onDismissRequest = { showConfirmDelete = false },
-                            title = { Text("Confirmar eliminación") },
-                            text = { Text("¿Estás seguro de que quieres eliminar este artículo?") },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    onDelete(initial.id)
-                                    showConfirmDelete = false
-                                    onDismiss()
-                                }) { Text("Eliminar", color = TicketScanTheme.colors.error) }
                             },
-                            dismissButton = {
-                                TextButton(onClick = { showConfirmDelete = false }) { Text("Cancelar") }
+                            onClick = {
+                                category = cat
+                                expanded = false
                             }
                         )
                     }
                 }
             }
+
+            if (onDelete != null) {
+                TextButton(
+                    onClick = { showConfirmDelete = true },
+                    colors = ButtonDefaults.textButtonColors(contentColor = TicketScanTheme.colors.error),
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Eliminar")
+                }
+
+                if (showConfirmDelete) {
+                    TicketScanDialog(
+                        onDismissRequest = { showConfirmDelete = false },
+                        title = "Eliminar artículo",
+                        subtitle = "Esta acción no se puede deshacer.",
+                        style = TicketScanCardStyle.Tonal,
+                        actions = {
+                            TextButton(
+                                onClick = { showConfirmDelete = false },
+                                colors = ButtonDefaults.textButtonColors(contentColor = TicketScanTheme.colors.onSurfaceVariant)
+                            ) {
+                                Text("Cancelar")
+                            }
+                            TicketScanDialogActionSpacer()
+                            Button(
+                                onClick = {
+                                    onDelete(initial.id)
+                                    showConfirmDelete = false
+                                    onDismiss()
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = TicketScanTheme.colors.errorContainer,
+                                    contentColor = TicketScanTheme.colors.onErrorContainer
+                                ),
+                                shape = TicketScanTheme.shapes.small
+                            ) {
+                                Text("Eliminar")
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "¿Estás seguro de que quieres eliminar este artículo?",
+                            style = TicketScanTheme.typography.bodyMedium,
+                            color = TicketScanTheme.colors.onSurface
+                        )
+                    }
+                }
+            }
         }
-    )
+    }
 }
 
