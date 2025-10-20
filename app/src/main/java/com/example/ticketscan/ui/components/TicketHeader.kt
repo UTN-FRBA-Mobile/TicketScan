@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,7 +32,6 @@ fun TicketHeader(
     onEditStoreClick: () -> Unit = {},
 ) {
     Column(modifier = modifier) {
-        Spacer(Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -42,6 +42,8 @@ fun TicketHeader(
                 color = TicketScanTheme.colors.onBackground
             )
         }
+
+        Spacer(Modifier.height(8.dp))
 
         // Fecha con icono de edición
         Row(
@@ -57,13 +59,15 @@ fun TicketHeader(
             if (isEditing) {
                 IconButton(
                     onClick = onEditDateClick,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier
+                        .padding(0.dp)
+                        .size(32.dp)
                 ) {
                     Icon(
                         imageVector = TicketScanIcons.Edit,
                         contentDescription = "Editar fecha",
                         tint = TicketScanTheme.colors.onBackground,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -71,26 +75,30 @@ fun TicketHeader(
 
         // Tienda con icono de edición (solo mostrar si existe o si está en modo edición)
         if (store != null || isEditing) {
+            Spacer(Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = store?.name ?: "Tienda: ?",
-                    style = TicketScanTheme.typography.bodyMedium,
+                    text = "Tienda: " + (store?.name ?: "?"),
+                    style = TicketScanTheme.typography.bodyLarge,
                     color = if (store != null) TicketScanTheme.colors.onBackground else TicketScanTheme.colors.onBackground.copy(alpha = 0.6f)
                 )
                 if (isEditing) {
                     IconButton(
                         onClick = onEditStoreClick,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier
+                            .padding(0.dp)
+                            .size(32.dp)
                     ) {
                         Icon(
                             imageVector = TicketScanIcons.Edit,
                             contentDescription = "Editar tienda",
                             tint = TicketScanTheme.colors.onBackground,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
