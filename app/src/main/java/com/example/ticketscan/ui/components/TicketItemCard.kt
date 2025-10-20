@@ -38,7 +38,7 @@ fun TicketItemCard(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
-            text = "${item.name} (${item.quantity} u.) - $${item.price}",
+            text = "${item.name} (${item.quantity} u.) - Total: $${item.price}",
             style = TicketScanTheme.typography.bodyLarge,
             color = TicketScanTheme.colors.onBackground,
             modifier = Modifier.padding(PaddingValues(horizontal = 18.dp, vertical = 12.dp))

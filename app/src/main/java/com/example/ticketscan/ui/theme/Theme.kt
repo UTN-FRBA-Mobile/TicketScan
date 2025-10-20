@@ -1,6 +1,5 @@
 package com.example.ticketscan.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 
