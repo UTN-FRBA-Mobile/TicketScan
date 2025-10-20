@@ -42,6 +42,8 @@ import com.example.ticketscan.ui.screens.NotificationSettingsScreen
 import com.example.ticketscan.ui.screens.ProcessingScreen
 import com.example.ticketscan.ui.screens.ProfileScreen
 import com.example.ticketscan.ui.screens.RecordAudioScreen
+import com.example.ticketscan.ui.screens.RecordAudioViewModel
+import com.example.ticketscan.ui.screens.RecordAudioViewModelFactory
 import com.example.ticketscan.ui.screens.StatsScreen
 import com.example.ticketscan.ui.screens.StatsViewModel
 import com.example.ticketscan.ui.screens.StatsViewModelFactory
@@ -80,6 +82,10 @@ class MainActivity : ComponentActivity() {
                 val statsFactory = remember { StatsViewModelFactory(repositoryViewModel) }
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
 
+                // Record audio viewmodel factory and instance
+                val recordAudioFactory = remember { RecordAudioViewModelFactory(iaService, repositoryViewModel) }
+                val recordAudioViewModel: RecordAudioViewModel = viewModel(factory = recordAudioFactory)
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
@@ -117,15 +123,8 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() }
                             )
                         }
-                        composable("record_audio") {
-                            RecordAudioScreen(
-                                navController = navController,
-                                iaService = iaService,
-                                repositoryViewModel = repositoryViewModel,
-                                onResult = { result -> navController.navigate("ticket") {}
-                                }
-                            )
-                        }
+                        composable("record_audio") { RecordAudioScreen(navController = navController, vm = recordAudioViewModel) }
+
                         composable("scan") { CameraScanScreen(navController = navController, vm = cameraScanViewModel) }
                         composable("profile") { ProfileScreen(navController = navController) }
                         composable("edit_contact") {
