@@ -1,15 +1,8 @@
 package com.example.ticketscan.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -18,6 +11,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -31,9 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.TicketItem
+import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import java.util.UUID
 
@@ -211,6 +205,13 @@ fun EditItemDialog(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Categoría") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = TicketScanIcons.categoryIcon(category.name),
+                            contentDescription = null,
+                            tint = TicketScanTheme.colors.onSurfaceVariant
+                        )
+                    },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     textStyle = TicketScanTheme.typography.bodyLarge,
                     modifier = Modifier
@@ -221,31 +222,23 @@ fun EditItemDialog(
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    modifier = Modifier
-                        .exposedDropdownSize(true)
-                        .heightIn(max = 240.dp)
+                    modifier = Modifier.exposedDropdownSize(true)
                 ) {
                     categories.forEach { cat ->
                         DropdownMenuItem(
                             text = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.md)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(16.dp)
-                                            .background(
-                                                color = cat.color,
-                                                shape = CircleShape
-                                            )
-                                    )
-                                    Text(
-                                        text = cat.name,
-                                        style = TicketScanTheme.typography.bodyMedium,
-                                        color = TicketScanTheme.colors.onSurface
-                                    )
-                                }
+                                Text(
+                                    text = cat.name,
+                                    style = TicketScanTheme.typography.bodyLarge,
+                                    color = TicketScanTheme.colors.onSurface
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = TicketScanIcons.categoryIcon(cat.name),
+                                    contentDescription = null,
+                                    tint = TicketScanTheme.colors.primary
+                                )
                             },
                             onClick = {
                                 category = cat
@@ -253,7 +246,7 @@ fun EditItemDialog(
                             }
                         )
                     }
-                }
+                    }
             }
 
             if (onDelete != null) {
