@@ -2,18 +2,22 @@ package com.example.ticketscan.domain.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ticketscan.domain.model.*
+import com.example.ticketscan.domain.model.Category
+import com.example.ticketscan.domain.model.Store
+import com.example.ticketscan.domain.model.Ticket
+import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.repositories.category.CategoryRepository
 import com.example.ticketscan.domain.repositories.stats.StatsRepository
 import com.example.ticketscan.domain.repositories.store.StoreRepository
 import com.example.ticketscan.domain.repositories.ticket.TicketRepository
 import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepository
 import com.example.ticketscan.ui.components.Period
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Calendar
+import java.util.UUID
 
 class RepositoryViewModel(
     private val storeRepo: StoreRepository,
