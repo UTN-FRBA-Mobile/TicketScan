@@ -1,39 +1,36 @@
 package com.example.ticketscan.ui.screens
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.ticketscan.ui.components.ProfileSection
 import com.example.ticketscan.ui.components.ProfileHeader
+import com.example.ticketscan.ui.components.ProfileItem
+import com.example.ticketscan.ui.components.ProfileSection
+import com.example.ticketscan.ui.components.TicketScanCard
+import com.example.ticketscan.ui.components.TicketScanCardStyle
+import com.example.ticketscan.ui.components.TicketScanScreenContainer
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @Composable
 fun ProfileScreen(
-    navController: NavController,
-    onNavigateToProfile: () -> Unit = {}
+    navController: NavController
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+    TicketScanScreenContainer(
+        verticalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.lg)
     ) {
-        // Header
-        ProfileHeader(
-            name = "Juan Pérez",
-            subtitle = "Mi cuenta",
-            onEditClick = { navController.navigate("edit_contact") }
-        )
+        TicketScanCard(
+            style = TicketScanCardStyle.Filled,
+            contentPadding = PaddingValues(TicketScanTheme.spacing.lg)
+        ) {
+            ProfileHeader(
+                name = "Juan Pérez",
+                subtitle = "Mi cuenta",
+                onEditClick = { navController.navigate("edit_contact") }
+            )
+        }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Gestión de datos section
         ProfileSection(
             title = "Gestión de datos",
             items = listOf(
@@ -50,9 +47,6 @@ fun ProfileScreen(
             )
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Accesibilidad section
         ProfileSection(
             title = "Accesibilidad",
             items = listOf(
@@ -68,30 +62,5 @@ fun ProfileScreen(
                 )
             )
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Sobre TicketScan section
-        ProfileSection(
-            title = "Sobre TicketScan",
-            items = listOf(
-                ProfileItem(
-                    text = "Términos y Condiciones",
-                    icon = TicketScanIcons.Description,
-                    onClick = onNavigateToProfile //TODO: hay que definir que colocar
-                ),
-                ProfileItem(
-                    text = "Sobre nosotros",
-                    icon = TicketScanIcons.Info,
-                    onClick = onNavigateToProfile //TODO: hay que definir que colocar
-                )
-            )
-        )
     }
 }
-
-data class ProfileItem(
-    val text: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector,
-    val onClick: () -> Unit
-)

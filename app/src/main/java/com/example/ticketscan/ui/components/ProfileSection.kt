@@ -1,13 +1,22 @@
 package com.example.ticketscan.ui.components
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.ticketscan.ui.screens.ProfileItem
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 
@@ -19,27 +28,20 @@ fun ProfileSection(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.sm)
     ) {
-        // Section title
         Text(
             text = title,
-            style = TicketScanTheme.typography.titleLarge,
-            color = TicketScanTheme.colors.primary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            style = TicketScanTheme.typography.titleMedium,
+            color = TicketScanTheme.colors.onSurface,
+            modifier = Modifier.padding(horizontal = TicketScanTheme.spacing.lg)
         )
 
-        // Section items
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = TicketScanTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = TicketScanTheme.colors.surfaceVariant
-            )
+        TicketScanCard(
+            style = TicketScanCardStyle.Tonal,
+            contentPadding = PaddingValues(vertical = TicketScanTheme.spacing.xs)
         ) {
-            Column(
-                modifier = Modifier.padding(vertical = 4.dp)
-            ) {
+            Column {
                 items.forEachIndexed { index, item ->
                     ProfileItemRow(
                         item = item,
@@ -61,8 +63,11 @@ private fun ProfileItemRow(
             onClick = item.onClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp)
+                .padding(horizontal = TicketScanTheme.spacing.xs),
+            contentPadding = PaddingValues(
+                horizontal = TicketScanTheme.spacing.md,
+                vertical = TicketScanTheme.spacing.sm
+            )
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -72,9 +77,9 @@ private fun ProfileItemRow(
                     imageVector = item.icon,
                     contentDescription = null,
                     tint = TicketScanTheme.colors.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(TicketScanTheme.spacing.xl)
                 )
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(TicketScanTheme.spacing.md))
                 Text(
                     text = item.text,
                     style = TicketScanTheme.typography.bodyLarge,
@@ -85,13 +90,16 @@ private fun ProfileItemRow(
                     imageVector = TicketScanIcons.ChevronRight,
                     contentDescription = null,
                     tint = TicketScanTheme.colors.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(TicketScanTheme.spacing.lg)
                 )
             }
         }
         if (showDivider) {
             HorizontalDivider(
-                modifier = Modifier.padding(start = 48.dp, end = 8.dp),
+                modifier = Modifier.padding(
+                    start = TicketScanTheme.spacing.xxl,
+                    end = TicketScanTheme.spacing.md
+                ),
                 thickness = 0.5.dp,
                 color = TicketScanTheme.colors.outline.copy(alpha = 0.5f)
             )

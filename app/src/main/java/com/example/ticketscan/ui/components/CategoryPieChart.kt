@@ -107,6 +107,13 @@ fun CategoryPieChart(
                             .background(stat.color, shape = CircleShape)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
+                    Icon(
+                        imageVector = TicketScanIcons.categoryIcon(stat.name),
+                        contentDescription = null,
+                        tint = TicketScanTheme.colors.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
                     FormattedCurrencyText(
                         label = stat.name,
                         amount = stat.amount,

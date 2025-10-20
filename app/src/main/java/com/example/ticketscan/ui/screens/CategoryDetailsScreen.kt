@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -54,7 +56,18 @@ fun CategoryDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = categoryName) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = TicketScanIcons.categoryIcon(categoryName),
+                            contentDescription = null,
+                            tint = TicketScanTheme.colors.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(TicketScanTheme.spacing.sm))
+                        Text(text = categoryName)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(TicketScanIcons.ArrowBack, contentDescription = "Volver")
@@ -152,7 +165,7 @@ fun TransactionItem(ticket: Ticket) {
                 Text(text = ticket.date.toString(), style = TicketScanTheme.typography.bodySmall)
             }
             Text(
-                text = "$$${ticket.total}",
+                text = "$${ticket.total}",
                 fontWeight = FontWeight.Bold,
                 color = TicketScanTheme.colors.primary
             )

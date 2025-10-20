@@ -2,28 +2,33 @@ package com.example.ticketscan.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Vibrant palette
-val Primary = Color(0xFF00BFA6)         // teal
-val PrimaryContainer = Color(0xFF00E5B4)
-val Secondary = Color(0xFFFF7043)       // coral
-val Tertiary = Color(0xFFFFC107)        // amber
+// Balanced brand palette leaning on emerald & slate neutrals
+val Primary = Color(0xFF006A60)
+val PrimaryContainer = Color(0xFF5DE3C5)
+val Secondary = Color(0xFF1F2933)
+val Tertiary = Color(0xFF0EA5E9)
 
-val Surface = Color(0xFFFFFFFF)
-val SurfaceVariant = Color(0xFFF1FBF9)
-val OnSurface = Color(0xFF022D26)
-val OnSurfaceVariant = Color(0xFF4B6B64)
-val Outline = Color(0xFFBDBDBD)
+val Surface = Color(0xFFFDFEFE)
+val SurfaceVariant = Color(0xFFF0F5F4)
+val OnSurface = Color(0xFF082924)
+val OnSurfaceVariant = Color(0xFF4A6963)
+val Outline = Color(0xFFC8D7D3)
 
-val Background = Color(0xFFF8FEFD)
-val OnBackground = Color(0xFF022D26)
+val Background = Color(0xFFF6FAF9)
+val OnBackground = OnSurface
 
 // Accent/danger
-val ErrorContainer = Color(0xFFFDECEA)
-val OnErrorContainer = Color(0xFF610E0E)
+val Error = Color(0xFFB3261E)
+val ErrorContainer = Color(0xFFF9DEDC)
+val OnErrorContainer = Color(0xFF410E0B)
 
-// New semantic tokens
-val Error = Color(0xFFB00020)    // standard material error
-val Success = Color(0xFF2E7D32)  // material green 700
+// Success & info semantic tokens
+val Success = Color(0xFF0F7A6C)
+val SuccessContainer = Color(0xFFD2F4ED)
+val OnSuccessContainer = Color(0xFF0B332D)
+val Info = Color(0xFF1B6EF3)
+val InfoContainer = Color(0xFFDBE5FF)
+val OnInfoContainer = Color(0xFF102A5C)
 
 // Legacy names (kept for backwards compatibility with existing Theme.kt)
 val Purple80 = Color(0xFFD0BCFF)

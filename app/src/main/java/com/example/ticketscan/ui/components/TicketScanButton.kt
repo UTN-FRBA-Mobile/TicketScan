@@ -1,8 +1,9 @@
 package com.example.ticketscan.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,8 +22,7 @@ fun TicketScanButton(
 ) {
     ElevatedButton(
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier,
         shape = TicketScanTheme.shapes.medium,
         colors = ButtonDefaults.elevatedButtonColors(
             containerColor = containerColor,
@@ -32,7 +32,10 @@ fun TicketScanButton(
         ),
         enabled = enabled,
         elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 8.dp),
-        contentPadding = PaddingValues(vertical = 14.dp)
+        contentPadding = PaddingValues(
+            vertical = TicketScanTheme.spacing.md,
+            horizontal = TicketScanTheme.spacing.lg
+        )
     ) {
         Text(
             text = text,

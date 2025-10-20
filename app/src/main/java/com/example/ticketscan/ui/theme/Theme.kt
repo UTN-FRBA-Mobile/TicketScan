@@ -1,15 +1,13 @@
 package com.example.ticketscan.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import com.example.ticketscan.domain.model.AppearancePreferences
 
 @Composable
 fun TicketScanTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    appearance: AppearancePreferences = AppearancePreferences(),
     content: @Composable () -> Unit
 ) {
     // Delegate to our centralized provider which already wires TicketScanTheme + MaterialTheme
-    TicketScanThemeProvider(darkTheme = darkTheme, content = content)
+    TicketScanThemeProvider(appearance = appearance, content = content)
 }

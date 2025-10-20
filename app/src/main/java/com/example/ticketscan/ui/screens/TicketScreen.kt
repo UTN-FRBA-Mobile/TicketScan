@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +25,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,13 +35,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -258,8 +262,19 @@ fun EditItemDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = 520.dp)
+            .padding(horizontal = TicketScanTheme.spacing.xl),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        containerColor = TicketScanTheme.colors.surface,
+        titleContentColor = TicketScanTheme.colors.onSurface,
+        textContentColor = TicketScanTheme.colors.onSurfaceVariant,
         confirmButton = {
             TextButton(
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = TicketScanTheme.colors.primary
+                ),
                 onClick = {
                     attemptedSave = true
                     if (isFormValid) {
@@ -271,11 +286,35 @@ fun EditItemDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = TicketScanTheme.colors.onSurfaceVariant)
+            ) { Text("Cancelar") }
         },
-        title = { Text("Editar artículo") },
+        title = {
+            Text(
+                text = "Editar artículo",
+                style = TicketScanTheme.typography.titleLarge,
+                color = TicketScanTheme.colors.onSurface
+            )
+        },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.md)
+            ) {
+                val textFieldColors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = TicketScanTheme.colors.primary,
+                    unfocusedBorderColor = TicketScanTheme.colors.outline,
+                    focusedLabelColor = TicketScanTheme.colors.primary,
+                    cursorColor = TicketScanTheme.colors.primary,
+                    focusedContainerColor = TicketScanTheme.colors.surfaceVariant,
+                    unfocusedContainerColor = TicketScanTheme.colors.surfaceVariant,
+                    errorCursorColor = TicketScanTheme.colors.error,
+                    errorBorderColor = TicketScanTheme.colors.error,
+                    errorLabelColor = TicketScanTheme.colors.error
+                )
+
                 OutlinedTextField(
                     value = name,
                     onValueChange = {
@@ -286,13 +325,17 @@ fun EditItemDialog(
                     isError = showNameError,
                     supportingText = {
                         if (showNameError) {
-                            Text("El nombre no puede estar vacío", color = TicketScanTheme.colors.error)
+                            Text(
+                                text = "El nombre no puede estar vacío",
+                                style = TicketScanTheme.typography.bodySmall,
+                                color = TicketScanTheme.colors.error
+                            )
                         }
                     },
                     textStyle = TicketScanTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxWidth().height(64.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = textFieldColors
                 )
-                Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = qtyText,
                     onValueChange = {
@@ -303,7 +346,11 @@ fun EditItemDialog(
                     isError = showQtyError,
                     supportingText = {
                         if (showQtyError) {
-                            Text("La cantidad debe ser mayor a 0", color = TicketScanTheme.colors.error)
+                            Text(
+                                text = "La cantidad debe ser mayor a 0",
+                                style = TicketScanTheme.typography.bodySmall,
+                                color = TicketScanTheme.colors.error
+                            )
                         }
                     },
                     keyboardOptions = KeyboardOptions(
@@ -311,9 +358,9 @@ fun EditItemDialog(
                         imeAction = ImeAction.Next
                     ),
                     textStyle = TicketScanTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxWidth().height(64.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = textFieldColors
                 )
-                Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = priceText,
                     onValueChange = {
@@ -324,7 +371,11 @@ fun EditItemDialog(
                     isError = showPriceError,
                     supportingText = {
                         if (showPriceError) {
-                            Text("El precio debe ser mayor a 0", color = TicketScanTheme.colors.error)
+                            Text(
+                                text = "El precio debe ser mayor a 0",
+                                style = TicketScanTheme.typography.bodySmall,
+                                color = TicketScanTheme.colors.error
+                            )
                         }
                     },
                     keyboardOptions = KeyboardOptions(
@@ -332,9 +383,9 @@ fun EditItemDialog(
                         imeAction = ImeAction.Next
                     ),
                     textStyle = TicketScanTheme.typography.bodyLarge,
-                    modifier = Modifier.fillMaxWidth().height(64.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = textFieldColors
                 )
-                Spacer(Modifier.height(12.dp))
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -344,9 +395,19 @@ fun EditItemDialog(
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Categoría") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = TicketScanIcons.categoryIcon(category.name),
+                                contentDescription = null,
+                                tint = TicketScanTheme.colors.onSurfaceVariant
+                            )
+                        },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         textStyle = TicketScanTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth().menuAnchor().height(64.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        colors = textFieldColors
                     )
                     DropdownMenu(
                         expanded = expanded,
@@ -355,7 +416,20 @@ fun EditItemDialog(
                     ) {
                         categories.forEach { cat ->
                             DropdownMenuItem(
-                                text = { Text(cat.name) },
+                                text = {
+                                    Text(
+                                        text = cat.name,
+                                        style = TicketScanTheme.typography.bodyLarge,
+                                        color = TicketScanTheme.colors.onSurface
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = TicketScanIcons.categoryIcon(cat.name),
+                                        contentDescription = null,
+                                        tint = TicketScanTheme.colors.primary
+                                    )
+                                },
                                 onClick = {
                                     category = cat
                                     expanded = false
@@ -366,27 +440,36 @@ fun EditItemDialog(
                 }
 
                 if (onDelete != null) {
-                    Spacer(Modifier.height(12.dp))
                     TextButton(
                         onClick = { showConfirmDelete = true },
+                        colors = ButtonDefaults.textButtonColors(contentColor = TicketScanTheme.colors.error)
                     ) {
-                        Text("Eliminar", color = TicketScanTheme.colors.error)
+                        Text("Eliminar")
                     }
 
                     if (showConfirmDelete) {
                         AlertDialog(
                             onDismissRequest = { showConfirmDelete = false },
+                            containerColor = TicketScanTheme.colors.surface,
+                            titleContentColor = TicketScanTheme.colors.onSurface,
+                            textContentColor = TicketScanTheme.colors.onSurfaceVariant,
                             title = { Text("Confirmar eliminación") },
                             text = { Text("¿Estás seguro de que quieres eliminar este artículo?") },
                             confirmButton = {
-                                TextButton(onClick = {
-                                    onDelete(initial.id)
-                                    showConfirmDelete = false
-                                    onDismiss()
-                                }) { Text("Eliminar", color = TicketScanTheme.colors.error) }
+                                TextButton(
+                                    colors = ButtonDefaults.textButtonColors(contentColor = TicketScanTheme.colors.error),
+                                    onClick = {
+                                        onDelete(initial.id)
+                                        showConfirmDelete = false
+                                        onDismiss()
+                                    }
+                                ) { Text("Eliminar") }
                             },
                             dismissButton = {
-                                TextButton(onClick = { showConfirmDelete = false }) { Text("Cancelar") }
+                                TextButton(
+                                    colors = ButtonDefaults.textButtonColors(contentColor = TicketScanTheme.colors.onSurfaceVariant),
+                                    onClick = { showConfirmDelete = false }
+                                ) { Text("Cancelar") }
                             }
                         )
                     }
@@ -406,14 +489,26 @@ fun CategorySection(
     onItemDelete: (id: UUID) -> Unit = {}
 ) {
     Column {
-        Text(
-            text = category.name,
-            style = TicketScanTheme.typography.titleMedium,
-            color = TicketScanTheme.colors.onBackground,
+        Row(
             modifier = Modifier
-                .padding(vertical = 8.dp)
-                .fillMaxWidth(),
-        )
+                .fillMaxWidth()
+                .padding(vertical = TicketScanTheme.spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.sm)
+        ) {
+            Icon(
+                imageVector = TicketScanIcons.categoryIcon(category.name),
+                contentDescription = null,
+                tint = TicketScanTheme.colors.primary,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = category.name,
+                style = TicketScanTheme.typography.titleMedium,
+                color = TicketScanTheme.colors.onBackground,
+                modifier = Modifier.weight(1f)
+            )
+        }
         var editingItem by remember { mutableStateOf<TicketItem?>(null) }
 
         items.forEach { item ->
@@ -465,14 +560,29 @@ fun CategorySection(
 
         Spacer(Modifier.height(8.dp))
         val categoryTotal = items.sumOf { it.price * it.quantity }
-        Text(
-            text = "Total ${category.name}: $${"%.2f".format(categoryTotal)}",
-            style = TicketScanTheme.typography.bodyLarge,
+        Row(
             modifier = Modifier
-                .padding(top = 4.dp)
-                .fillMaxWidth(),
-            textAlign = TextAlign.End
-        )
+                .fillMaxWidth()
+                .padding(top = TicketScanTheme.spacing.xs),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.xs)
+            ) {
+                Icon(
+                    imageVector = TicketScanIcons.categoryIcon(category.name),
+                    contentDescription = null,
+                    tint = TicketScanTheme.colors.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Total ${category.name}: $${"%.2f".format(categoryTotal)}",
+                    style = TicketScanTheme.typography.bodyLarge,
+                    color = TicketScanTheme.colors.onSurface
+                )
+            }
+        }
     }
 }
 
