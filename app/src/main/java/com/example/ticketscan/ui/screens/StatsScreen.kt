@@ -36,7 +36,7 @@ fun StatsScreen(
         )
 
         TicketScanCard(
-            style = TicketScanCardStyle.Outline,
+            style = TicketScanCardStyle.Tonal,
             contentPadding = PaddingValues(TicketScanTheme.spacing.lg)
         ) {
             PeriodSelector(
@@ -70,7 +70,7 @@ fun StatsScreen(
         }
 
         TicketScanCard(
-            style = TicketScanCardStyle.Filled,
+            style = TicketScanCardStyle.Tonal,
             contentPadding = PaddingValues(TicketScanTheme.spacing.lg)
         ) {
             Column(

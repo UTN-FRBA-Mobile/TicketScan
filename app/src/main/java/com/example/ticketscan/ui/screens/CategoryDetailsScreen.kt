@@ -1,11 +1,14 @@
 package com.example.ticketscan.ui.screens
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,23 +25,29 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.repositories.stats.PeriodExpense
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ui.components.PeriodSelector
+import com.example.ticketscan.ui.components.TicketScanCard
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import java.text.NumberFormat
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,8 +94,8 @@ fun CategoryDetailsScreen(
             PeriodSelector(selectedPeriod = uiState.period, onPeriodChange = { viewModel.setPeriod(it) })
             PeriodExpensesChart(periodExpenses = uiState.periodExpenses, maxPeriods = maxPeriods)
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(uiState.transactions) {
-                    TransactionItem(ticket = it)
+                items(uiState.transactions) { transaction ->
+                    TransactionItem(transaction = transaction)
                 }
             }
         }
@@ -95,51 +104,157 @@ fun CategoryDetailsScreen(
 
 @Composable
 fun PeriodExpensesChart(periodExpenses: List<PeriodExpense>, maxPeriods: Int) {
-    // Simple placeholder bar chart built with Compose primitives to avoid adding a 3rd-party dependency.
+    // Compose-based bar chart with explicit Y axis labels, using themed colors for light/dark parity.
+    val periodsToShow = periodExpenses.take(maxPeriods)
     val currencyFormat = NumberFormat.getCurrencyInstance().apply { maximumFractionDigits = 0 }
-    val maxValue = periodExpenses.maxOfOrNull { it.amount } ?: java.math.BigDecimal.ONE
+    val maxValue = periodsToShow.maxOfOrNull { it.amount } ?: BigDecimal.ZERO
+    val maxDenominator = maxValue.toDouble().takeIf { it > 0.0 } ?: 1.0
+    val chartVerticalPadding = TicketScanTheme.spacing.md
+    val chartHorizontalPadding = TicketScanTheme.spacing.lg
+    val axisSteps = 4
+    val stepCount = BigDecimal.valueOf(axisSteps.toLong())
+    val axisLabels = (0..axisSteps).map { step ->
+        val numerator = BigDecimal.valueOf((axisSteps - step).toLong())
+        val ratio = if (maxValue == BigDecimal.ZERO) BigDecimal.ZERO else numerator.divide(stepCount, 2, RoundingMode.HALF_UP)
+        val value = maxValue.multiply(ratio)
+        currencyFormat.format(value)
+    }
+    val chartShape = RoundedCornerShape(TicketScanTheme.spacing.sm)
+    val barShape = RoundedCornerShape(topStart = TicketScanTheme.spacing.sm, topEnd = TicketScanTheme.spacing.sm)
+    val chartBackgroundColor = TicketScanTheme.colors.surface
+    val chartBorderColor = TicketScanTheme.colors.outline.copy(alpha = 0.2f)
+    val gridColor = TicketScanTheme.colors.onSurfaceVariant.copy(alpha = 0.14f)
+    val barColor = TicketScanTheme.colors.primary
 
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(bottom = 16.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Gastos por período", style = TicketScanTheme.typography.titleMedium)
+    TicketScanCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = TicketScanTheme.spacing.md)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = TicketScanTheme.spacing.lg, vertical = TicketScanTheme.spacing.md)) {
+            Text(
+                text = "Gastos por período",
+                style = TicketScanTheme.typography.titleMedium,
+                color = TicketScanTheme.colors.onSurface,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = TicketScanTheme.spacing.sm),
+                textAlign = TextAlign.Center
+            )
 
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .height(140.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                // Show up to maxPeriods bars; if less data, fill remaining with empty space
-                val periodsToShow = periodExpenses.take(maxPeriods)
-                for (i in 0 until maxPeriods) {
-                    val expense = periodsToShow.getOrNull(i)
-                    val fraction = if (expense != null) {
-                        val amt = expense.amount.toDouble()
-                        val max = maxValue.toDouble().coerceAtLeast(1.0)
-                        (amt / max).toFloat()
-                    } else 0f
-
-                    val barColor = TicketScanTheme.colors.primary
-                    Box(modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 8.dp),
-                        contentAlignment = Alignment.BottomCenter
+            val axisLabelWidth = 64.dp
+            val axisSpacing = TicketScanTheme.spacing.sm
+            if (periodsToShow.isEmpty()) {
+                Text(
+                    text = "Sin datos disponibles",
+                    style = TicketScanTheme.typography.bodyMedium,
+                    color = TicketScanTheme.colors.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = TicketScanTheme.spacing.md)
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(148.dp),
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(top = chartVerticalPadding, bottom = chartVerticalPadding)
+                            .width(axisLabelWidth),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        horizontalAlignment = Alignment.End
                     ) {
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .height((fraction * 100).dp)
-                            .background(color = barColor)
-                        )
+                        axisLabels.forEach { label ->
+                            Text(
+                                text = label,
+                                style = TicketScanTheme.typography.bodySmall,
+                                color = TicketScanTheme.colors.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(axisSpacing))
+
+                    val density = LocalDensity.current
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(chartShape)
+                            .background(chartBackgroundColor)
+                            .border(width = 1.dp, color = chartBorderColor, shape = chartShape)
+                    ) {
+                        val outlineColor = gridColor
+                        Canvas(modifier = Modifier.matchParentSize()) {
+                            val topPaddingPx = with(density) { chartVerticalPadding.toPx() }
+                            val strokeWidthPx = with(density) { 1.dp.toPx() }
+                            val usableHeight = size.height - (topPaddingPx * 2f)
+                            if (usableHeight > 0f) {
+                                for (step in 0..axisSteps) {
+                                    val fraction = step / axisSteps.toFloat()
+                                    val y = size.height - topPaddingPx - (usableHeight * fraction)
+                                    drawLine(
+                                        color = outlineColor,
+                                        start = Offset(0f, y),
+                                        end = Offset(size.width, y),
+                                        strokeWidth = strokeWidthPx
+                                    )
+                                }
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = chartHorizontalPadding - axisSpacing, vertical = chartVerticalPadding),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.Bottom
+                        ) {
+                            periodsToShow.forEach { expense ->
+                                val fraction = (expense.amount.toDouble() / maxDenominator).toFloat().coerceIn(0f, 1f)
+
+                                Box(
+                                    modifier = Modifier
+                                        .width(TicketScanTheme.spacing.xxl)
+                                        .fillMaxHeight(),
+                                    contentAlignment = Alignment.BottomCenter
+                                ) {
+                                    if (fraction > 0f) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight(fraction)
+                                                .clip(barShape)
+                                                .background(barColor)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            // Legend / values
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                periodExpenses.take(maxPeriods).forEach { p ->
-                    Text(text = p.periodName, style = TicketScanTheme.typography.bodySmall)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = TicketScanTheme.spacing.sm)
+                        .padding(start = axisLabelWidth + axisSpacing),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    periodsToShow.forEach { expense ->
+                        val periodName = expense.periodName
+                        Text(
+                            text = periodName,
+                            style = TicketScanTheme.typography.bodySmall,
+                            color = TicketScanTheme.colors.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(TicketScanTheme.spacing.xxl)
+                        )
+                    }
                 }
             }
         }
@@ -147,8 +262,8 @@ fun PeriodExpensesChart(periodExpenses: List<PeriodExpense>, maxPeriods: Int) {
 }
 
 @Composable
-fun TransactionItem(ticket: Ticket) {
-    Card(
+fun TransactionItem(transaction: CategoryTransaction) {
+    TicketScanCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
@@ -161,11 +276,21 @@ fun TransactionItem(ticket: Ticket) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = ticket.store?.name ?: ticket.id.toString().take(8), fontWeight = FontWeight.Bold)
-                Text(text = ticket.date.toString(), style = TicketScanTheme.typography.bodySmall)
+                Text(
+                    text = transaction.storeName ?: transaction.ticketId.toString().take(8),
+                    fontWeight = FontWeight.Bold,
+                    color = TicketScanTheme.colors.onSurface
+                )
+                val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+                Text(
+                    text = dateFormatter.format(transaction.date),
+                    style = TicketScanTheme.typography.bodySmall,
+                    color = TicketScanTheme.colors.onSurfaceVariant
+                )
             }
+            val currencyFormat = remember { NumberFormat.getCurrencyInstance() }
             Text(
-                text = "$${ticket.total}",
+                text = currencyFormat.format(transaction.amount),
                 fontWeight = FontWeight.Bold,
                 color = TicketScanTheme.colors.primary
             )

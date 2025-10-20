@@ -3,7 +3,6 @@ package com.example.ticketscan.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.repositories.stats.PeriodExpense
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ui.components.Period
@@ -12,13 +11,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.util.Date
+import java.util.UUID
 
 data class CategoryDetailsUiState(
     val categoryName: String = "",
     val periodExpenses: List<PeriodExpense> = emptyList(),
-    val transactions: List<Ticket> = emptyList(),
+    val transactions: List<CategoryTransaction> = emptyList(),
     val period: Period = Period.MENSUAL,
     val maxPeriods: Int = 4
+)
+
+data class CategoryTransaction(
+    val ticketId: UUID,
+    val storeName: String?,
+    val date: Date,
+    val amount: BigDecimal
 )
 
 class CategoryDetailsViewModelFactory(
@@ -65,7 +75,27 @@ class CategoryDetailsViewModel(
 
     private fun loadTransactions() {
         viewModelScope.launch {
-            val transactions = repositoryViewModel.getTicketsByFilters(categoryName, _uiState.value.period, maxPeriods)
+            val tickets = repositoryViewModel.getTicketsByFilters(categoryName, _uiState.value.period, maxPeriods)
+            val normalizedCategory = categoryName.trim().lowercase()
+            val transactions = tickets.mapNotNull { ticket ->
+                val categoryTotal = ticket.items
+                    .filter { it.category.name.trim().lowercase() == normalizedCategory }
+                    .fold(BigDecimal.ZERO) { acc, item ->
+                        acc + BigDecimal.valueOf(item.price).setScale(2, RoundingMode.HALF_UP)
+                    }
+
+                if (categoryTotal.compareTo(BigDecimal.ZERO) > 0) {
+                    val normalizedTotal = categoryTotal.setScale(2, RoundingMode.HALF_UP)
+                    CategoryTransaction(
+                        ticketId = ticket.id,
+                        storeName = ticket.store?.name,
+                        date = ticket.date,
+                        amount = normalizedTotal
+                    )
+                } else {
+                    null
+                }
+            }
             _uiState.update { it.copy(transactions = transactions) }
         }
     }
