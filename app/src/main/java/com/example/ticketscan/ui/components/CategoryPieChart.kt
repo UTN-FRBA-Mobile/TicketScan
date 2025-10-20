@@ -16,21 +16,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.ticketscan.domain.model.CategoryStat
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import com.example.ticketscan.ui.theme.TicketScanIcons
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.NumberFormat
@@ -98,7 +96,7 @@ fun CategoryPieChart(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                        .border(1.dp, TicketScanTheme.colors.outline, RoundedCornerShape(8.dp))
                         .clickable { onCategoryClick(stat.name) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
 
@@ -109,13 +107,20 @@ fun CategoryPieChart(
                             .background(stat.color, shape = CircleShape)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
+                    Icon(
+                        imageVector = TicketScanIcons.categoryIcon(stat.name),
+                        contentDescription = null,
+                        tint = TicketScanTheme.colors.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
                     FormattedCurrencyText(
                         label = stat.name,
                         amount = stat.amount,
                         textStyle = TicketScanTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f)
                     )
-                    Icon(Icons.Default.ArrowForwardIos, contentDescription = "Ver detalle", tint = Color.Gray)
+                    Icon(TicketScanIcons.ArrowForwardIos, contentDescription = "Ver detalle", tint = TicketScanTheme.colors.onSurfaceVariant)
                 }
             }
         }

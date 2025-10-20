@@ -1,23 +1,17 @@
 package com.example.ticketscan.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import com.example.ticketscan.ui.theme.TicketScanIcons
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -34,44 +28,54 @@ fun ComparisonSection(current: BigDecimal, previous: BigDecimal) {
     val isPositive = percentageChange.compareTo(BigDecimal.ZERO) > 0
     val isNeutral = percentageChange.compareTo(BigDecimal.ZERO) == 0
 
-    val backgroundColor = when {
-        isNeutral -> MaterialTheme.colorScheme.surfaceVariant
-        isPositive -> Color(0xFFFBE9E7) // A light red color
-        else -> Color(0xFFE8F5E9) // A light green color
-    }
-
-    val contentColor = when {
-        isNeutral -> MaterialTheme.colorScheme.onSurfaceVariant
-        isPositive -> Color(0xFFD32F2F) // A dark red color
-        else -> Color(0xFF388E3C) // A dark green color
+    val (containerColor, contentColor, iconTint) = when {
+        isNeutral -> Triple(
+            TicketScanTheme.colors.surfaceVariant,
+            TicketScanTheme.colors.onSurfaceVariant,
+            TicketScanTheme.colors.onSurfaceVariant
+        )
+        isPositive -> Triple(
+            TicketScanTheme.colors.errorContainer,
+            TicketScanTheme.colors.error,
+            TicketScanTheme.colors.error
+        )
+        else -> Triple(
+            TicketScanTheme.colors.successContainer,
+            TicketScanTheme.colors.onSuccessContainer,
+            TicketScanTheme.colors.success
+        )
     }
 
     val icon = when {
         isNeutral -> null
-        isPositive -> Icons.Default.ArrowUpward
-        else -> Icons.Default.ArrowDownward
+        isPositive -> TicketScanIcons.ArrowUpward
+        else -> TicketScanIcons.ArrowDownward
     }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
-        Card(
-            colors = CardDefaults.cardColors(containerColor = backgroundColor)
+        TicketScanCard(
+            style = TicketScanCardStyle.Tonal,
+            containerColor = containerColor,
+            contentColor = contentColor,
+            contentPadding = PaddingValues(TicketScanTheme.spacing.md)
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
                 if (icon != null) {
-                    Icon(icon, contentDescription = null, tint = contentColor)
+                    Icon(icon, contentDescription = null, tint = iconTint)
                 }
                 val formattedPercentage = percentageChange.abs().multiply(BigDecimal(100)).setScale(2, RoundingMode.HALF_UP).toPlainString()
                 Text(
-                    text = if(isNeutral) "Sin cambios" else "$formattedPercentage%",
-                    color = contentColor,
+                    text = if (isNeutral) "Sin cambios" else "$formattedPercentage%",
                     style = TicketScanTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = if (icon != null) 8.dp else 0.dp)
+                    modifier = Modifier.padding(start = if (icon != null) TicketScanTheme.spacing.sm else TicketScanTheme.spacing.none),
+                    color = contentColor
                 )
             }
         }

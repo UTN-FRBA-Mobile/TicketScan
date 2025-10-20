@@ -1,7 +1,7 @@
 package com.example.ticketscan.ui.theme
 
-import androidx.compose.material3.Typography
 import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -29,13 +29,19 @@ data class TicketScanColors(
     val onErrorContainer: Color,
     // Simple semantic colors
     val error: Color,
-    val success: Color
+    val success: Color,
+    val successContainer: Color,
+    val onSuccessContainer: Color,
+    val info: Color,
+    val infoContainer: Color,
+    val onInfoContainer: Color
 )
 
 data class TicketScanThemeData(
     val colors: TicketScanColors,
     val typography: Typography,
-    val shapes: Shapes
+    val shapes: Shapes,
+    val spacing: TicketScanSpacing
 )
 
 val LocalTicketScanTheme = staticCompositionLocalOf<TicketScanThemeData> {
@@ -47,10 +53,12 @@ fun TicketScanTheme(
     colors: TicketScanColors,
     typography: Typography,
     shapes: Shapes,
+    spacing: TicketScanSpacing,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
-        LocalTicketScanTheme provides TicketScanThemeData(colors, typography, shapes),
+        LocalTicketScanTheme provides TicketScanThemeData(colors, typography, shapes, spacing),
+        LocalTicketScanSpacing provides spacing,
         content = content
     )
 }
@@ -62,4 +70,6 @@ object TicketScanTheme {
         @Composable @ReadOnlyComposable get() = LocalTicketScanTheme.current.typography
     val shapes: Shapes
         @Composable @ReadOnlyComposable get() = LocalTicketScanTheme.current.shapes
+    val spacing: TicketScanSpacing
+        @Composable @ReadOnlyComposable get() = LocalTicketScanTheme.current.spacing
 }

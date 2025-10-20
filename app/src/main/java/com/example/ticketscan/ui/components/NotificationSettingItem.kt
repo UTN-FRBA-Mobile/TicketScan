@@ -7,6 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @Composable
 fun NotificationSettingItem(
@@ -18,9 +19,9 @@ fun NotificationSettingItem(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        shape = TicketScanTheme.shapes.medium,
+        color = TicketScanTheme.colors.surfaceVariant,
+        contentColor = TicketScanTheme.colors.onSurfaceVariant
     ) {
         Row(
             modifier = Modifier
@@ -34,28 +35,28 @@ fun NotificationSettingItem(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = TicketScanTheme.typography.bodyLarge,
+                    color = TicketScanTheme.colors.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = TicketScanTheme.typography.bodyMedium,
+                    color = TicketScanTheme.colors.onSurfaceVariant,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            
+
             // Switch
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                    checkedThumbColor = TicketScanTheme.colors.primary,
+                    checkedTrackColor = TicketScanTheme.colors.primaryContainer,
+                    uncheckedThumbColor = TicketScanTheme.colors.outline,
+                    uncheckedTrackColor = TicketScanTheme.colors.surfaceVariant
                 )
             )
         }

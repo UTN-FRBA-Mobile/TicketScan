@@ -1,8 +1,6 @@
 package com.example.ticketscan.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.SettingDropdown
+import com.example.ticketscan.ui.theme.TicketScanIcons
+import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,13 +25,13 @@ fun DefaultTicketEntryScreen(
                 title = { 
                     Text(
                         text = "Entrada por defecto",
-                        style = MaterialTheme.typography.titleLarge
-                    ) 
+                        style = TicketScanTheme.typography.titleLarge
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = TicketScanIcons.ArrowBack,
                             contentDescription = "Volver"
                         )
                     }
@@ -68,8 +68,8 @@ fun DefaultTicketEntryScreen(
             // Help text
             Text(
                 text = "Esta configuración se aplicará cuando crees un nuevo ticket.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = TicketScanTheme.typography.bodyMedium,
+                color = TicketScanTheme.colors.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }

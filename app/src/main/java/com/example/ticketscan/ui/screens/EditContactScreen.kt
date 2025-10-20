@@ -4,9 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -15,6 +12,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.TicketScanButton
+import com.example.ticketscan.ui.theme.TicketScanIcons
+import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,13 +32,13 @@ fun EditContactScreen(
                 title = { 
                     Text(
                         text = "Editar Contacto",
-                        style = MaterialTheme.typography.titleLarge
-                    ) 
+                        style = TicketScanTheme.typography.titleLarge
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = TicketScanIcons.ArrowBack,
                             contentDescription = "Volver"
                         )
                     }
@@ -105,4 +104,3 @@ fun EditContactScreen(
         }
     )
 }
-

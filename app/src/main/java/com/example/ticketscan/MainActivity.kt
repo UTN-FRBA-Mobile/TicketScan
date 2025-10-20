@@ -9,6 +9,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,6 +28,8 @@ import com.example.ticketscan.ia.internal.IAServiceImpl
 import com.example.ticketscan.ia.internal.mock.MockIAApi
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
 import com.example.ticketscan.ui.screens.AppearanceSettingsScreen
+import com.example.ticketscan.ui.screens.AppearanceSettingsViewModel
+import com.example.ticketscan.ui.screens.AppearanceSettingsViewModelFactory
 import com.example.ticketscan.ui.screens.CameraScanScreen
 import com.example.ticketscan.ui.screens.CameraScanViewModel
 import com.example.ticketscan.ui.screens.CameraScanViewModelFactory
@@ -33,6 +37,7 @@ import com.example.ticketscan.ui.screens.CategoryDetailsScreen
 import com.example.ticketscan.ui.screens.DefaultTicketEntryScreen
 import com.example.ticketscan.ui.screens.EditContactScreen
 import com.example.ticketscan.ui.screens.HomeScreen
+import com.example.ticketscan.ui.screens.MoreScreen
 import com.example.ticketscan.ui.screens.NotificationSettingsScreen
 import com.example.ticketscan.ui.screens.ProcessingScreen
 import com.example.ticketscan.ui.screens.ProfileScreen
@@ -61,7 +66,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            TicketScanThemeProvider {
+            val appearanceFactory = remember { AppearanceSettingsViewModelFactory(applicationContext) }
+            val appearanceViewModel: AppearanceSettingsViewModel = viewModel(factory = appearanceFactory)
+            val appearancePreferences by appearanceViewModel.uiState.collectAsState()
+
+            TicketScanThemeProvider(appearance = appearancePreferences) {
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
@@ -130,12 +139,17 @@ class MainActivity : ComponentActivity() {
                             NotificationSettingsScreen(navController = navController)
                         }
                         composable("appearance_settings") {
-                            AppearanceSettingsScreen(navController = navController)
+                            AppearanceSettingsScreen(
+                                navController = navController,
+                                viewModel = appearanceViewModel
+                            )
                         }
                         composable("default_ticket_entry") {
                             DefaultTicketEntryScreen(navController = navController)
                         }
-                        composable("more") { /* TODO: More screen */ HomeScreen(navController, repositoryViewModel) }
+                        composable("more") {
+                            MoreScreen(navController = navController)
+                        }
                         composable("ticket/{id}") { backStackEntry ->
                             val idArg = backStackEntry.arguments?.getString("id")
                             val uuid = UUID.fromString(idArg)

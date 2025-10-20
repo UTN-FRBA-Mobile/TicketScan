@@ -11,7 +11,18 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -29,6 +40,8 @@ import java.util.concurrent.Executor
 import java.util.Locale
 import com.example.ticketscan.ui.components.CaptureThumbnailPreview
 import com.example.ticketscan.ui.components.ErrorBadge
+import com.example.ticketscan.ui.theme.TicketScanIcons
+import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @Composable
 fun CameraScanScreen(
@@ -176,7 +189,7 @@ fun CameraScanScreen(
 
             if (items.isNotEmpty()) {
                 Spacer(Modifier.height(12.dp))
-                Text("Resultados", style = MaterialTheme.typography.titleMedium)
+                Text("Resultados", style = TicketScanTheme.typography.titleMedium)
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -185,7 +198,22 @@ fun CameraScanScreen(
                     items(items) { it ->
                         ListItem(
                             headlineContent = { Text(it.name) },
-                            supportingContent = { Text(it.category.name) },
+                            supportingContent = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = TicketScanIcons.categoryIcon(it.category.name),
+                                        contentDescription = null,
+                                        tint = TicketScanTheme.colors.primary,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(TicketScanTheme.spacing.xs))
+                                    Text(
+                                        text = it.category.name,
+                                        style = TicketScanTheme.typography.bodyMedium,
+                                        color = TicketScanTheme.colors.onSurfaceVariant
+                                    )
+                                }
+                            },
                             trailingContent = {
                                 val priceText = "$" + String.format(Locale.US, "%.2f", it.price)
                                 Text(priceText)
@@ -198,5 +226,3 @@ fun CameraScanScreen(
         }
     }
 }
-
-
