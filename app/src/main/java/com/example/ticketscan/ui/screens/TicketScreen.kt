@@ -34,6 +34,7 @@ import com.example.ticketscan.ui.components.TicketHeader
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.util.Calendar
+import java.util.Date
 import java.util.UUID
 
 @Suppress("UNUSED_PARAMETER")
@@ -56,7 +57,7 @@ fun TicketScreen(
     ) {
         TicketHeader(
             title = if (isEditing) "Editar Ticket" else "Ticket",
-            date = ticket?.date,
+            date = ticket?.date ?: Date(),
             store = ticket?.store,
             isEditing = isEditing,
             onEditDate = {
@@ -105,10 +106,10 @@ fun TicketScreen(
             Spacer(Modifier.height(12.dp))
         }
 
-        val ticketTotal = ticket?.items?.sumOf { it.price * it.quantity } ?: 0.0
+        val ticketTotal = ticket?.items?.sumOf { it.price } ?: 0.0
         Text(
             text = "Total ticket: $${"%.2f".format(ticketTotal)}",
-            style = TicketScanTheme.typography.headlineSmall,
+            style = TicketScanTheme.typography.headlineMedium,
             color = TicketScanTheme.colors.primary,
             modifier = Modifier
                 .fillMaxWidth()

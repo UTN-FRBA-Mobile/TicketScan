@@ -68,7 +68,7 @@ fun HomeScreen(
             )
             Column(
                 modifier = Modifier
-                .fillMaxWidth(),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (tickets.isEmpty()) {
@@ -80,16 +80,10 @@ fun HomeScreen(
                 } else {
                     tickets.forEach { ticket ->
                         UploadCard(
-                            title = ticket.store?.name ?: "Ticket ${ticket.id.toString().take(8)}",
+                            ticket = ticket,
                             modifier = Modifier.fillMaxWidth(),
                             onClick = { navController.navigate("ticket/${ticket.id}") }
-                        ) {
-                            Text(
-                                text = "Fecha: ${ticket.date}  •  Total: $${ticket.total}",
-                                style = TicketScanTheme.typography.bodyMedium,
-                                color = TicketScanTheme.colors.onBackground
-                            )
-                        }
+                        )
                     }
                 }
             }

@@ -24,7 +24,7 @@ import java.util.Date
 fun TicketHeader(
     modifier: Modifier = Modifier,
     title: String,
-    date: Date?,
+    date: Date,
     store: Store? = null,
     isEditing: Boolean = false,
     onEditDate: () -> Unit = {},
@@ -50,9 +50,7 @@ fun TicketHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = date?.let {
-                    SimpleDateFormat("yyyy/MM/dd").format(it)
-                } ?: "Fecha xx/xx/xxxx HH:mm",
+                text = "Fecha: ${SimpleDateFormat("yyyy/MM/dd").format(date)}",
                 style = TicketScanTheme.typography.bodyLarge,
                 color = TicketScanTheme.colors.onBackground
             )

@@ -21,13 +21,13 @@ import java.util.UUID
 
 @Composable
 fun CategorySection(
+    modifier: Modifier = Modifier,
     category: Category,
     items: List<TicketItem>,
     categories: List<Category>,
     isEditable: Boolean = false,
     onItemChange: (id: UUID, name: String?, price: Double?, quantity: Int?, category: Category?) -> Unit = { _, _, _, _, _ -> },
     onItemDelete: (id: UUID) -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     var editingItem by remember { mutableStateOf<TicketItem?>(null) }
 
@@ -69,7 +69,7 @@ fun CategorySection(
         val categoryTotal = items.sumOf { it.price * it.quantity }
         Text(
             text = "Total ${category.name}: $${"%.2f".format(categoryTotal)}",
-            style = TicketScanTheme.typography.bodyLarge,
+            style = TicketScanTheme.typography.headlineSmall,
             modifier = Modifier
                 .padding(top = 4.dp)
                 .fillMaxWidth(),
