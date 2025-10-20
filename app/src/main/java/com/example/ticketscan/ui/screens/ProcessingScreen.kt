@@ -23,8 +23,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ticketscan.R
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketOrigin
-import com.example.ticketscan.domain.repositories.category.CategoryRepositorySQLite
-import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepositorySQLite
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ui.theme.TicketScanTheme
