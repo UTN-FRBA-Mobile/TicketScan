@@ -10,4 +10,6 @@ data class Ticket(
     val origin: TicketOrigin = TicketOrigin.MEDIA,
     val items: List<TicketItem>,
     val total: Double
-)
+) {
+    fun name() = store?.name ?: "Ticket $id"
+}
