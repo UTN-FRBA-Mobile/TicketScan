@@ -77,7 +77,7 @@ fun TicketHeader(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = store?.let { "${it.name} - ${it.location}" } ?: "Tienda: ?",
+                    text = store?.name ?: "Tienda: ?",
                     style = TicketScanTheme.typography.bodyMedium,
                     color = if (store != null) TicketScanTheme.colors.onBackground else TicketScanTheme.colors.onBackground.copy(alpha = 0.6f)
                 )

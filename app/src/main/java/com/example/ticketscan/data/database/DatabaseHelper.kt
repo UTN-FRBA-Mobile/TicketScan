@@ -51,8 +51,8 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         CREATE TABLE IF NOT EXISTS stores (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            cuit INTEGER NOT NULL,
-            location TEXT NOT NULL
+            cuit INTEGER,
+            location TEXT
         );
     """
 

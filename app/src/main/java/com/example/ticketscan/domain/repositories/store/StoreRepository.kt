@@ -9,5 +9,5 @@ interface StoreRepository {
     suspend fun insertStore(store: Store): Boolean
     suspend fun updateStore(store: Store): Boolean
     suspend fun deleteStore(id: UUID): Boolean
+    suspend fun searchStoresByName(query: String, limit: Int = 5): List<Store>
 }
-

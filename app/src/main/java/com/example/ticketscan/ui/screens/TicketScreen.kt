@@ -198,14 +198,16 @@ fun TicketScreen(
             )
         }
 
-        // Diálogo para editar/crear tienda
         if (editingStore) {
             EditStoreDialog(
                 initial = ticket?.store,
                 onDismiss = { editingStore = false },
-                onSave = { name, cuit, location ->
-                    viewModel.updateTicketStore(name, cuit, location)
+                onSave = { name ->
+                    viewModel.updateTicketStore(name)
                     editingStore = false
+                },
+                onSearch = { query ->
+                    viewModel.searchStores(query)
                 }
             )
         }

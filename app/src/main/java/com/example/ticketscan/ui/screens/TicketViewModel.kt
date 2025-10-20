@@ -82,21 +82,29 @@ class TicketViewModel (
         _ticket.value = currentTicket.copy(date = newDate)
     }
 
-    fun updateTicketStore(name: String, cuit: Long, location: String) {
+    suspend fun searchStores(query: String): List<Store> {
+        return if (query.isBlank()) {
+            emptyList()
+        } else {
+            repositoryViewModel.searchStoresByName(query, limit = 5)
+        }
+    }
+
+    fun updateTicketStore(name: String) {
         viewModelScope.launch {
             val currentTicket = _ticket.value ?: return@launch
 
-            // Buscar tienda existente por nombre o CUIT
+            // Buscar tienda existente por nombre
             val allStores = repositoryViewModel.getAllStores()
-            var store = allStores.find { it.name == name || it.cuit == cuit }
+            var store = allStores.find { it.name.equals(name, ignoreCase = true) }
 
             if (store == null) {
                 // Si no existe, crear nueva tienda
                 val newStore = Store(
                     id = UUID.randomUUID(),
                     name = name,
-                    cuit = cuit,
-                    location = location
+                    cuit = null,
+                    location = null
                 )
                 repositoryViewModel.insertStore(newStore) { success ->
                     if (success) {

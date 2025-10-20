@@ -29,6 +29,9 @@ class RepositoryViewModel(
     }
     suspend fun getStoreById(id: UUID) = withContext(Dispatchers.IO) { storeRepo.getStoreById(id) }
     suspend fun getAllStores() = withContext(Dispatchers.IO) { storeRepo.getAllStores() }
+    suspend fun searchStoresByName(query: String, limit: Int = 5) = withContext(Dispatchers.IO) {
+        storeRepo.searchStoresByName(query, limit)
+    }
 
     // CATEGORY
     fun insertCategory(category: Category, onResult: (Boolean) -> Unit) = viewModelScope.launch {
