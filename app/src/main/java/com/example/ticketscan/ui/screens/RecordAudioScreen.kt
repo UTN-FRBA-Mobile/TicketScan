@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -51,8 +54,9 @@ fun RecordAudioScreen(
     var isRecording by remember { mutableStateOf(false) }
     var recorder: MediaRecorder? by remember { mutableStateOf(null) }
     var currentFile: File? by remember { mutableStateOf(null) }
+    var lastRecordedFile by remember { mutableStateOf<File?>(null) }
+    var pendingAudioFile by remember { mutableStateOf<File?>(null) }
 
-    // Handle navigation when ticket is created
     LaunchedEffect(createdTicket) {
         createdTicket?.let { ticketId ->
             navController.navigate("ticket/$ticketId")
@@ -60,7 +64,6 @@ fun RecordAudioScreen(
         }
     }
 
-    // Permission
     var hasAudioPermission by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -137,58 +140,75 @@ fun RecordAudioScreen(
                     Spacer(modifier = Modifier.weight(1f))
                 }
 
-                Button(
-                    onClick = {
-                        if (!isRecording) {
-                            try {
-                                val file = File(context.filesDir, "recordings/grabacion_${System.currentTimeMillis()}.aac")
-                                file.parentFile?.mkdirs()
-                                val m = MediaRecorder(context)
-                                m.setAudioSource(MediaRecorder.AudioSource.MIC)
-                                m.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-                                m.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                                m.setOutputFile(file.absolutePath)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    Button(
+                        onClick = {
+                            if (!isRecording) {
                                 try {
-                                    m.prepare()
-                                    m.start()
-                                    recorder = m
-                                    currentFile = file
-                                    isRecording = true
-                                } catch (e: Exception) {
-                                    m.release()
-                                    vm.onAnalyzeError(e.message ?: "Error al iniciar la grabación")
-                                }
-                            } catch (e: Exception) {
-                                vm.onAnalyzeError(e.message ?: "Error al configurar la grabación")
-                            }
-                        } else {
-                            try {
-                                recorder?.apply {
+                                    val file = File(context.filesDir, "recordings/grabacion_${System.currentTimeMillis()}.aac")
+                                    file.parentFile?.mkdirs()
+                                    val m = MediaRecorder(context)
+                                    m.setAudioSource(MediaRecorder.AudioSource.MIC)
+                                    m.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
+                                    m.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                                    m.setOutputFile(file.absolutePath)
                                     try {
-                                        stop()
+                                        m.prepare()
+                                        m.start()
+                                        recorder = m
+                                        currentFile = file
+                                        isRecording = true
                                     } catch (e: Exception) {
-                                        // ignore stop errors
-                                    } finally {
-                                        release()
+                                        m.release()
+                                        vm.onAnalyzeError(e.message ?: "Error al iniciar la grabación")
                                     }
+                                } catch (e: Exception) {
+                                    vm.onAnalyzeError(e.message ?: "Error al configurar la grabación")
                                 }
-                                isRecording = false
-                                recorder = null
-                                currentFile?.let { file ->
-                                    vm.analyzeAudio(file)
+                            } else {
+                                try {
+                                    recorder?.apply {
+                                        try {
+                                            stop()
+                                        } catch (e: Exception) {
+                                            // ignore stop errors
+                                        } finally {
+                                            release()
+                                        }
+                                    }
+                                    isRecording = false
+                                    recorder = null
+                                    currentFile?.let { file ->
+                                        vm.analyzeAudio(file)
+                                        lastRecordedFile = file
+                                    }
+                                    currentFile = null
+                                } catch (e: Exception) {
+                                    vm.onAnalyzeError(e.message ?: "Error al detener la grabación")
                                 }
-                                currentFile = null
-                            } catch (e: Exception) {
-                                vm.onAnalyzeError(e.message ?: "Error al detener la grabación")
                             }
-                        }
-                    },
-                    enabled = /* no explicit permission check here, system will request */ !isLoading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    Text(if (isRecording) "Detener grabación" else "Grabar Audio")
+                        },
+                        enabled = /* no explicit permission check here, system will request */ !isLoading,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Text(if (isRecording) "Detener grabación" else "Grabar Audio")
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Button(
+                        onClick = {
+                            lastRecordedFile?.let { file -> pendingAudioFile = file }
+                        },
+                        enabled = !isRecording && lastRecordedFile != null,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Text("Previsualizar")
+                    }
                 }
 
                 if (canContinue) {
@@ -202,6 +222,15 @@ fun RecordAudioScreen(
                         Text("Guardar Ticket")
                     }
                 }
+            }
+
+            pendingAudioFile?.let { file ->
+                AudioPreviewDialog(
+                    audioFile = file,
+                    onClose = {
+                        pendingAudioFile = null
+                    }
+                )
             }
         }
     }
