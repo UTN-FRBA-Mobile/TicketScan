@@ -40,6 +40,11 @@ fun RecordAudioScreen(
 ) {
     val context = LocalContext.current
 
+    // Limpiar estado previo
+    LaunchedEffect(Unit) {
+        vm.resetState()
+    }
+
     // State from ViewModel
     val isLoading by vm.isLoading.collectAsState()
     val items by vm.items.collectAsState()

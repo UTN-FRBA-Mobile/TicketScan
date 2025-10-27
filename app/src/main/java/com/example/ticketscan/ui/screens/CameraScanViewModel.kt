@@ -99,6 +99,15 @@ class CameraScanViewModel(
         }
     }
 
+    // Nuevo: limpia el estado transitorio
+    fun resetState() {
+        viewModelScope.launch {
+            _items.emit(emptyList())
+            _error.emit(null)
+            _capturedThumbnail.emit(null)
+        }
+    }
+
     private fun List<TicketItem>.meetsRequirements(): Boolean =
         isNotEmpty() && all { it.name.isNotBlank() && it.price > 0.0 }
 
