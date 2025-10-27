@@ -188,7 +188,13 @@ fun TicketScreen(
                 }
             },
             onEdit = { isEditing = true },
-            onShare = { exportTicketToPdf(context, ticket) }
+            // En lugar de exportar directamente, navegamos a la pantalla de opciones PDF
+            onShare = {
+                // Navegar a pdf_options con el id del ticket actual
+                ticket?.let { t ->
+                    navController.navigate("pdf_options/${t.id}")
+                } ?: Toast.makeText(context, "No hay ticket para opciones PDF", Toast.LENGTH_SHORT).show()
+            }
         )
 
         // Diálogo para crear/editar artículo
@@ -282,7 +288,8 @@ fun TicketScreenPreview() {
 }
 
 // Función auxiliar para exportar un ticket sencillo a PDF y guardarlo en filesDir.
-private fun exportTicketToPdf(context: Context, ticket: Ticket?) {
+// Se quita 'private' para que pueda ser reutilizada desde PdfOptionsScreen.
+fun exportTicketToPdf(context: Context, ticket: Ticket?) {
     if (ticket == null) {
         Toast.makeText(context, "No hay ticket para exportar", Toast.LENGTH_SHORT).show()
         return
