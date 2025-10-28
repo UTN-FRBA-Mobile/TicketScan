@@ -35,13 +35,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import java.io.File
-import java.util.concurrent.Executor
-import java.util.Locale
 import com.example.ticketscan.ui.components.CaptureThumbnailPreview
 import com.example.ticketscan.ui.components.ErrorBadge
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
+import java.io.File
+import java.util.Locale
+import java.util.concurrent.Executor
 
 @Composable
 fun CameraScanScreen(
@@ -107,6 +107,8 @@ fun CameraScanScreen(
     val capturedThumbnail by vm.capturedThumbnail.collectAsState()
     val canContinue by vm.canContinue.collectAsState()
     val createdTicket by vm.createdTicket.collectAsState()
+
+    var pendingPhotoFile by remember { mutableStateOf<File?>(null) }
 
     createdTicket?.let { ticketId ->
         LaunchedEffect(ticketId) {
@@ -175,13 +177,39 @@ fun CameraScanScreen(
                         )
                     }
                 ) { Text("Capturar y analizar") }
-                if (canContinue) {
-                    Spacer(Modifier.width(12.dp))
-                    Button(
-                        onClick = { vm.saveTicket(items) }
-                    ) { Text("Continuar") }
-                }
 
+                Spacer(Modifier.width(12.dp))
+                Button(
+                    enabled = hasCameraPermission && cameraBound && !loading,
+                    onClick = {
+                        val photoFile = File.createTempFile("ticketscan_preview_", ".jpg", context.cacheDir)
+                        val output = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+                        imageCapture.takePicture(
+                            output,
+                            mainExecutor,
+                            object : ImageCapture.OnImageSavedCallback {
+                                override fun onError(exception: ImageCaptureException) {
+                                    Log.e("CameraScan", "Preview capture failed", exception)
+                                    vm.onCaptureError(exception.message ?: "Error al capturar la imagen")
+                                }
+
+                                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                    pendingPhotoFile = photoFile
+                                }
+                            }
+                        )
+                    }
+                ) { Text("Previsualizar") }
+
+            }
+
+            if (canContinue) {
+                Spacer(Modifier.height(12.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    Button(onClick = { vm.saveTicket(items) }) {
+                        Text("Continuar")
+                    }
+                }
             }
 
             if (error != null) {
@@ -228,6 +256,14 @@ fun CameraScanScreen(
                     }
                 }
             }
+        }
+        pendingPhotoFile?.let { file ->
+            PhotoPreviewDialog(
+                photoFile = file,
+                onClose = {
+                    pendingPhotoFile = null
+                }
+            )
         }
     }
 }
