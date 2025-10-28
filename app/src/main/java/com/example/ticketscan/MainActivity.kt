@@ -50,10 +50,10 @@ import com.example.ticketscan.ui.screens.StatsViewModelFactory
 import com.example.ticketscan.ui.screens.TicketScreen
 import com.example.ticketscan.ui.screens.TicketViewModel
 import com.example.ticketscan.ui.screens.TicketViewModelFactory
+import com.example.ticketscan.ui.screens.PdfOptionsScreen
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.util.UUID
 
-@RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,6 +156,13 @@ class MainActivity : ComponentActivity() {
                             val factoryWithId = remember(uuid) { TicketViewModelFactory(repositoryViewModel, uuid) }
                             val viewModelWithId: TicketViewModel = viewModel(factory = factoryWithId)
                             TicketScreen(navController = navController, viewModelWithId)
+                        }
+                        composable("pdf_options/{id}") { backStackEntry ->
+                            val idArg = backStackEntry.arguments?.getString("id")
+                            val uuid = UUID.fromString(idArg)
+                            val factoryWithId = remember(uuid) { TicketViewModelFactory(repositoryViewModel, uuid) }
+                            val viewModelWithId: TicketViewModel = viewModel(factory = factoryWithId)
+                            PdfOptionsScreen(navController = navController, viewModel = viewModelWithId)
                         }
                         composable("processing/{mode}") { backStackEntry ->
                             val mode = backStackEntry.arguments?.getString("mode") ?: "unknown"
