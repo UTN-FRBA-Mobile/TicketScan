@@ -53,6 +53,11 @@ fun CameraScanScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
 
+    // Limpiar estado previo
+    LaunchedEffect(Unit) {
+        vm.resetState()
+    }
+
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
