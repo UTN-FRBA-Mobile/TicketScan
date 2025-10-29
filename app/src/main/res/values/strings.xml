@@ -23,10 +23,12 @@
     <string name="notification_detail_top_category">Categoria destacada</string>
     <string name="notification_detail_current_month">Mes actual</string>
     <string name="notification_detail_previous_month">Mes anterior</string>
+    <string name="notification_detail_previous_month_value">Mes anterior: %1$s</string>
     <string name="notification_detail_difference">Diferencia</string>
     <string name="notification_detail_variation">Variacion</string>
     <string name="notification_detail_days_without_tickets">Dias sin tickets</string>
     <string name="notification_detail_last_ticket">Ultimo ticket</string>
     <string name="notification_detail_empty_title">No encontramos datos para esta notificacion.</string>
     <string name="notification_detail_empty_body">Prueba a abrir nuevamente la notificacion desde el panel del sistema.</string>
+    <string name="notification_back_content_description">Volver</string>
 </resources>

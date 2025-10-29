@@ -30,6 +30,7 @@ import com.example.ticketscan.ia.internal.IAService
 import com.example.ticketscan.ia.internal.IAServiceImpl
 import com.example.ticketscan.ia.internal.mock.MockIAApi
 import com.example.ticketscan.ui.components.NotificationPermissionHandler
+import com.example.ticketscan.ui.components.Period
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
 import com.example.ticketscan.ui.screens.AppearanceSettingsScreen
 import com.example.ticketscan.ui.screens.AppearanceSettingsViewModel
@@ -46,7 +47,7 @@ import com.example.ticketscan.ui.screens.NotificationNavigationViewModel
 import com.example.ticketscan.ui.screens.NotificationSettingsScreen
 import com.example.ticketscan.ui.screens.NotificationSettingsViewModel
 import com.example.ticketscan.ui.screens.NotificationSettingsViewModelFactory
-import com.example.ticketscan.ui.screens.NotificationDetailScreen
+import com.example.ticketscan.ui.screens.MonthlyComparisonScreen
 import com.example.ticketscan.ui.screens.ProcessingScreen
 import com.example.ticketscan.ui.screens.ProfileScreen
 import com.example.ticketscan.ui.screens.RecordAudioScreen
@@ -105,9 +106,24 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     notificationNavigationViewModel.navigationEvents.collectLatest { payload ->
-                        val destination = "notification_detail/${payload.type.id}"
-                        navController.navigate(destination) {
-                            launchSingleTop = true
+                        when (payload.type) {
+                            NotificationType.WEEKLY_INACTIVITY -> {
+                                navController.navigate("home") {
+                                    launchSingleTop = true
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                                }
+                            }
+                            NotificationType.WEEKLY_STATS -> {
+                                statsViewModel.onPeriodChanged(Period.SEMANAL)
+                                navController.navigate("expenses") {
+                                    launchSingleTop = true
+                                }
+                            }
+                            NotificationType.MONTHLY_COMPARISON -> {
+                                navController.navigate("notification_monthly_comparison") {
+                                    launchSingleTop = true
+                                }
+                            }
                         }
                     }
                 }
@@ -168,15 +184,9 @@ class MainActivity : ComponentActivity() {
                                 viewModel = notificationSettingsViewModel
                             )
                         }
-                        composable(
-                            route = "notification_detail/{type}",
-                            arguments = listOf(navArgument("type") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val typeId = backStackEntry.arguments?.getString("type")
-                            val notificationType = typeId?.let(NotificationType::fromId)
-                            NotificationDetailScreen(
+                        composable("notification_monthly_comparison") {
+                            MonthlyComparisonScreen(
                                 navController = navController,
-                                notificationType = notificationType,
                                 navigationViewModel = notificationNavigationViewModel
                             )
                         }
