@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,6 +69,7 @@ fun TicketScreen(
     val context = LocalContext.current
     var editingStore by remember { mutableStateOf(false) }
     var editingDate by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -180,22 +183,35 @@ fun TicketScreen(
                 viewModel.saveTicket()
                 isEditing = false
             },
-            onDelete = {
-                viewModel.deleteTicket {
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = false }
-                    }
-                }
-            },
+            onDelete = { showDeleteConfirm = true },
             onEdit = { isEditing = true },
-            // En lugar de exportar directamente, navegamos a la pantalla de opciones PDF
             onShare = {
-                // Navegar a pdf_options con el id del ticket actual
                 ticket?.let { t ->
                     navController.navigate("pdf_options/${t.id}")
                 } ?: Toast.makeText(context, "No hay ticket para opciones PDF", Toast.LENGTH_SHORT).show()
             }
         )
+
+        if (showDeleteConfirm) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false },
+                title = { Text(text = "Confirmar eliminación") },
+                text = { Text(text = "¿Estás seguro de que deseas eliminar este ticket? Esta acción no se puede deshacer.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showDeleteConfirm = false
+                        viewModel.deleteTicket {
+                            navController.navigate("home") {
+                                popUpTo("home") { inclusive = false }
+                            }
+                        }
+                    }) { Text(text = "Eliminar") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirm = false }) { Text(text = "Cancelar") }
+                }
+            )
+        }
 
         // Diálogo para crear/editar artículo
         if (creatingItem != null) {
