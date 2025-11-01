@@ -76,12 +76,13 @@ class MainActivity : ComponentActivity() {
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
                 
                 // Configure AI Service
-                // Option 1: Use mock API for testing
-                val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
+                // Option 1: Use real mock-ai-server
+                // For emulator: use 10.0.2.2 (localhost on host machine)
+                // For physical device: replace with your computer's IP address (e.g., 192.168.1.XXX)
+                val iaService: IAService = remember { IAServiceImpl("http://10.0.2.2:8080/") }
                 
-                // Option 2: Use real mock-ai-server (uncomment and update IP address)
-                // Replace "10.0.2.2" with your computer's IP address if testing on a physical device
-                // val iaService: IAService = remember { IAServiceImpl("http://10.0.2.2:8080/") }
+                // Option 2: Use mock API for offline testing (no server needed)
+                // val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
 
                 val cameraScanFactory = CameraScanViewModelFactory(iaService, repositoryViewModel)
                 val cameraScanViewModel: CameraScanViewModel = viewModel(factory = cameraScanFactory)
