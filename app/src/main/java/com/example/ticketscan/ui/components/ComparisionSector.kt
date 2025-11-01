@@ -36,7 +36,7 @@ fun ComparisonSection(current: BigDecimal, previous: BigDecimal) {
         )
         isPositive -> Triple(
             TicketScanTheme.colors.errorContainer,
-            TicketScanTheme.colors.error,
+            TicketScanTheme.colors.onErrorContainer,
             TicketScanTheme.colors.error
         )
         else -> Triple(
