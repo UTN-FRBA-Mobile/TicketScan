@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1027466832339",
+    "project_id": "ticketscan-6b0ee",
+    "storage_bucket": "ticketscan-6b0ee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1027466832339:android:dcb895dfe0848bce3ae726",
+        "android_client_info": {
+          "package_name": "com.example.ticketscan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKzgMqeSkTbQ3Tc597DClv0Qb-CokgtPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
