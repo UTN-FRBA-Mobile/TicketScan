@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">TicketScan</string>
+    <string name="notification_channel_analytics_name">Analiticas de gastos</string>
+    <string name="notification_channel_analytics_description">Alertas con resumenes y comparaciones de gastos.</string>
+    <string name="notification_channel_reminders_name">Recordatorios de tickets</string>
+    <string name="notification_channel_reminders_description">Avisos para mantener tu registro de tickets al dia.</string>
+    <string name="notification_weekly_stats_title">Resumen semanal</string>
+    <string name="notification_weekly_stats_body_with_category">Gastaste %1$s en %2$d tickets (promedio %3$s). Categoria destacada: %4$s.</string>
+    <string name="notification_weekly_stats_body">Gastaste %1$s en %2$d tickets (promedio %3$s).</string>
+    <string name="notification_monthly_comparison_title">Comparacion mensual</string>
+    <string name="notification_monthly_comparison_body">Mes actual: %1$s - Mes anterior: %2$s - Delta: %3$s (%4$s).</string>
+    <string name="notification_weekly_inactivity_title">Recordatorio de actividad</string>
+    <string name="notification_weekly_inactivity_body_with_date">Hace %1$d dias que no subes tickets. Ultimo registro: %2$s.</string>
+    <string name="notification_weekly_inactivity_body">Hace %1$d dias que no subes tickets.</string>
+    <string name="notification_variation_template">%1$s%2$s%%</string>
+    <string name="notification_detail_section_weekly">Resumen semanal</string>
+    <string name="notification_detail_section_monthly">Comparacion mensual</string>
+    <string name="notification_detail_section_activity">Actividad</string>
+    <string name="notification_detail_total_week">Total de la semana</string>
+    <string name="notification_detail_average_ticket">Promedio por ticket</string>
+    <string name="notification_detail_previous_week">Total semana anterior</string>
+    <string name="notification_detail_ticket_count">Cantidad de tickets</string>
+    <string name="notification_detail_top_category">Categoria destacada</string>
+    <string name="notification_detail_current_month">Mes actual</string>
+    <string name="notification_detail_previous_month">Mes anterior</string>
+    <string name="notification_detail_previous_month_value">Mes anterior: %1$s</string>
+    <string name="notification_detail_difference">Diferencia</string>
+    <string name="notification_detail_variation">Variacion</string>
+    <string name="notification_detail_days_without_tickets">Dias sin tickets</string>
+    <string name="notification_detail_last_ticket">Ultimo ticket</string>
+    <string name="notification_detail_empty_title">No encontramos datos para esta notificacion.</string>
+    <string name="notification_detail_empty_body">Prueba a abrir nuevamente la notificacion desde el panel del sistema.</string>
+    <string name="notification_back_content_description">Volver</string>
 </resources>

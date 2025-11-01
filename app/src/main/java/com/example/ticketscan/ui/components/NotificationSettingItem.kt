@@ -15,7 +15,8 @@ fun NotificationSettingItem(
     description: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -52,6 +53,7 @@ fun NotificationSettingItem(
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+                enabled = enabled,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = TicketScanTheme.colors.primary,
                     checkedTrackColor = TicketScanTheme.colors.primaryContainer,
