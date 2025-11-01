@@ -5,13 +5,9 @@ import com.example.ticketscan.ia.internal.mapper.TicketMapper
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
-import java.io.IOException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 
 class IAServiceImpl : IAService {
     private val api: IAApi
@@ -60,26 +56,6 @@ class IAServiceImpl : IAService {
     }
 
     private fun handleException(e: Exception, source: String): Exception {
-        return when (e) {
-            is UnknownHostException -> {
-                Exception("No se pudo conectar al servidor. Verifica que el servidor mock esté ejecutándose.")
-            }
-            is SocketTimeoutException -> {
-                Exception("El servidor tardó demasiado en responder. Verifica tu conexión o reinicia el servidor.")
-            }
-            is IOException -> {
-                Exception("Error de conexión. Asegúrate de estar en la misma red que el servidor mock.")
-            }
-            is HttpException -> {
-                when (e.code()) {
-                    404 -> Exception("Endpoint no encontrado. Verifica la configuración del servidor.")
-                    500 -> Exception("Error del servidor al procesar la $source.")
-                    else -> Exception("Error del servidor (código ${e.code()})")
-                }
-            }
-            else -> {
-                Exception("Error inesperado al analizar la $source: ${e.message}")
-            }
-        }
+        return Exception("Ocurrió un error en la conexión con el servidor")
     }
 }
