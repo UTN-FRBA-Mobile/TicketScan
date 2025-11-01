@@ -1,15 +1,11 @@
 plugins {
-    kotlin("jvm") version "1.9.20"
-    kotlin("plugin.serialization") version "1.9.20"
+    kotlin("jvm")
+    kotlin("plugin.serialization") version "2.0.21"
     application
 }
 
 group = "com.example"
 version = "1.0.0"
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     implementation("io.ktor:ktor-server-core:2.3.5")
