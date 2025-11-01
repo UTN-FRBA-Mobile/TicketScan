@@ -1,6 +1,6 @@
 package com.example.ticketscan.ia.internal
 
-import com.example.ticketscan.domain.model.TicketItem
+import com.example.ticketscan.ia.internal.dto.TicketDto
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.Multipart
@@ -9,13 +9,13 @@ import retrofit2.http.Part
 
 interface IAApi {
     @Multipart
-    @POST("analyze/image")
-    suspend fun analyzeImage(@Part image: MultipartBody.Part): List<TicketItem>
+    @POST("api/analyze/image")
+    suspend fun analyzeImage(@Part image: MultipartBody.Part): TicketDto
 
     @Multipart
-    @POST("analyze/audio")
-    suspend fun analyzeAudio(@Part audio: MultipartBody.Part): List<TicketItem>
+    @POST("api/analyze/audio")
+    suspend fun analyzeAudio(@Part audio: MultipartBody.Part): TicketDto
 
-    @POST("analyze/items")
-    suspend fun analyzeItems(@Body items: Map<String, Double>): List<TicketItem>
+    @POST("api/analyze/text")
+    suspend fun analyzeText(@Body items: Map<String, Double>): TicketDto
 }

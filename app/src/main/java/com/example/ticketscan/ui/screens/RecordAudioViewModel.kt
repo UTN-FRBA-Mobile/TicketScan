@@ -45,9 +45,8 @@ class RecordAudioViewModel(
             _isLoading.emit(true)
             _error.emit(null)
             try {
-                val categories = repositoryViewModel.getAllCategories()
-                val result = service.analyzeTicketAudio(file, categories)
-                _items.emit(result)
+                val ticket = service.analyzeTicketAudio(file)
+                _items.emit(ticket.items)
             } catch (e: Exception) {
                 _error.emit(e.message ?: "Error al analizar el audio")
             } finally {

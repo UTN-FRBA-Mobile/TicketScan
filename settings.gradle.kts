@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "TicketScan"
 include(":app")
+include(":mock-ai-server")
