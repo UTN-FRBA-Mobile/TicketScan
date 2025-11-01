@@ -1,14 +1,17 @@
 package com.example.ticketscan
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -26,6 +29,8 @@ import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ia.internal.IAService
 import com.example.ticketscan.ia.internal.IAServiceImpl
 import com.example.ticketscan.ia.internal.mock.MockIAApi
+import com.example.ticketscan.ui.components.NotificationPermissionHandler
+import com.example.ticketscan.ui.components.Period
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
 import com.example.ticketscan.ui.screens.AppearanceSettingsScreen
 import com.example.ticketscan.ui.screens.AppearanceSettingsViewModel
@@ -38,7 +43,11 @@ import com.example.ticketscan.ui.screens.DefaultTicketEntryScreen
 import com.example.ticketscan.ui.screens.EditContactScreen
 import com.example.ticketscan.ui.screens.HomeScreen
 import com.example.ticketscan.ui.screens.MoreScreen
+import com.example.ticketscan.ui.screens.NotificationNavigationViewModel
 import com.example.ticketscan.ui.screens.NotificationSettingsScreen
+import com.example.ticketscan.ui.screens.NotificationSettingsViewModel
+import com.example.ticketscan.ui.screens.NotificationSettingsViewModelFactory
+import com.example.ticketscan.ui.screens.MonthlyComparisonScreen
 import com.example.ticketscan.ui.screens.ProcessingScreen
 import com.example.ticketscan.ui.screens.ProfileScreen
 import com.example.ticketscan.ui.screens.RecordAudioScreen
@@ -51,10 +60,14 @@ import com.example.ticketscan.ui.screens.TicketScreen
 import com.example.ticketscan.ui.screens.TicketViewModel
 import com.example.ticketscan.ui.screens.TicketViewModelFactory
 import com.example.ticketscan.ui.screens.PdfOptionsScreen
+import com.example.ticketscan.domain.model.notifications.NotificationType
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
+import kotlinx.coroutines.flow.collectLatest
 import java.util.UUID
 
 class MainActivity : ComponentActivity() {
+    private val notificationNavigationViewModel: NotificationNavigationViewModel by viewModels()
+
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +77,8 @@ class MainActivity : ComponentActivity() {
         DatabaseHelper.getInstance(this).writableDatabase
 
         enableEdgeToEdge()
+
+        notificationNavigationViewModel.handleIntent(intent)
 
         setContent {
             val appearanceFactory = remember { AppearanceSettingsViewModelFactory(applicationContext) }
@@ -85,6 +100,33 @@ class MainActivity : ComponentActivity() {
                 // Record audio viewmodel factory and instance
                 val recordAudioFactory = remember { RecordAudioViewModelFactory(iaService, repositoryViewModel) }
                 val recordAudioViewModel: RecordAudioViewModel = viewModel(factory = recordAudioFactory)
+                val notificationSettingsFactory = remember { NotificationSettingsViewModelFactory.fromContext(applicationContext) }
+
+                NotificationPermissionHandler()
+
+                LaunchedEffect(Unit) {
+                    notificationNavigationViewModel.navigationEvents.collectLatest { payload ->
+                        when (payload.type) {
+                            NotificationType.WEEKLY_INACTIVITY -> {
+                                navController.navigate("home") {
+                                    launchSingleTop = true
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                                }
+                            }
+                            NotificationType.WEEKLY_STATS -> {
+                                statsViewModel.onPeriodChanged(Period.SEMANAL)
+                                navController.navigate("expenses") {
+                                    launchSingleTop = true
+                                }
+                            }
+                            NotificationType.MONTHLY_COMPARISON -> {
+                                navController.navigate("notification_monthly_comparison") {
+                                    launchSingleTop = true
+                                }
+                            }
+                        }
+                    }
+                }
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -136,7 +178,17 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("notification_settings") {
-                            NotificationSettingsScreen(navController = navController)
+                            val notificationSettingsViewModel: NotificationSettingsViewModel = viewModel(factory = notificationSettingsFactory)
+                            NotificationSettingsScreen(
+                                navController = navController,
+                                viewModel = notificationSettingsViewModel
+                            )
+                        }
+                        composable("notification_monthly_comparison") {
+                            MonthlyComparisonScreen(
+                                navController = navController,
+                                navigationViewModel = notificationNavigationViewModel
+                            )
                         }
                         composable("appearance_settings") {
                             AppearanceSettingsScreen(
@@ -172,5 +224,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        notificationNavigationViewModel.handleIntent(intent)
     }
 }

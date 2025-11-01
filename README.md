@@ -43,6 +43,7 @@ La aplicación también ofrece un **análisis de patrones de compra semanales y 
 - **Clasificación automática** de productos en categorías.
 - **Análisis detallado** de gastos y hábitos de consumo.
 - **Exportación de historial** en distintos formatos.
+- **Notificaciones automáticas** vía Firebase con recordatorios e informes.
 
 ---
 
@@ -54,6 +55,20 @@ La aplicación también ofrece un **análisis de patrones de compra semanales y 
 2. Abrir el proyecto en **Android Studio**.
 3. Conectar un dispositivo Android o configurar un emulador.
 4. Ejecutar la aplicación con el botón **Run ▶️**.
+
+---
+
+## 🔔 Notificaciones con Firebase
+
+Para habilitar las notificaciones se requiere configurar Firebase Cloud Messaging:
+
+1. Crear un proyecto en [Firebase Console](https://console.firebase.google.com/) y agregar la app Android.
+2. Descargar el archivo `google-services.json` y ubicarlo en `app/google-services.json`.
+3. Habilitar **Cloud Messaging** y, opcionalmente, **Analytics** para el proyecto.
+4. Crear dos Cloud Functions (o endpoints equivalentes) con los nombres `syncNotificationPreferences` y `sendTicketScanNotification`. La primera debe registrar el token FCM y los tópicos seleccionados; la segunda debe emitir notificaciones hacia los tópicos `weekly_inactivity`, `weekly_stats` y `monthly_comparison` respetando la estructura del payload enviada por la app.
+5. Revisar las reglas de seguridad del backend para proteger los endpoints y las claves de servidor.
+
+El cliente mantiene los recordatorios mediante **WorkManager**, por lo que es necesario mantener los servicios de Google Play actualizados en el dispositivo o emulador de pruebas.
 
 ---
 

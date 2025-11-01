@@ -1,8 +1,21 @@
 package com.example.ticketscan.ui.screens
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -13,10 +26,10 @@ import com.example.ticketscan.ui.theme.TicketScanTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationSettingsScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: NotificationSettingsViewModel
 ) {
-    var monthlyReportEnabled by remember { mutableStateOf(true) }
-    var weeklyReminderEnabled by remember { mutableStateOf(true) }
+    val uiState = viewModel.uiState.collectAsState().value
 
     Scaffold(
         topBar = {
@@ -45,21 +58,42 @@ fun NotificationSettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Monthly Report Notification
+            if (uiState.isSyncing) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
             NotificationSettingItem(
-                title = "Notificación de Reporte Mensual",
-                description = "Recibe un resumen mensual de tus gastos",
-                checked = monthlyReportEnabled,
-                onCheckedChange = { monthlyReportEnabled = it }
+                title = "Resumen semanal",
+                description = "Recibe un resumen con tus gastos de la semana",
+                checked = uiState.weeklyStatsEnabled,
+                onCheckedChange = viewModel::onWeeklyStatsChanged,
+                enabled = !uiState.isSyncing
             )
 
-            // Weekly Reminder Notification
             NotificationSettingItem(
-                title = "Recordatorio semanal para subir Tickets",
-                description = "Recuerda subir tus tickets de la semana",
-                checked = weeklyReminderEnabled,
-                onCheckedChange = { weeklyReminderEnabled = it }
+                title = "Recordatorio de tickets",
+                description = "Te avisamos si pasa una semana sin cargar tickets",
+                checked = uiState.weeklyInactivityEnabled,
+                onCheckedChange = viewModel::onWeeklyInactivityChanged,
+                enabled = !uiState.isSyncing
             )
+
+            NotificationSettingItem(
+                title = "Comparacion mensual",
+                description = "Compara tus gastos con el mes anterior",
+                checked = uiState.monthlyComparisonEnabled,
+                onCheckedChange = viewModel::onMonthlyComparisonChanged,
+                enabled = !uiState.isSyncing
+            )
+
+            if (uiState.errorMessage != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = uiState.errorMessage,
+                    style = TicketScanTheme.typography.bodySmall,
+                    color = TicketScanTheme.colors.error
+                )
+            }
         }
     }
 }
