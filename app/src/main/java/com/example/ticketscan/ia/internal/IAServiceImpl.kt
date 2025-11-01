@@ -1,7 +1,7 @@
 package com.example.ticketscan.ia.internal
 
-import com.example.ticketscan.domain.model.Category
-import com.example.ticketscan.domain.model.TicketItem
+import com.example.ticketscan.domain.model.Ticket
+import com.example.ticketscan.ia.internal.mapper.TicketMapper
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -24,19 +24,22 @@ class IAServiceImpl : IAService {
         this.api = api
     }
 
-    override suspend fun analyzeTicketImage(image: File, categories: List<Category>): List<TicketItem> {
+    override suspend fun analyzeTicketImage(image: File): Ticket {
         val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), image)
         val body = MultipartBody.Part.createFormData("image", image.name, requestFile)
-        return api.analyzeImage(body)
+        val ticketDto = api.analyzeImage(body)
+        return TicketMapper.toDomain(ticketDto)
     }
 
-    override suspend fun analyzeTicketAudio(audio: File, categories: List<Category>): List<TicketItem> {
+    override suspend fun analyzeTicketAudio(audio: File): Ticket {
         val requestFile = RequestBody.create("audio/*".toMediaTypeOrNull(), audio)
         val body = MultipartBody.Part.createFormData("audio", audio.name, requestFile)
-        return api.analyzeAudio(body)
+        val ticketDto = api.analyzeAudio(body)
+        return TicketMapper.toDomain(ticketDto)
     }
 
-    override suspend fun analyzeTicketItems(items: Map<String, Double>, categories: List<Category>): List<TicketItem> {
-        return api.analyzeItems(items)
+    override suspend fun analyzeTicketText(items: Map<String, Double>): Ticket {
+        val ticketDto = api.analyzeText(items)
+        return TicketMapper.toDomain(ticketDto)
     }
 }

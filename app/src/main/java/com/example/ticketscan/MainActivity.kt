@@ -74,7 +74,14 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
+                
+                // Configure AI Service
+                // Option 1: Use mock API for testing
                 val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
+                
+                // Option 2: Use real mock-ai-server (uncomment and update IP address)
+                // Replace "10.0.2.2" with your computer's IP address if testing on a physical device
+                // val iaService: IAService = remember { IAServiceImpl("http://10.0.2.2:8080/") }
 
                 val cameraScanFactory = CameraScanViewModelFactory(iaService, repositoryViewModel)
                 val cameraScanViewModel: CameraScanViewModel = viewModel(factory = cameraScanFactory)

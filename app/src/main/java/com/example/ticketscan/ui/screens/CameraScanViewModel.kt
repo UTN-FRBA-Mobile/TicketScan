@@ -51,9 +51,8 @@ class CameraScanViewModel(
             _error.emit(null)
             _capturedThumbnail.emit(decodeThumbnail(file))
             try {
-                val categories = repositoryViewModel.getAllCategories()
-                val result = service.analyzeTicketImage(file, categories)
-                _items.emit(result)
+                val ticket = service.analyzeTicketImage(file)
+                _items.emit(ticket.items)
             } catch (e: Exception) {
                 _error.emit(e.message ?: "Error al analizar la imagen")
             } finally {
