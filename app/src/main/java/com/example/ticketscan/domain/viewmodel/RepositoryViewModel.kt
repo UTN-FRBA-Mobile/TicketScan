@@ -44,6 +44,10 @@ class RepositoryViewModel(
         val result = withContext(Dispatchers.IO) { categoryRepo.insertCategory(category) }
         onResult(result)
     }
+    fun updateCategory(category: Category, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val result = withContext(Dispatchers.IO) { categoryRepo.updateCategory(category) }
+        onResult(result)
+    }
     suspend fun getCategoryById(id: UUID) = withContext(Dispatchers.IO) { categoryRepo.getCategoryById(id) }
     suspend fun getAllCategories() = withContext(Dispatchers.IO) { categoryRepo.getAllCategories() }
     suspend fun getActiveCategories() = withContext(Dispatchers.IO) { categoryRepo.getActiveCategories() }
