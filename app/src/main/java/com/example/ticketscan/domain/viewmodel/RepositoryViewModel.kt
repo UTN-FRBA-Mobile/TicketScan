@@ -7,6 +7,7 @@ import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.repositories.category.CategoryRepository
+import com.example.ticketscan.domain.repositories.icon.IconRepository
 import com.example.ticketscan.domain.repositories.stats.StatsRepository
 import com.example.ticketscan.domain.repositories.store.StoreRepository
 import com.example.ticketscan.domain.repositories.ticket.TicketRepository
@@ -24,7 +25,8 @@ class RepositoryViewModel(
     private val categoryRepo: CategoryRepository,
     private val ticketRepo: TicketRepository,
     private val ticketItemRepo: TicketItemRepository,
-    private val statsRepo: StatsRepository
+    private val statsRepo: StatsRepository,
+    private val iconRepo: IconRepository
 ) : ViewModel() {
     // STORE
     fun insertStore(store: Store, onResult: (Boolean) -> Unit) = viewModelScope.launch {
@@ -44,6 +46,19 @@ class RepositoryViewModel(
     }
     suspend fun getCategoryById(id: UUID) = withContext(Dispatchers.IO) { categoryRepo.getCategoryById(id) }
     suspend fun getAllCategories() = withContext(Dispatchers.IO) { categoryRepo.getAllCategories() }
+    suspend fun getActiveCategories() = withContext(Dispatchers.IO) { categoryRepo.getActiveCategories() }
+    fun deleteCategory(id: UUID, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val result = withContext(Dispatchers.IO) { categoryRepo.deleteCategory(id) }
+        onResult(result)
+    }
+    fun toggleCategoryActive(id: UUID, isActive: Boolean, onResult: (Boolean) -> Unit) = viewModelScope.launch {
+        val result = withContext(Dispatchers.IO) { categoryRepo.toggleCategoryActive(id, isActive) }
+        onResult(result)
+    }
+
+    // ICON
+    suspend fun getAllIcons() = withContext(Dispatchers.IO) { iconRepo.getAllIcons() }
+    suspend fun getIconById(id: UUID) = withContext(Dispatchers.IO) { iconRepo.getIconById(id) }
 
     // TICKET
     val ticketsChanged: Flow<Unit> = ticketRepo.ticketsChanged

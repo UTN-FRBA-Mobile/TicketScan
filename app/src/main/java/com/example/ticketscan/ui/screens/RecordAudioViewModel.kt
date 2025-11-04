@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Date
 import java.util.UUID
@@ -45,7 +44,7 @@ class RecordAudioViewModel(
             _isLoading.emit(true)
             _error.emit(null)
             try {
-                val categories = repositoryViewModel.getAllCategories()
+                val categories = repositoryViewModel.getActiveCategories()
                 val result = service.analyzeTicketAudio(file, categories)
                 _items.emit(result)
             } catch (e: Exception) {

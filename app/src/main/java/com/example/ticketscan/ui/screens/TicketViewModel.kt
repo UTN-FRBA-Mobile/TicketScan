@@ -36,7 +36,7 @@ class TicketViewModel (
 
     private fun loadCategories() {
         viewModelScope.launch {
-            _categories.value = repositoryViewModel.getAllCategories()
+            _categories.value = repositoryViewModel.getActiveCategories()
         }
     }
 

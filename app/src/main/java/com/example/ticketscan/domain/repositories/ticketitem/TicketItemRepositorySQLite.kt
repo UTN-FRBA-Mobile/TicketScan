@@ -3,13 +3,16 @@ package com.example.ticketscan.domain.repositories.ticketitem
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import androidx.compose.ui.graphics.Color
 import com.example.ticketscan.data.database.DatabaseHelper
+import com.example.ticketscan.domain.model.Category
+import com.example.ticketscan.domain.model.Icon
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.repositories.category.CategoryRepository
 import java.util.UUID
 
 class TicketItemRepositorySQLite(
-    private val context: Context,
+    context: Context,
     private val categoryRepository: CategoryRepository
 ) : TicketItemRepository {
     private val dbHelper = DatabaseHelper.getInstance(context)
@@ -23,7 +26,8 @@ class TicketItemRepositorySQLite(
             val id = UUID.fromString(idStr)
             val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
             val categoryIdStr = cursor.getString(cursor.getColumnIndexOrThrow("category_id"))
-            val category = categoryRepository.getCategoryById(UUID.fromString(categoryIdStr)) ?: com.example.ticketscan.domain.model.Category(UUID.fromString(categoryIdStr), "", androidx.compose.ui.graphics.Color.Gray)
+            val category = categoryRepository.getCategoryById(UUID.fromString(categoryIdStr))
+                ?: Category(UUID.fromString(categoryIdStr), "", Color.Gray, Icon.default(),)
             val quantity = cursor.getInt(cursor.getColumnIndexOrThrow("quantity"))
             val isIntUnit = cursor.getInt(cursor.getColumnIndexOrThrow("isIntUnit")) != 0
             val price = cursor.getDouble(cursor.getColumnIndexOrThrow("price"))

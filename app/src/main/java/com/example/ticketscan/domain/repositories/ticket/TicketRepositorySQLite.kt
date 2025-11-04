@@ -16,7 +16,7 @@ import java.util.UUID
 private const val TAG = "TicketRepositorySQLite"
 
 class TicketRepositorySQLite(
-    private val context: Context,
+    context: Context,
     private val ticketItemRepository: TicketItemRepository
 ) : TicketRepository {
     private val dbHelper = DatabaseHelper.getInstance(context)
@@ -51,7 +51,10 @@ class TicketRepositorySQLite(
 
     override suspend fun getAllTickets(limit: Int?): List<Ticket> {
         val db = dbHelper.readableDatabase
-        var query = "SELECT t.id, t.date, t.store_id, s.name as store_name, s.cuit as store_cuit, s.location as store_location, t.total FROM tickets t LEFT JOIN stores s ON s.id = t.store_id ORDER BY t.date DESC"
+        var query = "SELECT t.id, t.date, t.store_id, s.name as store_name, s.cuit as store_cuit, s.location as store_location, t.total " +
+                "FROM tickets t " +
+                "LEFT JOIN stores s ON s.id = t.store_id " +
+                "ORDER BY t.date DESC"
         val selectionArgs = mutableListOf<String>()
         if (limit != null) {
             query += " LIMIT ?"

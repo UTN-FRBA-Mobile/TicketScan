@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.ticketscan.domain.repositories.category.CategoryRepositorySQLite
+import com.example.ticketscan.domain.repositories.icon.IconRepositorySQLite
 import com.example.ticketscan.domain.repositories.stats.StatsRepositorySQLite
 import com.example.ticketscan.domain.repositories.store.StoreRepositorySQLite
 import com.example.ticketscan.domain.repositories.ticket.TicketRepositorySQLite
@@ -14,7 +15,8 @@ class RepositoryViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RepositoryViewModel::class.java)) {
-            val categoryRepository = CategoryRepositorySQLite(context)
+            val iconRepository = IconRepositorySQLite(context)
+            val categoryRepository = CategoryRepositorySQLite(context, iconRepository)
             val ticketItemRepository = TicketItemRepositorySQLite(context, categoryRepository)
             val storeRepository = StoreRepositorySQLite(context)
             val ticketRepository = TicketRepositorySQLite(context, ticketItemRepository)
@@ -26,10 +28,10 @@ class RepositoryViewModelFactory(
                 categoryRepository,
                 ticketRepository,
                 ticketItemRepository,
-                statsRepository
+                statsRepository,
+                iconRepository
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
-

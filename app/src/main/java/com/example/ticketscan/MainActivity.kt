@@ -168,7 +168,7 @@ class MainActivity : ComponentActivity() {
                         composable("record_audio") { RecordAudioScreen(navController = navController, vm = recordAudioViewModel) }
 
                         composable("scan") { CameraScanScreen(navController = navController, vm = cameraScanViewModel) }
-                        composable("profile") { ProfileScreen(navController = navController) }
+                        composable("profile") { ProfileScreen(navController = navController, repositoryViewModel = repositoryViewModel) }
                         composable("edit_contact") {
                             EditContactScreen(
                                 navController = navController,

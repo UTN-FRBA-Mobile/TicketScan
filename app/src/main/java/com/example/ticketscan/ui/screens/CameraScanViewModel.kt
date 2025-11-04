@@ -51,7 +51,7 @@ class CameraScanViewModel(
             _error.emit(null)
             _capturedThumbnail.emit(decodeThumbnail(file))
             try {
-                val categories = repositoryViewModel.getAllCategories()
+                val categories = repositoryViewModel.getActiveCategories()
                 val result = service.analyzeTicketImage(file, categories)
                 _items.emit(result)
             } catch (e: Exception) {

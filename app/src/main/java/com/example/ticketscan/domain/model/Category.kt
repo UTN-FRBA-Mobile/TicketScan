@@ -6,12 +6,13 @@ import java.util.UUID
 data class Category(
     val id: UUID,
     val name: String,
-    val color: Color
+    val color: Color,
+    val icon: Icon,
+    val isActive: Boolean = true
 ) {
     companion object {
         fun default(): Category {
-            return Category(UUID.randomUUID(), "Otros", Color.Gray)
+            return Category(UUID.randomUUID(), "Otros", Color.Gray, Icon.default(), true)
         }
     }
 }
-

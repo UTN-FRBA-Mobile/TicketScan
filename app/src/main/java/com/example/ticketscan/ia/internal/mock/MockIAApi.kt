@@ -15,7 +15,7 @@ class MockIAApi(
 
     override suspend fun analyzeAudio(audio: MultipartBody.Part): List<TicketItem> {
         // Devolvemos resultados distintos para audio (Jabón, Shampoo)
-        val categories = repositoryViewModel.getAllCategories()
+        val categories = repositoryViewModel.getActiveCategories()
         return listOf(
             TicketItem(
                 id = UUID.randomUUID(),
@@ -41,7 +41,7 @@ class MockIAApi(
     }
 
     private suspend fun getMockItems(): List<TicketItem> {
-        val categories = repositoryViewModel.getAllCategories()
+        val categories = repositoryViewModel.getActiveCategories()
         return listOf(
             TicketItem(
                 id = UUID.randomUUID(),

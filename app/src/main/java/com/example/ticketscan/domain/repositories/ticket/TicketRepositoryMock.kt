@@ -1,33 +1,30 @@
 package com.example.ticketscan.domain.repositories.ticket
 
-import android.content.Context
 import androidx.compose.ui.graphics.Color
 import com.example.ticketscan.domain.model.Category
+import com.example.ticketscan.domain.model.Icon
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.model.TicketOrigin
-import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepository
 import kotlinx.coroutines.flow.Flow
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 
 class TicketRepositoryMock (
-    private val context: Context,
-    private val ticketItemRepository: TicketItemRepository,
     override val ticketsChanged: Flow<Unit>
 ) : TicketRepository {
 
     private val mockTickets by lazy { generateMockTickets() }
 
     private val categories = listOf(
-        Category(UUID.randomUUID(), "Alimentación", Color(red = 0, green = 150, blue = 136, alpha = 255)),
-        Category(UUID.randomUUID(), "Transporte", Color(red = 33, green = 150, blue = 243, alpha = 255)),
-        Category(UUID.randomUUID(), "Entretenimiento", Color(0xFFFF9800)),
-        Category(UUID.randomUUID(), "Salud", Color(0xFFF44336)),
-        Category(UUID.randomUUID(), "Hogar", Color(0xFF9C27B0)),
-        Category(UUID.randomUUID(), "Otros", Color.Gray)
+        Category(UUID.randomUUID(), "Alimentación", Color(red = 0, green = 150, blue = 136, alpha = 255), Icon.default()),
+        Category(UUID.randomUUID(), "Transporte", Color(red = 33, green = 150, blue = 243, alpha = 255), Icon.default()),
+        Category(UUID.randomUUID(), "Entretenimiento", Color(0xFFFF9800), Icon.default()),
+        Category(UUID.randomUUID(), "Salud", Color(0xFFF44336), Icon.default()),
+        Category(UUID.randomUUID(), "Hogar", Color(0xFF9C27B0), Icon.default()),
+        Category(UUID.randomUUID(), "Otros", Color.Gray, Icon.default())
     )
 
     private fun generateMockTickets(): List<Ticket> {
