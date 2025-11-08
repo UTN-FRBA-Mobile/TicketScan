@@ -3,9 +3,10 @@ package com.example.ticketscan.data.database
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import android.util.Log
+import java.util.UUID
 
 class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -135,19 +136,19 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         cursorIcons.close()
 
         if (iconCount == 0) {
-            // Insertar iconos por defecto
-            val defaultIcons = mapOf(
-                "Alimentación" to java.util.UUID.randomUUID().toString(),
-                "Transporte" to java.util.UUID.randomUUID().toString(),
-                "Entretenimiento" to java.util.UUID.randomUUID().toString(),
-                "Salud" to java.util.UUID.randomUUID().toString(),
-                "Hogar" to java.util.UUID.randomUUID().toString(),
-                "Compras" to java.util.UUID.randomUUID().toString(),
-                "Otros" to java.util.UUID.randomUUID().toString()
+            data class InitialDataTemplate(val name: String, val iconKey: String, val color: Color, val iconId: UUID)
+
+            val initialData = listOf(
+                InitialDataTemplate("Alimentación", "comida", Color(red = 0, green = 150, blue = 136, alpha = 255), UUID.randomUUID()), // Icons.Filled.Fastfood
+                InitialDataTemplate("Transporte", "transporte", Color(red = 33, green = 150, blue = 243, alpha = 255), UUID.randomUUID()), // Icons.Filled.DirectionsCar
+                InitialDataTemplate("Entretenimiento", "ocio", Color(0xFFFF9800), UUID.randomUUID()), // Icons.Filled.Movie
+                InitialDataTemplate("Salud", "salud", Color(0xFFF44336), UUID.randomUUID()), // Icons.Filled.HealthAndSafety
+                InitialDataTemplate("Hogar", "hogar", Color(0xFF9C27B0), UUID.randomUUID()), // Icons.Filled.Home
+                InitialDataTemplate("Otros", "otros", Color.Gray, UUID.randomUUID()) // Icons.Filled.Category
             )
 
-            for ((name, id) in defaultIcons) {
-                db.execSQL("INSERT INTO icons (id, name, icon_key) VALUES ('$id', '$name', '$name')")
+            for ((name, iconKey, _, id) in initialData) {
+                db.execSQL("INSERT INTO icons (id, name, icon_key) VALUES ('$id', '$name', '$iconKey')")
             }
 
             // Verificar si ya hay categorías
@@ -157,18 +158,9 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
             cursorCategories.close()
 
             if (categoryCount == 0) {
-                // Insertar categorías por defecto con sus iconos correspondientes
-                val defaultCategories = listOf(
-                    Triple("Alimentación", Color(red = 0, green = 150, blue = 136, alpha = 255), defaultIcons["Alimentación"]!!),
-                    Triple("Transporte", Color(red = 33, green = 150, blue = 243, alpha = 255), defaultIcons["Transporte"]!!),
-                    Triple("Entretenimiento", Color(0xFFFF9800), defaultIcons["Entretenimiento"]!!),
-                    Triple("Salud", Color(0xFFF44336), defaultIcons["Salud"]!!),
-                    Triple("Hogar", Color(0xFF9C27B0), defaultIcons["Hogar"]!!),
-                    Triple("Otros", Color.Gray, defaultIcons["Otros"]!!)
-                )
 
-                for ((name, color, iconId) in defaultCategories) {
-                    val categoryId = java.util.UUID.randomUUID().toString()
+                for ((name, _, color, iconId) in initialData) {
+                    val categoryId = UUID.randomUUID().toString()
                     db.execSQL(
                         "INSERT INTO categories (id, name, color, icon_id, is_active) VALUES ('$categoryId', '$name', ${color.toArgb()}, '$iconId', 1)"
                     )

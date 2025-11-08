@@ -44,7 +44,6 @@ fun CategoriesManagementModal(
                     .fillMaxSize()
                     .padding(TicketScanTheme.spacing.lg)
             ) {
-                // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -66,7 +65,6 @@ fun CategoriesManagementModal(
 
                 Spacer(modifier = Modifier.height(TicketScanTheme.spacing.md))
 
-                // Categories List
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.xs)
@@ -158,7 +156,6 @@ private fun CategoryManagementItem(
 
             Spacer(modifier = Modifier.width(TicketScanTheme.spacing.sm))
 
-            // Icon - Usando el icono mapeado por nombre
             Icon(
                 imageVector = icon?.let { TicketScanIcons.categoryIcon(it.name) }
                     ?: TicketScanIcons.Category,
