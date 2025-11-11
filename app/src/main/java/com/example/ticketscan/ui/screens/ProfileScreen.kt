@@ -3,7 +3,10 @@ package com.example.ticketscan.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
+import com.example.ticketscan.domain.model.ContactInfo
 import com.example.ticketscan.ui.components.ProfileHeader
 import com.example.ticketscan.ui.components.ProfileItem
 import com.example.ticketscan.ui.components.ProfileSection
@@ -15,8 +18,25 @@ import com.example.ticketscan.ui.theme.TicketScanTheme
 
 @Composable
 fun ProfileScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: ContactInfoViewModel
 ) {
+    val contactInfo by viewModel.contactInfo.collectAsState()
+
+    ProfileContent(
+        navController = navController,
+        contactInfo = contactInfo
+    )
+}
+
+@Composable
+private fun ProfileContent(
+    navController: NavController,
+    contactInfo: ContactInfo
+) {
+    val displayName = contactInfo.fullName.ifBlank { "Juan Pérez" }
+    val subtitle = contactInfo.email.ifBlank { "Mi cuenta" }
+
     TicketScanScreenContainer(
         verticalArrangement = Arrangement.spacedBy(TicketScanTheme.spacing.lg)
     ) {
@@ -25,8 +45,8 @@ fun ProfileScreen(
             contentPadding = PaddingValues(TicketScanTheme.spacing.lg)
         ) {
             ProfileHeader(
-                name = "Juan Pérez",
-                subtitle = "Mi cuenta",
+                name = displayName,
+                subtitle = subtitle,
                 onEditClick = { navController.navigate("edit_contact") }
             )
         }
@@ -34,11 +54,6 @@ fun ProfileScreen(
         ProfileSection(
             title = "Gestión de datos",
             items = listOf(
-                ProfileItem(
-                    text = "Editar contacto",
-                    icon = TicketScanIcons.Edit,
-                    onClick = { navController.navigate("edit_contact") }
-                ),
                 ProfileItem(
                     text = "Notificaciones",
                     icon = TicketScanIcons.Notifications,

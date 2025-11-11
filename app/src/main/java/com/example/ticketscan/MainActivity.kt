@@ -39,6 +39,8 @@ import com.example.ticketscan.ui.screens.CameraScanScreen
 import com.example.ticketscan.ui.screens.CameraScanViewModel
 import com.example.ticketscan.ui.screens.CameraScanViewModelFactory
 import com.example.ticketscan.ui.screens.CategoryDetailsScreen
+import com.example.ticketscan.ui.screens.ContactInfoViewModel
+import com.example.ticketscan.ui.screens.ContactInfoViewModelFactory
 import com.example.ticketscan.ui.screens.DefaultTicketEntryScreen
 import com.example.ticketscan.ui.screens.EditContactScreen
 import com.example.ticketscan.ui.screens.HomeScreen
@@ -96,6 +98,8 @@ class MainActivity : ComponentActivity() {
 
                 val statsFactory = remember { StatsViewModelFactory(repositoryViewModel) }
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
+                val contactInfoFactory = remember { ContactInfoViewModelFactory(applicationContext) }
+                val contactInfoViewModel: ContactInfoViewModel = viewModel(factory = contactInfoFactory)
 
                 // Record audio viewmodel factory and instance
                 val recordAudioFactory = remember { RecordAudioViewModelFactory(iaService, repositoryViewModel) }
@@ -168,13 +172,16 @@ class MainActivity : ComponentActivity() {
                         composable("record_audio") { RecordAudioScreen(navController = navController, vm = recordAudioViewModel) }
 
                         composable("scan") { CameraScanScreen(navController = navController, vm = cameraScanViewModel) }
-                        composable("profile") { ProfileScreen(navController = navController) }
+                        composable("profile") {
+                            ProfileScreen(
+                                navController = navController,
+                                viewModel = contactInfoViewModel
+                            )
+                        }
                         composable("edit_contact") {
                             EditContactScreen(
                                 navController = navController,
-                                onSave = { name, lastName, email, phone ->
-                                    // TODO: Save the contact information
-                                }
+                                viewModel = contactInfoViewModel
                             )
                         }
                         composable("notification_settings") {
