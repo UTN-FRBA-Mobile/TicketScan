@@ -46,11 +46,24 @@ fun Application.configureRouting() {
 }
 
 fun generateMockTicket(): Ticket {
+    // Categories without IDs - the app will match by name
+    val alimentacionCategory = Category(
+        id = "",
+        name = "Alimentación",
+        color = "#FF009688"
+    )
+    
+    val hogarCategory = Category(
+        id = "",
+        name = "Hogar",
+        color = "#FF9C27B0"
+    )
+    
     return Ticket(
-        id = UUID.randomUUID().toString(),
+        id = "",
         date = Instant.now().toString(),
         store = Store(
-            id = UUID.randomUUID().toString(),
+            id = "",
             name = "Supermercado Central",
             cuit = 30123456789L,
             location = "Av. Principal 123"
@@ -58,28 +71,28 @@ fun generateMockTicket(): Ticket {
         origin = "MEDIA",
         items = listOf(
             TicketItem(
-                id = UUID.randomUUID().toString(),
+                id = "",
                 name = "Pan integral",
-                category = Category(
-                    id = UUID.randomUUID().toString(),
-                    name = "Panaderia",
-                    color = "#FFB74D"
-                ),
+                category = alimentacionCategory,
                 quantity = 2,
                 isIntUnit = true,
                 price = 450.50
             ),
             TicketItem(
-                id = UUID.randomUUID().toString(),
+                id = "",
                 name = "Leche entera 1L",
-                category = Category(
-                    id = UUID.randomUUID().toString(),
-                    name = "Lacteos",
-                    color = "#64B5F6"
-                ),
+                category = alimentacionCategory,
                 quantity = 3,
                 isIntUnit = true,
                 price = 380.00
+            ),
+            TicketItem(
+                id = "",
+                name = "Detergente",
+                category = hogarCategory,
+                quantity = 1,
+                isIntUnit = true,
+                price = 661.00
             )
         ),
         total = 1591.50

@@ -1,5 +1,6 @@
 package com.example.ticketscan.ia.internal
 
+import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.ia.internal.mapper.TicketMapper
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -24,32 +25,32 @@ class IAServiceImpl : IAService {
         this.api = api
     }
 
-    override suspend fun analyzeTicketImage(image: File): Ticket {
+    override suspend fun analyzeTicketImage(image: File, categories: List<Category>): Ticket {
         return try {
             val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), image)
             val body = MultipartBody.Part.createFormData("image", image.name, requestFile)
             val ticketDto = api.analyzeImage(body)
-            TicketMapper.toDomain(ticketDto)
+            TicketMapper.toDomain(ticketDto, categories)
         } catch (e: Exception) {
             throw handleException(e, "imagen")
         }
     }
 
-    override suspend fun analyzeTicketAudio(audio: File): Ticket {
+    override suspend fun analyzeTicketAudio(audio: File, categories: List<Category>): Ticket {
         return try {
             val requestFile = RequestBody.create("audio/*".toMediaTypeOrNull(), audio)
             val body = MultipartBody.Part.createFormData("audio", audio.name, requestFile)
             val ticketDto = api.analyzeAudio(body)
-            TicketMapper.toDomain(ticketDto)
+            TicketMapper.toDomain(ticketDto, categories)
         } catch (e: Exception) {
             throw handleException(e, "audio")
         }
     }
 
-    override suspend fun analyzeTicketText(items: Map<String, Double>): Ticket {
+    override suspend fun analyzeTicketText(items: Map<String, Double>, categories: List<Category>): Ticket {
         return try {
             val ticketDto = api.analyzeText(items)
-            TicketMapper.toDomain(ticketDto)
+            TicketMapper.toDomain(ticketDto, categories)
         } catch (e: Exception) {
             throw handleException(e, "texto")
         }

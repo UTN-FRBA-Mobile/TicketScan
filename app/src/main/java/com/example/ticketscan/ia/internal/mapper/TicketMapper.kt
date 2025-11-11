@@ -17,39 +17,44 @@ import java.util.UUID
 
 object TicketMapper {
     
-    fun toDomain(dto: TicketDto): Ticket {
+    fun toDomain(dto: TicketDto, existingCategories: List<Category>): Ticket {
         return Ticket(
-            id = UUID.fromString(dto.id),
+            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
             date = parseDate(dto.date),
             store = dto.store?.let { toDomain(it) },
             origin = parseOrigin(dto.origin),
-            items = dto.items.map { toDomain(it) },
+            items = dto.items.map { toDomain(it, existingCategories) },
             total = dto.total
         )
     }
     
     private fun toDomain(dto: StoreDto): Store {
         return Store(
-            id = UUID.fromString(dto.id),
+            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
             name = dto.name,
             cuit = dto.cuit,
             location = dto.location
         )
     }
     
-    private fun toDomain(dto: CategoryDto): Category {
-        return Category(
-            id = UUID.fromString(dto.id),
+    private fun toDomain(dto: CategoryDto, existingCategories: List<Category>): Category {
+        // Match by name first, fallback to creating new category
+        val matchedCategory = existingCategories.find { 
+            it.name.equals(dto.name, ignoreCase = true) 
+        }
+        
+        return matchedCategory ?: Category(
+            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
             name = dto.name,
-            color = parseColor(dto.color)
+            color = dto.color?.let { parseColor(it) } ?: Color.Gray
         )
     }
     
-    private fun toDomain(dto: TicketItemDto): TicketItem {
+    private fun toDomain(dto: TicketItemDto, existingCategories: List<Category>): TicketItem {
         return TicketItem(
-            id = UUID.fromString(dto.id),
+            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
             name = dto.name,
-            category = toDomain(dto.category),
+            category = toDomain(dto.category, existingCategories),
             quantity = dto.quantity,
             isIntUnit = dto.isIntUnit,
             price = dto.price
