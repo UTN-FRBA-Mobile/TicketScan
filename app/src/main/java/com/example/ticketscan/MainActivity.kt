@@ -39,6 +39,8 @@ import com.example.ticketscan.ui.screens.CameraScanScreen
 import com.example.ticketscan.ui.screens.CameraScanViewModel
 import com.example.ticketscan.ui.screens.CameraScanViewModelFactory
 import com.example.ticketscan.ui.screens.CategoryDetailsScreen
+import com.example.ticketscan.ui.screens.ContactInfoViewModel
+import com.example.ticketscan.ui.screens.ContactInfoViewModelFactory
 import com.example.ticketscan.ui.screens.DefaultTicketEntryScreen
 import com.example.ticketscan.ui.screens.EditContactScreen
 import com.example.ticketscan.ui.screens.HomeScreen
@@ -89,13 +91,23 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
-                val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
+
+                // Configure AI Service
+                // Option 1: Use real mock-ai-server
+                // For emulator: use 10.0.2.2 (localhost on host machine)
+                // For physical device: replace with your computer's IP address (e.g., 192.168.1.XXX)
+                val iaService: IAService = remember { IAServiceImpl("http://10.0.2.2:8080/") }
+
+                // Option 2: Use mock API for offline testing (no server needed)
+                // val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
 
                 val cameraScanFactory = CameraScanViewModelFactory(iaService, repositoryViewModel)
                 val cameraScanViewModel: CameraScanViewModel = viewModel(factory = cameraScanFactory)
 
                 val statsFactory = remember { StatsViewModelFactory(repositoryViewModel) }
                 val statsViewModel: StatsViewModel = viewModel(factory = statsFactory)
+                val contactInfoFactory = remember { ContactInfoViewModelFactory(applicationContext) }
+                val contactInfoViewModel: ContactInfoViewModel = viewModel(factory = contactInfoFactory)
 
                 // Record audio viewmodel factory and instance
                 val recordAudioFactory = remember { RecordAudioViewModelFactory(iaService, repositoryViewModel) }
@@ -168,13 +180,17 @@ class MainActivity : ComponentActivity() {
                         composable("record_audio") { RecordAudioScreen(navController = navController, vm = recordAudioViewModel) }
 
                         composable("scan") { CameraScanScreen(navController = navController, vm = cameraScanViewModel) }
-                        composable("profile") { ProfileScreen(navController = navController, repositoryViewModel = repositoryViewModel) }
+                        composable("profile") {
+                            ProfileScreen(
+                                navController = navController,
+                                viewModel = contactInfoViewModel,
+                                repositoryViewModel = repositoryViewModel
+                            )
+                        }
                         composable("edit_contact") {
                             EditContactScreen(
                                 navController = navController,
-                                onSave = { name, lastName, email, phone ->
-                                    // TODO: Save the contact information
-                                }
+                                viewModel = contactInfoViewModel
                             )
                         }
                         composable("notification_settings") {

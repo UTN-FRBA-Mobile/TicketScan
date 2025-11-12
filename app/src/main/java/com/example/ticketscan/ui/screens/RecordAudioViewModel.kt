@@ -1,5 +1,6 @@
 package com.example.ticketscan.ui.screens
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -23,6 +24,10 @@ class RecordAudioViewModel(
     private val repositoryViewModel: RepositoryViewModel
 ) : ViewModel() {
 
+    companion object {
+        private const val TAG = "RecordAudioViewModel"
+    }
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -44,10 +49,11 @@ class RecordAudioViewModel(
             _isLoading.emit(true)
             _error.emit(null)
             try {
-                val categories = repositoryViewModel.getActiveCategories()
-                val result = service.analyzeTicketAudio(file, categories)
-                _items.emit(result)
+                val categories = repositoryViewModel.getAllCategories()
+                val ticket = service.analyzeTicketAudio(file, categories)
+                _items.emit(ticket.items)
             } catch (e: Exception) {
+                Log.e(TAG, "Error analyzing audio", e)
                 _error.emit(e.message ?: "Error al analizar el audio")
             } finally {
                 if (file.exists()) {
