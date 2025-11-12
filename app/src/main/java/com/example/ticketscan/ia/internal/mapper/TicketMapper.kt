@@ -2,11 +2,13 @@ package com.example.ticketscan.ia.internal.mapper
 
 import androidx.compose.ui.graphics.Color
 import com.example.ticketscan.domain.model.Category
+import com.example.ticketscan.domain.model.Icon
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.model.TicketOrigin
 import com.example.ticketscan.ia.internal.dto.CategoryDto
+import com.example.ticketscan.ia.internal.dto.IconDto
 import com.example.ticketscan.ia.internal.dto.StoreDto
 import com.example.ticketscan.ia.internal.dto.TicketDto
 import com.example.ticketscan.ia.internal.dto.TicketItemDto
@@ -46,7 +48,16 @@ object TicketMapper {
         return matchedCategory ?: Category(
             id = UUID.randomUUID(), // Always generate a new UUID for new categories
             name = dto.name,
-            color = dto.color?.let { parseColor(it) } ?: Color.Gray
+            color = dto.color?.let { parseColor(it) } ?: Color.Gray,
+            icon = dto.icon?.let { toDomain(it) } ?: Icon.default()
+        )
+    }
+    
+    private fun toDomain(dto: IconDto): Icon {
+        return Icon(
+            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
+            name = dto.name ?: "Genérico",
+            iconKey = dto.iconKey
         )
     }
     
@@ -56,7 +67,8 @@ object TicketMapper {
             Category(
                 id = UUID.randomUUID(),
                 name = "Sin categoría",
-                color = Color.Gray
+                color = Color.Gray,
+                icon = Icon.default()
             )
         } else {
             toDomain(dto.category, existingCategories)

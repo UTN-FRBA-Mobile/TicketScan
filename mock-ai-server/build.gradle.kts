@@ -18,7 +18,3 @@ dependencies {
 application {
     mainClass.set("com.example.mockserver.ApplicationKt")
 }
-
-kotlin {
-    jvmToolchain(17)
-}

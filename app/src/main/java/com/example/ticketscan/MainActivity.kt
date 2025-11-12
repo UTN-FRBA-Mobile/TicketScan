@@ -90,13 +90,13 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
-                
+
                 // Configure AI Service
                 // Option 1: Use real mock-ai-server
                 // For emulator: use 10.0.2.2 (localhost on host machine)
                 // For physical device: replace with your computer's IP address (e.g., 192.168.1.XXX)
                 val iaService: IAService = remember { IAServiceImpl("http://10.0.2.2:8080/") }
-                
+
                 // Option 2: Use mock API for offline testing (no server needed)
                 // val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
 
@@ -182,7 +182,8 @@ class MainActivity : ComponentActivity() {
                         composable("profile") {
                             ProfileScreen(
                                 navController = navController,
-                                viewModel = contactInfoViewModel
+                                viewModel = contactInfoViewModel,
+                                repositoryViewModel = repositoryViewModel
                             )
                         }
                         composable("edit_contact") {

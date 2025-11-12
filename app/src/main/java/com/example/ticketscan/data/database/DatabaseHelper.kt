@@ -3,9 +3,10 @@ package com.example.ticketscan.data.database
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import android.util.Log
+import java.util.UUID
 
 class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -26,6 +27,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
 
     override fun onCreate(db: SQLiteDatabase) {
         Log.d(TAG, "Creating database tables...")
+        db.execSQL(CREATE_ICONS_TABLE)
         db.execSQL(CREATE_STORES_TABLE)
         db.execSQL(CREATE_CATEGORIES_TABLE)
         db.execSQL(CREATE_TICKETS_TABLE)
@@ -42,10 +44,19 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         db.execSQL("DROP TABLE IF EXISTS tickets")
         db.execSQL("DROP TABLE IF EXISTS categories")
         db.execSQL("DROP TABLE IF EXISTS stores")
+        db.execSQL("DROP TABLE IF EXISTS icons")
         db.execSQL("DROP VIEW IF EXISTS vw_monthly_expenses")
         db.execSQL("DROP VIEW IF EXISTS vw_weekly_expenses")
         onCreate(db)
     }
+
+    private val CREATE_ICONS_TABLE = """
+        CREATE TABLE IF NOT EXISTS icons (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            icon_key TEXT NOT NULL
+        );
+    """
 
     private val CREATE_STORES_TABLE = """
         CREATE TABLE IF NOT EXISTS stores (
@@ -60,7 +71,10 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
         CREATE TABLE IF NOT EXISTS categories (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            color INTEGER NOT NULL
+            color INTEGER NOT NULL,
+            icon_id TEXT NOT NULL,
+            is_active INTEGER NOT NULL DEFAULT 1,
+            FOREIGN KEY(icon_id) REFERENCES icons(id)
         );
     """
 
@@ -116,24 +130,41 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(co
 
     private fun initializeDefaultData(db: SQLiteDatabase) {
         // Verificar si ya hay datos
-        val cursor = db.rawQuery("SELECT COUNT(*) FROM categories", null)
-        cursor.moveToFirst()
-        val count = cursor.getInt(0)
-        cursor.close()
+        val cursorIcons = db.rawQuery("SELECT COUNT(*) FROM icons", null)
+        cursorIcons.moveToFirst()
+        val iconCount = cursorIcons.getInt(0)
+        cursorIcons.close()
 
-        if (count == 0) {
-            // Insertar categorías por defecto
-            val defaultCategories = listOf(
-                "('${java.util.UUID.randomUUID()}', 'Alimentación', ${Color(red = 0, green = 150, blue = 136, alpha = 255).toArgb()})",
-                "('${java.util.UUID.randomUUID()}', 'Transporte', ${Color(red = 33, green = 150, blue = 243, alpha = 255).toArgb()})",
-                "('${java.util.UUID.randomUUID()}', 'Entretenimiento', ${Color(0xFFFF9800).toArgb()})",
-                "('${java.util.UUID.randomUUID()}', 'Salud', ${Color(0xFFF44336).toArgb()})",
-                "('${java.util.UUID.randomUUID()}', 'Hogar', ${Color(0xFF9C27B0).toArgb()})",
-                "('${java.util.UUID.randomUUID()}', 'Otros', ${Color.Gray.toArgb()})"
+        if (iconCount == 0) {
+            data class InitialDataTemplate(val name: String, val iconKey: String, val color: Color, val iconId: UUID)
+
+            val initialData = listOf(
+                InitialDataTemplate("Alimentación", "comida", Color(red = 0, green = 150, blue = 136, alpha = 255), UUID.randomUUID()), // Icons.Filled.Fastfood
+                InitialDataTemplate("Transporte", "transporte", Color(red = 33, green = 150, blue = 243, alpha = 255), UUID.randomUUID()), // Icons.Filled.DirectionsCar
+                InitialDataTemplate("Entretenimiento", "ocio", Color(0xFFFF9800), UUID.randomUUID()), // Icons.Filled.Movie
+                InitialDataTemplate("Salud", "salud", Color(0xFFF44336), UUID.randomUUID()), // Icons.Filled.HealthAndSafety
+                InitialDataTemplate("Hogar", "hogar", Color(0xFF9C27B0), UUID.randomUUID()), // Icons.Filled.Home
+                InitialDataTemplate("Otros", "otros", Color.Gray, UUID.randomUUID()) // Icons.Filled.Category
             )
 
-            for (category in defaultCategories) {
-                db.execSQL("INSERT INTO categories (id, name, color) VALUES $category")
+            for ((name, iconKey, _, id) in initialData) {
+                db.execSQL("INSERT INTO icons (id, name, icon_key) VALUES ('$id', '$name', '$iconKey')")
+            }
+
+            // Verificar si ya hay categorías
+            val cursorCategories = db.rawQuery("SELECT COUNT(*) FROM categories", null)
+            cursorCategories.moveToFirst()
+            val categoryCount = cursorCategories.getInt(0)
+            cursorCategories.close()
+
+            if (categoryCount == 0) {
+
+                for ((name, _, color, iconId) in initialData) {
+                    val categoryId = UUID.randomUUID().toString()
+                    db.execSQL(
+                        "INSERT INTO categories (id, name, color, icon_id, is_active) VALUES ('$categoryId', '$name', ${color.toArgb()}, '$iconId', 1)"
+                    )
+                }
             }
         }
     }

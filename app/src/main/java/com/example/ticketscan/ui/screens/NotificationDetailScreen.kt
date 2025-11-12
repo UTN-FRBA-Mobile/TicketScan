@@ -1,5 +1,7 @@
 package com.example.ticketscan.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +35,7 @@ import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationDetailScreen(
@@ -94,6 +97,7 @@ fun NotificationDetailScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun NotificationDetailContent(
     payload: NotificationPayload,
@@ -172,6 +176,7 @@ private fun MonthlyComparisonDetail(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun WeeklyInactivityDetail(
     payload: NotificationPayload.WeeklyInactivity,
