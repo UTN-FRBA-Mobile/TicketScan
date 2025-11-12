@@ -19,7 +19,7 @@ object TicketMapper {
     
     fun toDomain(dto: TicketDto, existingCategories: List<Category>): Ticket {
         return Ticket(
-            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
+            id = UUID.randomUUID(), // Always generate a new UUID for new tickets
             date = parseDate(dto.date),
             store = dto.store?.let { toDomain(it) },
             origin = parseOrigin(dto.origin),
@@ -30,7 +30,7 @@ object TicketMapper {
     
     private fun toDomain(dto: StoreDto): Store {
         return Store(
-            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
+            id = UUID.randomUUID(), // Always generate a new UUID for new stores
             name = dto.name,
             cuit = dto.cuit,
             location = dto.location
@@ -44,17 +44,28 @@ object TicketMapper {
         }
         
         return matchedCategory ?: Category(
-            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
+            id = UUID.randomUUID(), // Always generate a new UUID for new categories
             name = dto.name,
             color = dto.color?.let { parseColor(it) } ?: Color.Gray
         )
     }
     
     private fun toDomain(dto: TicketItemDto, existingCategories: List<Category>): TicketItem {
+        // Ensure category is not null and has a valid name
+        val category = if (dto.category?.name.isNullOrBlank()) {
+            Category(
+                id = UUID.randomUUID(),
+                name = "Sin categoría",
+                color = Color.Gray
+            )
+        } else {
+            toDomain(dto.category, existingCategories)
+        }
+        
         return TicketItem(
-            id = dto.id?.let { UUID.fromString(it) } ?: UUID.randomUUID(),
+            id = UUID.randomUUID(), // Always generate a new UUID for ticket items
             name = dto.name,
-            category = toDomain(dto.category, existingCategories),
+            category = category,
             quantity = dto.quantity,
             isIntUnit = dto.isIntUnit,
             price = dto.price

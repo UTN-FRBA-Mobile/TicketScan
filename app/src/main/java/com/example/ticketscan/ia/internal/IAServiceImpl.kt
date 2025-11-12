@@ -57,6 +57,27 @@ class IAServiceImpl : IAService {
     }
 
     private fun handleException(e: Exception, source: String): Exception {
-        return Exception("Ocurrió un error en la conexión con el servidor")
+        return when (e) {
+            is retrofit2.HttpException -> {
+                val errorMessage = try {
+                    e.response()?.errorBody()?.string() ?: "Error ${e.code()}: ${e.message()}"
+                } catch (ex: Exception) {
+                    "Error ${e.code()}: ${e.message()}"
+                }
+                Exception("Error al procesar $source: $errorMessage")
+            }
+            is java.net.ConnectException -> {
+                Exception("No se pudo conectar al servidor. Por favor verifica tu conexión a internet.")
+            }
+            is java.net.SocketTimeoutException -> {
+                Exception("Tiempo de espera agotado. El servidor está tardando demasiado en responder.")
+            }
+            is com.google.gson.JsonSyntaxException -> {
+                Exception("Error en el formato de la respuesta del servidor: ${e.message}")
+            }
+            else -> {
+                Exception("Error al procesar $source: ${e.message ?: "Error desconocido"}")
+            }
+        }
     }
 }
