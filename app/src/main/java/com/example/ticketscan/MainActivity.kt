@@ -28,7 +28,6 @@ import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ia.internal.IAService
 import com.example.ticketscan.ia.internal.IAServiceImpl
-import com.example.ticketscan.ia.internal.mock.MockIAApi
 import com.example.ticketscan.ui.components.NotificationPermissionHandler
 import com.example.ticketscan.ui.components.Period
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation
@@ -91,7 +90,15 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
-                val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
+                
+                // Configure AI Service
+                // Option 1: Use real mock-ai-server
+                // For emulator: use 10.0.2.2 (localhost on host machine)
+                // For physical device: replace with your computer's IP address (e.g., 192.168.1.XXX)
+                val iaService: IAService = remember { IAServiceImpl("http://10.0.2.2:8080/") }
+                
+                // Option 2: Use mock API for offline testing (no server needed)
+                // val iaService: IAService = remember { IAServiceImpl(MockIAApi(repositoryViewModel)) }
 
                 val cameraScanFactory = CameraScanViewModelFactory(iaService, repositoryViewModel)
                 val cameraScanViewModel: CameraScanViewModel = viewModel(factory = cameraScanFactory)

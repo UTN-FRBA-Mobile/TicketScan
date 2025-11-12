@@ -1,6 +1,7 @@
 package com.example.ticketscan.ui.screens
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
@@ -25,6 +26,10 @@ class CameraScanViewModel(
     private val service: IAService,
     private val repositoryViewModel: RepositoryViewModel
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "CameraScanViewModel"
+    }
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -52,9 +57,10 @@ class CameraScanViewModel(
             _capturedThumbnail.emit(decodeThumbnail(file))
             try {
                 val categories = repositoryViewModel.getAllCategories()
-                val result = service.analyzeTicketImage(file, categories)
-                _items.emit(result)
+                val ticket = service.analyzeTicketImage(file, categories)
+                _items.emit(ticket.items)
             } catch (e: Exception) {
+                Log.e(TAG, "Error analyzing image", e)
                 _error.emit(e.message ?: "Error al analizar la imagen")
             } finally {
                 if (file.exists()) {
