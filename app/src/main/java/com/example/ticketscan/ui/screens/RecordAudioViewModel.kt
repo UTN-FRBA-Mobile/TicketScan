@@ -8,6 +8,8 @@ import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ia.internal.IAService
+import com.example.ticketscan.ui.feedback.UserFeedbackManager
+import com.example.ticketscan.ui.feedback.ErrorMessageHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -52,9 +54,12 @@ class RecordAudioViewModel(
                 val categories = repositoryViewModel.getAllCategories()
                 val ticket = service.analyzeTicketAudio(file, categories)
                 _items.emit(ticket.items)
+                UserFeedbackManager.showSuccess("Audio analizado correctamente")
             } catch (e: Exception) {
                 Log.e(TAG, "Error analyzing audio", e)
-                _error.emit(e.message ?: "Error al analizar el audio")
+                val friendlyMessage = ErrorMessageHelper.getFriendlyErrorMessage(e)
+                _error.emit(friendlyMessage)
+                UserFeedbackManager.showError(friendlyMessage)
             } finally {
                 if (file.exists()) {
                     // Opcional: eliminar el archivo temporal para no acumular
@@ -78,13 +83,16 @@ class RecordAudioViewModel(
                 ticket,
                 onResult = { result ->
                     if (result) {
+                        UserFeedbackManager.showSuccess("Ticket guardado correctamente")
                         viewModelScope.launch {
                             _createdTicket.emit(ticket.id)
                         }
                     } else {
+                        val errorMessage = "Error al guardar el ticket"
                         viewModelScope.launch {
-                            _error.emit("Error al guardar el ticket")
+                            _error.emit(errorMessage)
                         }
+                        UserFeedbackManager.showError(errorMessage)
                     }
                 }
             )
@@ -100,6 +108,7 @@ class RecordAudioViewModel(
     fun onAnalyzeError(message: String) {
         viewModelScope.launch {
             _error.emit(message)
+            UserFeedbackManager.showError(message)
         }
     }
 

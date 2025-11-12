@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
+import com.example.ticketscan.domain.model.TicketFilter
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.repositories.category.CategoryRepository
 import com.example.ticketscan.domain.repositories.icon.IconRepository
@@ -85,6 +86,11 @@ class RepositoryViewModel(
     suspend fun getTicketById(id: UUID) = withContext(Dispatchers.IO) { ticketRepo.getTicketById(id) }
 
     suspend fun getAllTickets(limit: Int? = null) = withContext(Dispatchers.IO) { ticketRepo.getAllTickets(limit) }
+
+    fun searchTickets(filter: TicketFilter, onResult: (List<Ticket>) -> Unit) = viewModelScope.launch {
+        val result = withContext(Dispatchers.IO) { ticketRepo.searchTickets(filter) }
+        onResult(result)
+    }
 
     // TICKET ITEM
     fun insertTicketItem(item: TicketItem, ticketId: UUID, onResult: (Boolean) -> Unit) = viewModelScope.launch {

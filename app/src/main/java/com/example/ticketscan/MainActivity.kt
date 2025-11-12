@@ -63,6 +63,11 @@ import com.example.ticketscan.ui.screens.TicketViewModelFactory
 import com.example.ticketscan.ui.screens.PdfOptionsScreen
 import com.example.ticketscan.domain.model.notifications.NotificationType
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
+import com.example.ticketscan.ui.feedback.UserFeedbackHost
+import com.example.ticketscan.data.onboarding.OnboardingRepositoryImpl
+import com.example.ticketscan.ui.screens.OnboardingScreen
+import com.example.ticketscan.ui.screens.OnboardingViewModel
+import com.example.ticketscan.ui.screens.OnboardingViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
 import java.util.UUID
 
@@ -87,9 +92,25 @@ class MainActivity : ComponentActivity() {
             val appearancePreferences by appearanceViewModel.uiState.collectAsState()
 
             TicketScanThemeProvider(appearance = appearancePreferences) {
+                UserFeedbackHost()
+                
                 val navController = rememberNavController()
                 val repositoryViewModelFactory = RepositoryViewModelFactory(context = this@MainActivity)
                 val repositoryViewModel: RepositoryViewModel = viewModel(factory = repositoryViewModelFactory)
+                
+                val onboardingRepository = remember { OnboardingRepositoryImpl(this@MainActivity) }
+                val onboardingViewModelFactory = remember { OnboardingViewModelFactory(onboardingRepository) }
+                val onboardingViewModel: OnboardingViewModel = viewModel(factory = onboardingViewModelFactory)
+                
+                // Check onboarding status on app start
+                LaunchedEffect(Unit) {
+                    val isCompleted = onboardingRepository.isOnboardingCompleted()
+                    if (!isCompleted) {
+                        navController.navigate("onboarding") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
 
                 // Configure AI Service
                 // Option 1: Use real mock-ai-server
@@ -154,6 +175,12 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .fillMaxSize()
                     ) {
+                        composable("onboarding") {
+                            OnboardingScreen(
+                                navController = navController,
+                                viewModel = onboardingViewModel
+                            )
+                        }
                         composable("home") { HomeScreen(navController, repositoryViewModel) }
                         composable("expenses") {
                             StatsScreen(

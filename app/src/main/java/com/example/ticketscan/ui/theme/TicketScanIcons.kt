@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SettingsInputComponent
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ShoppingBag
@@ -61,6 +62,7 @@ object TicketScanIcons {
     val SettingsInputComponent: ImageVector = Icons.Filled.SettingsInputComponent
     val Description: ImageVector = Icons.Filled.Description
     val Info: ImageVector = Icons.Filled.Info
+    val Search: ImageVector = Icons.Filled.Search
     val ArrowUpward: ImageVector = Icons.Filled.ArrowUpward
     val ArrowDownward: ImageVector = Icons.Filled.ArrowDownward
     val ArrowForwardIos: ImageVector = Icons.Filled.ArrowForwardIos

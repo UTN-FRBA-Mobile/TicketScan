@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.ticketscan.data.database.DatabaseHelper
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
+import com.example.ticketscan.domain.model.TicketFilter
 import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -175,6 +176,87 @@ class TicketRepositorySQLite(
         if (minDate != null) {
             whereClauses.add("t.date >= ?")
             selectionArgs.add(dateFormat.format(minDate))
+        }
+
+        if (whereClauses.isNotEmpty()) {
+            query += " WHERE " + whereClauses.joinToString(separator = " AND ")
+        }
+
+        query += " ORDER BY t.date DESC"
+
+        val cursor = db.rawQuery(query, selectionArgs.toTypedArray())
+
+        while (cursor.moveToNext()) {
+            val ticketId = cursor.getString(cursor.getColumnIndexOrThrow("id"))
+            getTicketById(UUID.fromString(ticketId))?.let { tickets.add(it) }
+        }
+        cursor.close()
+        return tickets
+    }
+
+    override suspend fun searchTickets(filter: TicketFilter): List<Ticket> {
+        if (filter.isEmpty()) {
+            return getAllTickets()
+        }
+
+        val db = dbHelper.readableDatabase
+        val tickets = mutableListOf<Ticket>()
+        val selectionArgs = mutableListOf<String>()
+
+        // Build base query with necessary joins
+        var needsItemJoin = filter.categoryName != null || filter.searchQuery != null
+        var query = "SELECT DISTINCT t.id FROM tickets t"
+        
+        if (filter.storeName != null || needsItemJoin) {
+            query += " LEFT JOIN stores s ON s.id = t.store_id"
+        }
+        
+        if (needsItemJoin) {
+            query += " LEFT JOIN ticket_items ti ON t.id = ti.ticket_id"
+            if (filter.categoryName != null) {
+                query += " LEFT JOIN categories c ON ti.category_id = c.id"
+            }
+        }
+
+        // Build WHERE clauses
+        val whereClauses = mutableListOf<String>()
+
+        if (filter.storeName != null) {
+            whereClauses.add("s.name LIKE ?")
+            selectionArgs.add("%${filter.storeName}%")
+        }
+
+        if (filter.minDate != null) {
+            whereClauses.add("t.date >= ?")
+            selectionArgs.add(dateFormat.format(filter.minDate))
+        }
+
+        if (filter.maxDate != null) {
+            whereClauses.add("t.date <= ?")
+            selectionArgs.add(dateFormat.format(filter.maxDate))
+        }
+
+        if (filter.minAmount != null) {
+            whereClauses.add("t.total >= ?")
+            selectionArgs.add(filter.minAmount.toString())
+        }
+
+        if (filter.maxAmount != null) {
+            whereClauses.add("t.total <= ?")
+            selectionArgs.add(filter.maxAmount.toString())
+        }
+
+        if (filter.categoryName != null) {
+            whereClauses.add("c.name = ?")
+            selectionArgs.add(filter.categoryName)
+        }
+
+        if (!filter.searchQuery.isNullOrBlank()) {
+            // Search in store names and ticket item names
+            whereClauses.add("(s.name LIKE ? OR ti.name LIKE ?)")
+            val searchPattern = "%${filter.searchQuery}%"
+            selectionArgs.add(searchPattern)
+            selectionArgs.add(searchPattern)
         }
 
         if (whereClauses.isNotEmpty()) {

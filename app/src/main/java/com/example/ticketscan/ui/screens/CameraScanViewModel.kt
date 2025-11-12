@@ -11,6 +11,8 @@ import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ia.internal.IAService
+import com.example.ticketscan.ui.feedback.UserFeedbackManager
+import com.example.ticketscan.ui.feedback.ErrorMessageHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,9 +61,12 @@ class CameraScanViewModel(
                 val categories = repositoryViewModel.getAllCategories()
                 val ticket = service.analyzeTicketImage(file, categories)
                 _items.emit(ticket.items)
+                UserFeedbackManager.showSuccess("Imagen analizada correctamente")
             } catch (e: Exception) {
                 Log.e(TAG, "Error analyzing image", e)
-                _error.emit(e.message ?: "Error al analizar la imagen")
+                val friendlyMessage = ErrorMessageHelper.getFriendlyErrorMessage(e)
+                _error.emit(friendlyMessage)
+                UserFeedbackManager.showError(friendlyMessage)
             } finally {
                 if (file.exists()) {
                     file.delete()
@@ -84,9 +89,12 @@ class CameraScanViewModel(
                 ticket,
                 onResult = { result ->
                     if (result) {
+                        UserFeedbackManager.showSuccess("Ticket guardado correctamente")
                         viewModelScope.launch {
                             _createdTicket.emit(ticket.id)
                         }
+                    } else {
+                        UserFeedbackManager.showError("Error al guardar el ticket")
                     }
                 }
             )
@@ -102,6 +110,7 @@ class CameraScanViewModel(
     fun onCaptureError(message: String) {
         viewModelScope.launch {
             _error.emit(message)
+            UserFeedbackManager.showError(message)
         }
     }
 
