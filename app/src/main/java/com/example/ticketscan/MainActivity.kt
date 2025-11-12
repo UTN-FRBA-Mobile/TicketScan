@@ -28,7 +28,6 @@ import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ia.internal.IAService
 import com.example.ticketscan.ia.internal.IAServiceImpl
-import com.example.ticketscan.ia.internal.mock.MockIAApi
 import com.example.ticketscan.ui.components.NotificationPermissionHandler
 import com.example.ticketscan.ui.components.Period
 import com.example.ticketscan.ui.components.TicketScanBottomNavigation

@@ -38,14 +38,16 @@ fun ProfileScreen(
 
     ProfileContent(
         navController = navController,
-        contactInfo = contactInfo
+        contactInfo = contactInfo,
+        repositoryViewModel = repositoryViewModel
     )
 }
 
 @Composable
 private fun ProfileContent(
     navController: NavController,
-    contactInfo: ContactInfo
+    contactInfo: ContactInfo,
+    repositoryViewModel: RepositoryViewModel
 ) {
     val displayName = contactInfo.fullName.ifBlank { "Juan Pérez" }
     val subtitle = contactInfo.email.ifBlank { "Mi cuenta" }

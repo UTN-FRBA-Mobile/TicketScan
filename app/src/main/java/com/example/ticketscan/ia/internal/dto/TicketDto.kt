@@ -18,10 +18,17 @@ data class StoreDto(
     @SerializedName("location") val location: String?
 )
 
+data class IconDto(
+    @SerializedName("id") val id: String?,
+    @SerializedName("name") val name: String?,
+    @SerializedName("iconKey") val iconKey: String
+)
+
 data class CategoryDto(
     @SerializedName("id") val id: String?,
     @SerializedName("name") val name: String,
-    @SerializedName("color") val color: String?
+    @SerializedName("color") val color: String?,
+    @SerializedName("icon") val icon: IconDto?
 )
 
 data class TicketItemDto(
