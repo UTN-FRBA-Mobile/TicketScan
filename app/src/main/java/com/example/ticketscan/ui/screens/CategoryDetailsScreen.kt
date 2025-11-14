@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -30,8 +31,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,11 +42,12 @@ import com.example.ticketscan.domain.repositories.stats.PeriodExpense
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.ui.components.PeriodSelector
 import com.example.ticketscan.ui.components.TicketScanCard
+import com.example.ticketscan.ui.components.TicketScanCardStyle
 import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
-import java.text.NumberFormat
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -89,11 +91,45 @@ fun CategoryDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            PeriodSelector(selectedPeriod = uiState.period, onPeriodChange = { viewModel.setPeriod(it) })
+            TicketScanCard(
+                style = TicketScanCardStyle.Tonal,
+                contentPadding = PaddingValues(TicketScanTheme.spacing.lg)
+            ) {
+                PeriodSelector(
+                    selectedPeriod = uiState.period,
+                    onPeriodChange = { viewModel.setPeriod(it) }
+                )
+            }
+            Spacer(modifier = Modifier.height(TicketScanTheme.spacing.lg))
+            TicketScanCard(
+                style = TicketScanCardStyle.Tonal,
+                contentPadding = PaddingValues(TicketScanTheme.spacing.lg)
+            ) {
+                Text(
+                    text = "Importe total del periodo",
+                    style = TicketScanTheme.typography.titleMedium,
+                    color = TicketScanTheme.colors.onSurface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = TicketScanTheme.spacing.sm),
+                    textAlign = TextAlign.Center
+                )
+                val currencyFormat = remember { NumberFormat.getCurrencyInstance() }
+                Text(
+                    text = currencyFormat.format(uiState.totalAmountForPeriod),
+                    fontWeight = FontWeight.Bold,
+                    color = TicketScanTheme.colors.primary,
+                    fontSize = TicketScanTheme.typography.titleLarge.fontSize,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Spacer(modifier = Modifier.height(TicketScanTheme.spacing.lg))
             PeriodExpensesChart(periodExpenses = uiState.periodExpenses, maxPeriods = maxPeriods)
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(modifier = Modifier.weight(1f)) {
                 items(uiState.transactions) { transaction ->
                     TransactionItem(transaction = transaction)
                 }
@@ -127,11 +163,12 @@ fun PeriodExpensesChart(periodExpenses: List<PeriodExpense>, maxPeriods: Int) {
     val barColor = TicketScanTheme.colors.primary
 
     TicketScanCard(
+        style = TicketScanCardStyle.Tonal,
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = TicketScanTheme.spacing.md)
     ) {
-        Column(modifier = Modifier.padding(horizontal = TicketScanTheme.spacing.lg, vertical = TicketScanTheme.spacing.md)) {
+        Column(modifier = Modifier.padding(vertical = TicketScanTheme.spacing.md)) {
             Text(
                 text = "Gastos por período",
                 style = TicketScanTheme.typography.titleMedium,
@@ -219,7 +256,7 @@ fun PeriodExpensesChart(periodExpenses: List<PeriodExpense>, maxPeriods: Int) {
 
                                 Box(
                                     modifier = Modifier
-                                        .width(TicketScanTheme.spacing.xxl)
+                                        .width(TicketScanTheme.spacing.xl)
                                         .fillMaxHeight(),
                                     contentAlignment = Alignment.BottomCenter
                                 ) {
@@ -264,6 +301,7 @@ fun PeriodExpensesChart(periodExpenses: List<PeriodExpense>, maxPeriods: Int) {
 @Composable
 fun TransactionItem(transaction: CategoryTransaction) {
     TicketScanCard(
+        style = TicketScanCardStyle.Tonal,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
