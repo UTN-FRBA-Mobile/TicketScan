@@ -122,7 +122,7 @@ fun CategoryDetailsScreen(
                     text = currencyFormat.format(uiState.totalAmountForPeriod),
                     fontWeight = FontWeight.Bold,
                     color = TicketScanTheme.colors.primary,
-                    fontSize = TicketScanTheme.typography.titleLarge.fontSize,
+                    fontSize = TicketScanTheme.typography.headlineMedium.fontSize,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -304,12 +304,11 @@ fun TransactionItem(transaction: CategoryTransaction) {
         style = TicketScanCardStyle.Tonal,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 2.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
