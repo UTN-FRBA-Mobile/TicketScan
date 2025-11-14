@@ -21,7 +21,8 @@ data class CategoryDetailsUiState(
     val periodExpenses: List<PeriodExpense> = emptyList(),
     val transactions: List<CategoryTransaction> = emptyList(),
     val period: Period = Period.MENSUAL,
-    val maxPeriods: Int = 4
+    val maxPeriods: Int = 4,
+    val totalAmountForPeriod: BigDecimal = BigDecimal.ZERO
 )
 
 data class CategoryTransaction(
@@ -68,8 +69,10 @@ class CategoryDetailsViewModel(
 
     private fun loadPeriodExpenses() {
         viewModelScope.launch {
+            val totalAmountForPeriod = repositoryViewModel.getPeriodCategoryHistory(categoryName, _uiState.value.period, 1)
+                .firstOrNull()?.amount ?: BigDecimal.ZERO
             val periodExpenses = repositoryViewModel.getPeriodCategoryHistory(categoryName, _uiState.value.period, maxPeriods)
-            _uiState.update { it.copy(periodExpenses = periodExpenses) }
+            _uiState.update { it.copy(periodExpenses = periodExpenses, totalAmountForPeriod = totalAmountForPeriod) }
         }
     }
 
