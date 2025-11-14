@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -77,6 +78,17 @@ fun HomeScreen(
     LaunchedEffect(ticketTitleSearch, selectedStore, dateRange, amountRange, selectedCategory) {
         val filter = searchFilterViewModel.toTicketFilter()
         homeViewModel.applyFilters(filter)
+    }
+    
+    var amountError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(amountRange) {
+        val min = amountRange?.min
+        val max = amountRange?.max
+        amountError = if (min != null && max != null && (min > max)) {
+            "El monto mínimo debe ser menor o igual al máximo."
+        } else {
+            null
+        }
     }
 
     TicketScanScreenContainer(
@@ -147,6 +159,7 @@ fun HomeScreen(
             onAmountRangeChange = { searchFilterViewModel.setAmountRange(it) },
             activeFilterCount = activeFilterCount,
             onClearAll = { searchFilterViewModel.clearFilters() },
+            amountError = amountError,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 

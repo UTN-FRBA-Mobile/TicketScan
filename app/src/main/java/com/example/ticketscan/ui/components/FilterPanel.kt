@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.ticketscan.domain.model.Category
@@ -48,6 +49,7 @@ fun FilterPanel(
     onAmountRangeChange: (AmountRange?) -> Unit,
     activeFilterCount: Int,
     onClearAll: () -> Unit,
+    amountError: String?,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(activeFilterCount > 0) }
@@ -203,6 +205,15 @@ fun FilterPanel(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            if (amountError != null) {
+                Text(
+                    text = amountError,
+                    fontSize = TicketScanTheme.typography.bodySmall.fontSize,
+                    color = TicketScanTheme.colors.error,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
     }
 }
