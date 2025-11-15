@@ -1,5 +1,6 @@
 package com.example.ticketscan.ui.components
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,8 @@ fun UploadOption(
     label: String,
     icon: ImageVector,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    color: Color = TicketScanTheme.colors.onPrimary
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -56,7 +58,7 @@ fun UploadOption(
         Text(
             text = label,
             style = TicketScanTheme.typography.labelLarge,
-            color = TicketScanTheme.colors.onPrimary
+            color = color
         )
     }
 }

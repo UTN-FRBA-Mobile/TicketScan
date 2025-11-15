@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,6 +42,7 @@ fun HomeScreen(
 
     val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(repositoryViewModel))
     val tickets by viewModel.tickets.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     TicketScanScreenContainer(
         modifier = modifier,
@@ -78,18 +80,21 @@ fun HomeScreen(
                     UploadOption(
                         label = "Audio",
                         icon = TicketScanIcons.Audio,
-                        modifier = Modifier.weight(1f)
-                    ) { navController.navigate("record_audio") }
+                        modifier = Modifier.weight(1f),
+                        onClick = { navController.navigate("processing/audio") }
+                    )
                     UploadOption(
                         label = "Cámara",
                         icon = TicketScanIcons.Camera,
-                        modifier = Modifier.weight(1f)
-                    ) { navController.navigate("scan") }
+                        modifier = Modifier.weight(1f),
+                        onClick = { navController.navigate("scan") }
+                    )
                     UploadOption(
                         label = "Texto",
                         icon = TicketScanIcons.Text,
-                        modifier = Modifier.weight(1f)
-                    ) { navController.navigate("processing/texto") }
+                        modifier = Modifier.weight(1f),
+                        onClick = { navController.navigate("processing/text") }
+                    )
                 }
             }
         }
@@ -99,7 +104,15 @@ fun HomeScreen(
             subtitle = "Revisá tus comprobantes recientes"
         )
 
-        if (tickets.isEmpty()) {
+        if (isLoading) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (tickets.isEmpty()) {
             TicketScanEmptyState(
                 icon = TicketScanIcons.EmptyInbox,
                 title = "Todavía no cargaste tickets",
@@ -118,7 +131,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { navController.navigate("ticket/${ticket.id}") }
                     ) {
-                        val formattedDate = ticket?.date?.let {
+                        val formattedDate = ticket.date.let {
                             SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(it)
                         } ?: "Fecha sin definir"
                         Text(
