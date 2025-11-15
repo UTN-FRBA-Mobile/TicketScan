@@ -20,6 +20,7 @@ import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 @Composable
 fun TicketHeader(
@@ -52,7 +53,7 @@ fun TicketHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Fecha: ${SimpleDateFormat("yyyy/MM/dd").format(date)}",
+                text = "Fecha: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date)}",
                 style = TicketScanTheme.typography.bodyLarge,
                 color = TicketScanTheme.colors.onBackground
             )

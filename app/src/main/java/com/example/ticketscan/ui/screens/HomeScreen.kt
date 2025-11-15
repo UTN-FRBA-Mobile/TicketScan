@@ -4,9 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -17,10 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,7 +24,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.ticketscan.domain.model.TicketFilter
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
 import com.example.ticketscan.ui.components.FilterPanel
@@ -43,7 +38,6 @@ import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -56,7 +50,7 @@ fun HomeScreen(
     val homeViewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(repositoryViewModel))
     val tickets by homeViewModel.tickets.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
-    
+
     val searchFilterViewModel: SearchFilterViewModel = viewModel(factory = SearchFilterViewModelFactory())
     val ticketTitleSearch by searchFilterViewModel.ticketTitleSearch.collectAsState()
     val selectedStore by searchFilterViewModel.selectedStore.collectAsState()
@@ -79,7 +73,7 @@ fun HomeScreen(
         val filter = searchFilterViewModel.toTicketFilter()
         homeViewModel.applyFilters(filter)
     }
-    
+
     var amountError by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(amountRange) {
         val min = amountRange?.min
@@ -127,18 +121,21 @@ fun HomeScreen(
                     UploadOption(
                         label = "Audio",
                         icon = TicketScanIcons.Audio,
-                        modifier = Modifier.weight(1f)
-                    ) { navController.navigate("record_audio") }
+                        modifier = Modifier.weight(1f),
+                        onClick = { navController.navigate("record_audio") }
+                    )
                     UploadOption(
                         label = "Cámara",
                         icon = TicketScanIcons.Camera,
-                        modifier = Modifier.weight(1f)
-                    ) { navController.navigate("scan") }
+                        modifier = Modifier.weight(1f),
+                        onClick = { navController.navigate("scan") }
+                    )
                     UploadOption(
                         label = "Texto",
                         icon = TicketScanIcons.Text,
-                        modifier = Modifier.weight(1f)
-                    ) { navController.navigate("processing/texto") }
+                        modifier = Modifier.weight(1f),
+                        onClick = { navController.navigate("processing/text") }
+                    )
                 }
             }
         }
@@ -180,12 +177,12 @@ fun HomeScreen(
             TicketScanEmptyState(
                 icon = TicketScanIcons.EmptyInbox,
                 title = if (activeFilterCount > 0) "No se encontraron tickets" else "Todavía no cargaste tickets",
-                description = if (activeFilterCount > 0) 
-                    "Intenta ajustar los filtros de búsqueda." 
-                else 
+                description = if (activeFilterCount > 0)
+                    "Intenta ajustar los filtros de búsqueda."
+                else
                     "Escaneá o subí un ticket para comenzar a ver tu historial.",
                 actionLabel = if (activeFilterCount > 0) "Limpiar filtros" else "Cargar ticket",
-                onActionClick = { 
+                onActionClick = {
                     if (activeFilterCount > 0) {
                         searchFilterViewModel.clearFilters()
                     } else {
@@ -204,7 +201,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { navController.navigate("ticket/${ticket.id}") }
                     ) {
-                        val formattedDate = ticket?.date?.let {
+                        val formattedDate = ticket.date.let {
                             SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(it)
                         } ?: "Fecha sin definir"
                         Text(
@@ -216,7 +213,6 @@ fun HomeScreen(
                 }
             }
         }
-
     }
 }
 

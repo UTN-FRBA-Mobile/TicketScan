@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.example.ticketscan.ui.components.ErrorBadge
 import com.example.ticketscan.ui.components.UploadOption
 import com.example.ticketscan.ui.theme.TicketScanIcons
+import com.example.ticketscan.ui.theme.TicketScanTheme
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.S)
@@ -107,6 +108,7 @@ fun RecordAudioScreen(
                     label = if (isRecording) "Grabando..." else "Grabar Audio",
                     icon = TicketScanIcons.Audio,
                     modifier = Modifier.size(160.dp),
+                    color = TicketScanTheme.colors.primary,
                     onClick = { /* decorative */ }
                 )
 

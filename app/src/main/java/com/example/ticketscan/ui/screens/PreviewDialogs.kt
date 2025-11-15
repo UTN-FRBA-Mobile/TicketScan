@@ -2,8 +2,12 @@ package com.example.ticketscan.ui.screens
 
 import android.media.MediaPlayer
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -85,10 +89,16 @@ fun AudioPreviewDialog(
         onDismissRequest = onClose,
         title = { Text("Previsualizar audio") },
         text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Text(audioFile.name)
-                Spacer(Modifier.size(8.dp))
-                Button(onClick = {
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = {
                     player?.let {
                         if (isPlaying) {
                             it.pause()
@@ -102,9 +112,10 @@ fun AudioPreviewDialog(
                             }
                         }
                     }
-                }) {
-                    Text(if (isPlaying) "Pausar" else "Reproducir")
-                }
+                },
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                Text(if (isPlaying) "Pausar" else "Reproducir")
             }
         },
         confirmButton = {

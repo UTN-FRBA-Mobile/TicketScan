@@ -23,7 +23,7 @@ class HomeViewModel(
 
     init {
         loadTickets()
-        
+
         // Observe ticket changes to refresh filtered results
         repository.ticketsChanged
             .onEach { loadTickets() }
