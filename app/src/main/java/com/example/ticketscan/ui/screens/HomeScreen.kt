@@ -122,7 +122,7 @@ fun HomeScreen(
                         label = "Audio",
                         icon = TicketScanIcons.Audio,
                         modifier = Modifier.weight(1f),
-                        onClick = { navController.navigate("record/audio") }
+                        onClick = { navController.navigate("record_audio") }
                     )
                     UploadOption(
                         label = "Cámara",
