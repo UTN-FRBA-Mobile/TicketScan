@@ -1,6 +1,7 @@
 package com.example.ticketscan.domain.repositories.ticket
 
 import com.example.ticketscan.domain.model.Ticket
+import com.example.ticketscan.domain.model.TicketFilter
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 import java.util.UUID
@@ -13,4 +14,5 @@ interface TicketRepository {
     suspend fun updateTicket(ticket: Ticket): Boolean
     suspend fun deleteTicket(id: UUID): Boolean
     suspend fun getTicketsByFilters(categoryName: String? = null, minDate: Date? = null): List<Ticket>
+    suspend fun searchTickets(filter: TicketFilter): List<Ticket>
 }

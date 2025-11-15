@@ -2,7 +2,7 @@ package com.example.ticketscan.ui.screens
 
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
+import com.example.ticketscan.ui.feedback.UserFeedbackManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,7 +65,7 @@ fun PdfOptionsScreen(navController: NavController, viewModel: TicketViewModel) {
             onClick = {
                 // Compartir: asegurarse de que el PDF exista y lanzar intent
                 if (ticket == null) {
-                    Toast.makeText(context, "No hay ticket para compartir", Toast.LENGTH_SHORT).show()
+                    UserFeedbackManager.showError("No hay ticket para compartir")
                     return@Button
                 }
 
@@ -77,7 +77,7 @@ fun PdfOptionsScreen(navController: NavController, viewModel: TicketViewModel) {
                 }
 
                 if (!file.exists()) {
-                    Toast.makeText(context, "No se pudo generar el PDF para compartir", Toast.LENGTH_LONG).show()
+                    UserFeedbackManager.showError("No se pudo generar el PDF para compartir")
                     return@Button
                 }
 
@@ -91,8 +91,9 @@ fun PdfOptionsScreen(navController: NavController, viewModel: TicketViewModel) {
                     }
                     val chooser = Intent.createChooser(shareIntent, "Compartir PDF")
                     context.startActivity(chooser)
+                    UserFeedbackManager.showSuccess("PDF compartido correctamente")
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Error compartiendo PDF: ${e.message}", Toast.LENGTH_LONG).show()
+                    UserFeedbackManager.showError("Error compartiendo PDF: ${e.message ?: "Error desconocido"}")
                 }
             },
             modifier = Modifier
