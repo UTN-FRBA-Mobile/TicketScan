@@ -5,6 +5,7 @@ import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Icon
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
+import com.example.ticketscan.domain.model.TicketFilter
 import com.example.ticketscan.domain.model.TicketItem
 import com.example.ticketscan.domain.model.TicketOrigin
 import kotlinx.coroutines.flow.Flow
@@ -87,6 +88,37 @@ class TicketRepositoryMock (
             ticket.items.any { item ->
                 (categoryName == null || item.category.name == categoryName) &&
                 (minDate == null || ticket.date >= minDate) }
+        }
+    }
+
+    override suspend fun searchTickets(filter: TicketFilter): List<Ticket> {
+        if (filter.isEmpty()) {
+            return mockTickets
+        }
+
+        return mockTickets.filter { ticket ->
+            // Store name filter
+            val matchesStore = filter.storeName == null || 
+                ticket.store?.name?.contains(filter.storeName, ignoreCase = true) == true
+
+            // Date range filter
+            val matchesDateRange = (filter.minDate == null || ticket.date >= filter.minDate) &&
+                (filter.maxDate == null || ticket.date <= filter.maxDate)
+
+            // Amount range filter
+            val matchesAmountRange = (filter.minAmount == null || ticket.total >= filter.minAmount) &&
+                (filter.maxAmount == null || ticket.total <= filter.maxAmount)
+
+            // Category filter
+            val matchesCategory = filter.categoryName == null ||
+                ticket.items.any { it.category.name == filter.categoryName }
+
+            // Search query filter (searches in store name and item names)
+            val matchesSearchQuery = filter.searchQuery.isNullOrBlank() ||
+                ticket.store?.name?.contains(filter.searchQuery, ignoreCase = true) == true ||
+                ticket.items.any { it.name.contains(filter.searchQuery, ignoreCase = true) }
+
+            matchesStore && matchesDateRange && matchesAmountRange && matchesCategory && matchesSearchQuery
         }
     }
 

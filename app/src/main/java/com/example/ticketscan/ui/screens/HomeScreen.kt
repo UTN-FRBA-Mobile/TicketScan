@@ -4,21 +4,34 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.ticketscan.domain.model.TicketFilter
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModelFactory
+import com.example.ticketscan.ui.components.FilterPanel
 import com.example.ticketscan.ui.components.TicketScanCard
 import com.example.ticketscan.ui.components.TicketScanCardStyle
 import com.example.ticketscan.ui.components.TicketScanEmptyState
@@ -30,6 +43,7 @@ import com.example.ticketscan.ui.theme.TicketScanIcons
 import com.example.ticketscan.ui.theme.TicketScanTheme
 import com.example.ticketscan.ui.theme.TicketScanThemeProvider
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -39,8 +53,43 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     ) {
 
-    val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(repositoryViewModel))
-    val tickets by viewModel.tickets.collectAsState()
+    val homeViewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(repositoryViewModel))
+    val tickets by homeViewModel.tickets.collectAsState()
+    val isLoading by homeViewModel.isLoading.collectAsState()
+    
+    val searchFilterViewModel: SearchFilterViewModel = viewModel(factory = SearchFilterViewModelFactory())
+    val ticketTitleSearch by searchFilterViewModel.ticketTitleSearch.collectAsState()
+    val selectedStore by searchFilterViewModel.selectedStore.collectAsState()
+    val dateRange by searchFilterViewModel.dateRange.collectAsState()
+    val amountRange by searchFilterViewModel.amountRange.collectAsState()
+    val selectedCategory by searchFilterViewModel.selectedCategory.collectAsState()
+    val activeFilterCount = searchFilterViewModel.getActiveFilterCount()
+
+    val allStores = remember { mutableStateOf<List<com.example.ticketscan.domain.model.Store>>(emptyList()) }
+    val allCategories = remember { mutableStateOf<List<com.example.ticketscan.domain.model.Category>>(emptyList()) }
+
+    // Load stores and categories
+    LaunchedEffect(Unit) {
+        allStores.value = repositoryViewModel.getAllStores()
+        allCategories.value = repositoryViewModel.getAllCategories()
+    }
+
+    // Apply filters when they change
+    LaunchedEffect(ticketTitleSearch, selectedStore, dateRange, amountRange, selectedCategory) {
+        val filter = searchFilterViewModel.toTicketFilter()
+        homeViewModel.applyFilters(filter)
+    }
+    
+    var amountError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(amountRange) {
+        val min = amountRange?.min
+        val max = amountRange?.max
+        amountError = if (min != null && max != null && (min > max)) {
+            "El monto mínimo debe ser menor o igual al máximo."
+        } else {
+            null
+        }
+    }
 
     TicketScanScreenContainer(
         modifier = modifier,
@@ -94,18 +143,55 @@ fun HomeScreen(
             }
         }
 
-        TicketScanSectionHeader(
-            title = "Últimas cargas",
-            subtitle = "Revisá tus comprobantes recientes"
+        // Filter Panel
+        FilterPanel(
+            ticketTitleSearch = ticketTitleSearch,
+            onTicketTitleSearchChange = { searchFilterViewModel.updateTicketTitleSearch(it) },
+            storeFilter = selectedStore,
+            onStoreFilterChange = { searchFilterViewModel.setStoreFilter(it) },
+            availableStores = allStores.value,
+            categoryFilter = selectedCategory,
+            onCategoryFilterChange = { searchFilterViewModel.setCategoryFilter(it) },
+            availableCategories = allCategories.value,
+            dateRange = dateRange,
+            onDateRangeChange = { searchFilterViewModel.setDateRange(it) },
+            amountRange = amountRange,
+            onAmountRangeChange = { searchFilterViewModel.setAmountRange(it) },
+            activeFilterCount = activeFilterCount,
+            onClearAll = { searchFilterViewModel.clearFilters() },
+            amountError = amountError,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        if (tickets.isEmpty()) {
+        TicketScanSectionHeader(
+            title = if (activeFilterCount > 0) "Resultados de búsqueda" else "Últimas cargas",
+            subtitle = if (activeFilterCount > 0) "${tickets.size} ticket(s) encontrado(s)" else "Revisá tus comprobantes recientes"
+        )
+
+        if (isLoading) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (tickets.isEmpty()) {
             TicketScanEmptyState(
                 icon = TicketScanIcons.EmptyInbox,
-                title = "Todavía no cargaste tickets",
-                description = "Escaneá o subí un ticket para comenzar a ver tu historial.",
-                actionLabel = "Cargar ticket",
-                onActionClick = { navController.navigate("scan") }
+                title = if (activeFilterCount > 0) "No se encontraron tickets" else "Todavía no cargaste tickets",
+                description = if (activeFilterCount > 0) 
+                    "Intenta ajustar los filtros de búsqueda." 
+                else 
+                    "Escaneá o subí un ticket para comenzar a ver tu historial.",
+                actionLabel = if (activeFilterCount > 0) "Limpiar filtros" else "Cargar ticket",
+                onActionClick = { 
+                    if (activeFilterCount > 0) {
+                        searchFilterViewModel.clearFilters()
+                    } else {
+                        navController.navigate("scan")
+                    }
+                }
             )
         } else {
             Column(
@@ -130,6 +216,7 @@ fun HomeScreen(
                 }
             }
         }
+
     }
 }
 

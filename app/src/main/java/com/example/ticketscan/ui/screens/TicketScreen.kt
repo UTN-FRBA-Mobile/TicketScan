@@ -5,7 +5,7 @@ import android.content.Context
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
-import android.widget.Toast
+import com.example.ticketscan.ui.feedback.UserFeedbackManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -181,6 +181,7 @@ fun TicketScreen(
             },
             onSave = {
                 viewModel.saveTicket()
+                UserFeedbackManager.showSuccess("Ticket guardado correctamente")
                 isEditing = false
             },
             onDelete = { showDeleteConfirm = true },
@@ -188,7 +189,7 @@ fun TicketScreen(
             onShare = {
                 ticket?.let { t ->
                     navController.navigate("pdf_options/${t.id}")
-                } ?: Toast.makeText(context, "No hay ticket para opciones PDF", Toast.LENGTH_SHORT).show()
+                } ?: UserFeedbackManager.showError("No hay ticket para opciones PDF")
             }
         )
 
@@ -229,6 +230,7 @@ fun TicketScreen(
                         price = price ?: 0.0
                     )
                     viewModel.addTicketItem(item)
+                    UserFeedbackManager.showSuccess("Artículo agregado")
                     creatingItem = null
                 },
                 onDelete = null
@@ -248,6 +250,7 @@ fun TicketScreen(
                         quantity = quantity,
                         category = categoryValue
                     )
+                    UserFeedbackManager.showSuccess("Artículo actualizado")
                     editingItem = null
                 },
                 onDelete = { id -> viewModel.removeTicketItem(id) }
@@ -307,7 +310,7 @@ fun TicketScreenPreview() {
 // Se quita 'private' para que pueda ser reutilizada desde PdfOptionsScreen.
 fun exportTicketToPdf(context: Context, ticket: Ticket?) {
     if (ticket == null) {
-        Toast.makeText(context, "No hay ticket para exportar", Toast.LENGTH_SHORT).show()
+        UserFeedbackManager.showError("No hay ticket para exportar")
         return
     }
 
@@ -350,8 +353,8 @@ fun exportTicketToPdf(context: Context, ticket: Ticket?) {
         }
         doc.close()
 
-        Toast.makeText(context, "Ticket exportado: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+        UserFeedbackManager.showSuccess("Ticket exportado correctamente")
     } catch (e: Exception) {
-        Toast.makeText(context, "Error exportando PDF: ${e.message}", Toast.LENGTH_LONG).show()
+        UserFeedbackManager.showError("Error exportando PDF: ${e.message ?: "Error desconocido"}")
     }
 }

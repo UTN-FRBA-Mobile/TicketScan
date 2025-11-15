@@ -7,6 +7,7 @@ import com.example.ticketscan.domain.model.Category
 import com.example.ticketscan.domain.model.Store
 import com.example.ticketscan.domain.model.Ticket
 import com.example.ticketscan.domain.viewmodel.RepositoryViewModel
+import com.example.ticketscan.ui.feedback.UserFeedbackManager
 import java.util.Date
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,7 +123,12 @@ class TicketViewModel (
     fun saveTicket() {
         val currentTicket = _ticket.value ?: return
         viewModelScope.launch {
-            repositoryViewModel.updateTicket(currentTicket) {
+            repositoryViewModel.updateTicket(currentTicket) { success ->
+                if (success) {
+                    UserFeedbackManager.showSuccess("Ticket guardado correctamente")
+                } else {
+                    UserFeedbackManager.showError("Error al guardar el ticket")
+                }
                 loadTicket(ticketId)
             }
         }
@@ -131,7 +137,12 @@ class TicketViewModel (
     fun deleteTicket(onDeleted: () -> Unit) {
         val currentTicket = _ticket.value ?: return
         viewModelScope.launch {
-            repositoryViewModel.deleteTicket(currentTicket) {
+            repositoryViewModel.deleteTicket(currentTicket) { success ->
+                if (success) {
+                    UserFeedbackManager.showSuccess("Ticket eliminado correctamente")
+                } else {
+                    UserFeedbackManager.showError("Error al eliminar el ticket")
+                }
                 onDeleted()
             }
         }
