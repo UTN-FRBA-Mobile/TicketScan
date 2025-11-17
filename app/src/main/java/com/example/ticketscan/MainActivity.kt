@@ -80,7 +80,8 @@ class MainActivity : ComponentActivity() {
 
         // Inicializar la base de datos
         // Esto creará las tablas si no existen e insertará datos por defecto
-        DatabaseHelper.getInstance(this).writableDatabase
+        val db = DatabaseHelper.getInstance(this).writableDatabase
+        db.close()
 
         enableEdgeToEdge()
 
