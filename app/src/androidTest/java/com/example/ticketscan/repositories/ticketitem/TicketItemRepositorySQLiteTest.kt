@@ -15,6 +15,8 @@ import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.graphics.Color
 import com.example.ticketscan.domain.repositories.ticketitem.TicketItemRepositorySQLite
+import com.example.ticketscan.domain.repositories.icon.IconRepositorySQLite
+import com.example.ticketscan.domain.model.Icon
 
 @RunWith(AndroidJUnit4::class)
 class TicketItemRepositorySQLiteTest {
@@ -25,10 +27,12 @@ class TicketItemRepositorySQLiteTest {
     @Before
     fun setup() {
         context = InstrumentationRegistry.getInstrumentation().targetContext
-        categoryRepo = CategoryRepositorySQLite(context)
+        val iconRepository = IconRepositorySQLite(context)
+        categoryRepo = CategoryRepositorySQLite(context, iconRepository)
         repo = TicketItemRepositorySQLite(context, categoryRepo)
         val db = context.openOrCreateDatabase("ticketscan.db", Context.MODE_PRIVATE, null)
-        db.execSQL("CREATE TABLE IF NOT EXISTS categories (id TEXT PRIMARY KEY, name TEXT NOT NULL, color INTEGER NOT NULL)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS icons (id TEXT PRIMARY KEY, name TEXT NOT NULL, icon_key TEXT NOT NULL)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS categories (id TEXT PRIMARY KEY, name TEXT NOT NULL, color INTEGER NOT NULL, icon_id TEXT NOT NULL, is_active INTEGER NOT NULL DEFAULT 1)")
         db.execSQL("CREATE TABLE IF NOT EXISTS tickets (id TEXT PRIMARY KEY, date TEXT NOT NULL, store_id TEXT NOT NULL, total REAL NOT NULL)")
         db.execSQL("CREATE TABLE IF NOT EXISTS ticket_items (id TEXT PRIMARY KEY, ticket_id TEXT NOT NULL, name TEXT NOT NULL, category_id TEXT NOT NULL, quantity INTEGER NOT NULL, isIntUnit INTEGER NOT NULL, price REAL NOT NULL)")
         db.close()
@@ -36,7 +40,11 @@ class TicketItemRepositorySQLiteTest {
 
     @Test
     fun testInsertAndGetTicketItem() = runBlocking {
-        val category = Category(UUID.randomUUID(), "TestCat", Color.Red)
+        val icon = Icon.default()
+        val dbIcon = context.openOrCreateDatabase("ticketscan.db", Context.MODE_PRIVATE, null)
+        dbIcon.execSQL("INSERT OR IGNORE INTO icons (id, name, icon_key) VALUES (?, ?, ?)", arrayOf(icon.id.toString(), icon.name, icon.iconKey))
+        dbIcon.close()
+        val category = Category(UUID.randomUUID(), "TestCat", Color.Red, icon)
         categoryRepo.insertCategory(category)
         val ticketId = UUID.randomUUID()
         val item = TicketItem(UUID.randomUUID(), "TestItem", category, 2, true, 10.0)
@@ -61,7 +69,11 @@ class TicketItemRepositorySQLiteTest {
 
     @Test
     fun testUpdateTicketItem() = runBlocking {
-        val category = Category(UUID.randomUUID(), "TestCat", Color.Red)
+        val icon = Icon.default()
+        val dbIcon = context.openOrCreateDatabase("ticketscan.db", Context.MODE_PRIVATE, null)
+        dbIcon.execSQL("INSERT OR IGNORE INTO icons (id, name, icon_key) VALUES (?, ?, ?)", arrayOf(icon.id.toString(), icon.name, icon.iconKey))
+        dbIcon.close()
+        val category = Category(UUID.randomUUID(), "TestCat", Color.Red, icon)
         categoryRepo.insertCategory(category)
         val ticketId = UUID.randomUUID()
         val item = TicketItem(UUID.randomUUID(), "TestItem", category, 2, true, 10.0)
@@ -86,7 +98,11 @@ class TicketItemRepositorySQLiteTest {
 
     @Test
     fun testDeleteTicketItem() = runBlocking {
-        val category = Category(UUID.randomUUID(), "TestCat", Color.Red)
+        val icon = Icon.default()
+        val dbIcon = context.openOrCreateDatabase("ticketscan.db", Context.MODE_PRIVATE, null)
+        dbIcon.execSQL("INSERT OR IGNORE INTO icons (id, name, icon_key) VALUES (?, ?, ?)", arrayOf(icon.id.toString(), icon.name, icon.iconKey))
+        dbIcon.close()
+        val category = Category(UUID.randomUUID(), "TestCat", Color.Red, icon)
         categoryRepo.insertCategory(category)
         val ticketId = UUID.randomUUID()
         val item = TicketItem(UUID.randomUUID(), "TestItem", category, 2, true, 10.0)
